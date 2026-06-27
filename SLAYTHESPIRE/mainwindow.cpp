@@ -66,8 +66,16 @@ void MainWindow::setupSplashPage()
     loadingBar->setFixedHeight(40);
 
     loadingBar->setStyleSheet(
-        "QProgressBar { border: 2px solid #5a5a54; bprder-radius: 5px; background-color: #c7d4d9;}"
-        "QProgressBar::chunk { background-color: #00cfc1; width: 10px; }"
+        "QProgressBar {"
+        "   border: 2px solid #00cfc1;"
+        "   border-radius: 20px;"
+        "   background-color: #2b2b2b;"
+        "}"
+        "QProgressBar::chunk {"
+        "   background-color: #00cfc1;"
+        "   border-radius: 16px;"
+        "   margin: 2px; "
+        "}"
         );
 
     layout->addWidget(loadingBar, 0 , Qt::AlignBottom);
