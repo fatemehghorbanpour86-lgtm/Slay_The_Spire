@@ -16,7 +16,7 @@ protected:
     int maxHealth;
     int currentHealth;
     int block;
-    QVector<Effect*> activeEffects;
+  //  QVector<Effect*> activeEffects;
 
 protected:
 

@@ -10,12 +10,14 @@ SOURCES += \
     loginpage.cpp \
     main.cpp \
     mainwindow.cpp \
-    splashpage.cpp
+    splashpage.cpp \
+    character.cpp \
 
 HEADERS += \
     loginpage.h \
     mainwindow.h \
-    splashpage.h
+    splashpage.h \
+    character.h \
 
 FORMS += \
     mainwindow.ui
