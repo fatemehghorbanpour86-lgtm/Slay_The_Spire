@@ -10,4 +10,6 @@ int main(int argc, char *argv[])
     return QApplication::exec();
 
     // از اناهیتا به فاطمه صدامو داری؟
+    //ااااااارررررهههههههههههههه
+    //بلاخرهههههههههه
 }
