@@ -2,7 +2,12 @@
 #include "ui_mainwindow.h"
 
 #include "splashpage.h"
+#include "loginpage.h"
 
+void MainWindow::showLoginPAge()
+{
+    stackedWidget->setCurrentWidget(loginPage);
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,11 +21,13 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(stackedWidget);
 
     splashPage = new SplashPage(this);
+    loginPage = new loginpage(this);
+
     stackedWidget->addWidget(splashPage);
+    stackedWidget->addWidget(loginPage);
 
+    connect(splashPage, &SplashPage::loadingFinished, this, &MainWindow::showLoginPAge);
     stackedWidget->setCurrentWidget(splashPage);
-
-
 }
 
 MainWindow::~MainWindow()
