@@ -8,10 +8,12 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    splashpage.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    splashpage.h
 
 FORMS += \
     mainwindow.ui

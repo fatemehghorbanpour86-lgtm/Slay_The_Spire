@@ -16,11 +16,15 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+
+class SplashPage;
+
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
 private slots:
-    void updateLoadingProgress();
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -28,17 +32,8 @@ public:
 
 private:
     Ui::MainWindow *ui;
-
     QStackedWidget *stackedWidget;
 
-    QWidget *splashPage;
-
-
-    QProgressBar *loadingBar;
-    QTimer *loadingTimer;
-    int currentProgress;
-
-
-    void setupSplashPage();
+    SplashPage *splashPage;
 };
 #endif // MAINWINDOW_H

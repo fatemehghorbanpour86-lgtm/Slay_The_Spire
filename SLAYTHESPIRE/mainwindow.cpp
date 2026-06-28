@@ -1,26 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-void MainWindow::updateLoadingProgress()
-{
-    currentProgress++;
+#include "splashpage.h"
 
-    if(currentProgress == 30 || currentProgress == 75)
-    {
-        loadingTimer->setInterval(1100);
-    }
-    else
-    {
-        loadingTimer->setInterval(30);
-    }
-
-    loadingBar->setValue(currentProgress);
-
-    if(currentProgress >= 100)
-    {
-        loadingTimer->stop();
-    }
-}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -33,15 +15,12 @@ MainWindow::MainWindow(QWidget *parent)
     stackedWidget = new QStackedWidget(this);
     setCentralWidget(stackedWidget);
 
-    setupSplashPage();
-
+    splashPage = new SplashPage(this);
+    stackedWidget->addWidget(splashPage);
 
     stackedWidget->setCurrentWidget(splashPage);
 
-    currentProgress = 0;
-    loadingTimer = new QTimer(this);
-    connect(loadingTimer, &QTimer::timeout, this, &MainWindow::updateLoadingProgress);
-    loadingTimer->start(30);
+
 }
 
 MainWindow::~MainWindow()
@@ -49,37 +28,3 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::setupSplashPage()
-{
-    splashPage = new QWidget();
-    splashPage->setObjectName("splashPage");
-
-    splashPage->setStyleSheet("QWidget#splashPage { border-image: url(:/SplashPage.png); }");
-
-    QVBoxLayout *layout = new QVBoxLayout(splashPage);
-    layout->addStretch();
-
-    loadingBar = new QProgressBar(splashPage);
-    loadingBar->setRange(0, 100);
-    loadingBar->setValue(0);
-    loadingBar->setTextVisible(false);
-    loadingBar->setFixedHeight(40);
-
-    loadingBar->setStyleSheet(
-        "QProgressBar {"
-        "   border: 2px solid #00cfc1;"
-        "   border-radius: 20px;"
-        "   background-color: #2b2b2b;"
-        "}"
-        "QProgressBar::chunk {"
-        "   background-color: #00cfc1;"
-        "   border-radius: 16px;"
-        "   margin: 2px; "
-        "}"
-        );
-
-    layout->addWidget(loadingBar, 0 , Qt::AlignBottom);
-    layout->setContentsMargins(320, 0 , 550, 120);
-
-    stackedWidget->addWidget(splashPage);
-}
