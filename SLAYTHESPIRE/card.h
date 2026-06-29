@@ -2,7 +2,7 @@
 #define CARD_H
 
 #include <QString>
-#include <Qvector>
+#include <QVector>
 
 class Player;
 class Enemy; // future class

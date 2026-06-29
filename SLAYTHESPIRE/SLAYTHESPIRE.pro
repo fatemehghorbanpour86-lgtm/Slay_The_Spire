@@ -8,6 +8,7 @@ CONFIG += c++17
 
 SOURCES += \
     card.cpp \
+    effect.cpp \
     loginpage.cpp \
     main.cpp \
     mainpage.cpp \
@@ -18,6 +19,7 @@ SOURCES += \
 
 HEADERS += \
     card.h \
+    effect.h \
     loginpage.h \
     mainpage.h \
     mainwindow.h \

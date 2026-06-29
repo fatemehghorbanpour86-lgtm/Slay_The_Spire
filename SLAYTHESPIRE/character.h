@@ -4,8 +4,8 @@
 #include <QString>
 #include <QVector>
 
-// TODO
-//class Effect;
+// TODO //Done by f
+class Effect;
 
 
 class Character
@@ -16,7 +16,7 @@ protected:
     int maxHealth;
     int currentHealth;
     int block;
-//    QVector<Effect*> activeEffects;
+    QVector<Effect*> activeEffects; //Done by f
 
 protected:
 
