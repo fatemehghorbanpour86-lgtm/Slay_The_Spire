@@ -10,12 +10,14 @@ SOURCES += \
     loginpage.cpp \
     main.cpp \
     mainwindow.cpp \
+    player.cpp \
     splashpage.cpp \
     character.cpp \
 
 HEADERS += \
     loginpage.h \
     mainwindow.h \
+    player.h \
     splashpage.h \
     character.h \
 
