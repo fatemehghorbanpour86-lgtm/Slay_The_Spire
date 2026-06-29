@@ -6,7 +6,11 @@ loginpage::loginpage(QWidget *parent)
     : QWidget{parent}
 {
     setObjectName("loginPage");
-    setStyleSheet("QWidget#loginPage {border-image: url(:/loginpage.png); }");
+    setStyleSheet("QWidget#loginPage {border-image: url(:/loginpage.png); }"
+                  "QToolTip { color: #facc15; background-color: #1f2937; border: 1px solid #b91c1c;"
+                  "border-radius: 4px; padding: 6px; font-weight: bold; font-family: Tahoma;"
+                  "}"
+                  );
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 20 ,0);
