@@ -19,6 +19,7 @@ QT_END_NAMESPACE
 
 class SplashPage;
 class loginpage;
+class mainpage;
 
 
 class MainWindow : public QMainWindow
@@ -27,6 +28,7 @@ class MainWindow : public QMainWindow
 
 private slots:
     void showLoginPAge();
+    void showMainMenuPage();
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
@@ -37,5 +39,6 @@ private:
 
     SplashPage *splashPage;
     loginpage *loginPage;
+    mainpage *mainMenuPage;
 };
 #endif // MAINWINDOW_H

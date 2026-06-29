@@ -9,12 +9,14 @@ CONFIG += c++17
 SOURCES += \
     loginpage.cpp \
     main.cpp \
+    mainpage.cpp \
     mainwindow.cpp \
     splashpage.cpp \
     character.cpp \
 
 HEADERS += \
     loginpage.h \
+    mainpage.h \
     mainwindow.h \
     splashpage.h \
     character.h \
