@@ -321,4 +321,44 @@ void Hemokinesis::upgrade()
     description = "Lose 2 HP. Deal 20 damage.";
 }
 
+// Carnage
+
+Carnage::Carnage()
+    : Card("Carnage","Deal 20 damage. Ethereal.", 2, CardType::Attack, false, true)
+{
+    damageAmount = 20;
+}
+
+
+void Carnage::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
+{
+    Q_UNUSED(user)
+    Q_UNUSED(enemies)
+
+    if(target == nullptr)
+    {
+        return;
+    }
+
+    // target->takeDamage(damageAmount);
+
+    // TODO
+    // Replace with CombatCalculator
+}
+
+void Carnage::upgrade()
+{
+    if(isUpgraded)
+    {
+        return;
+    }
+
+    isUpgraded = true;
+
+    name = "Carnage+";
+
+    damageAmount = 28;
+
+    description = "Deal 28 damage. Ethereal.";
+}
 
