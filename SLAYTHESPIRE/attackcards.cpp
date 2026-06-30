@@ -4,7 +4,7 @@
 
 Strike::Strike() : Card("Strike", "Deal 6 damage.", 1, CardType::Attack)
 {
-    this->damageAmount = 6;
+    damageAmount = 6;
 }
 
 
@@ -13,13 +13,15 @@ void Strike::play(Player* user , QVector<Enemy*>& enemies, Enemy* target)
     Q_UNUSED(user)
     Q_UNUSED(enemies)
 
-    if (target != nullptr)
+    if(target == nullptr)
     {
-       //target->takeDamage(damageAmount);
-       //TODO anahita
-       // Replace with CombatCalculator after combat system is implemented.
-
+        return;
     }
+
+    //target->takeDamage(damageAmount);
+    //TODO anahita
+    // Replace with CombatCalculator after combat system is implemented.
+
 }
 
 void Strike::upgrade()
@@ -27,7 +29,11 @@ void Strike::upgrade()
     if (!isUpgraded)
     {
         isUpgraded = true;
-        this->damageAmount = 9;
+
+        name = "Strike+";
+
+        damageAmount = 9;
+
         description = "Deal 9 damage.";
     }
 }
@@ -36,7 +42,7 @@ void Strike::upgrade()
 
 Reaper::Reaper() : Card("Reaper", "Deal 4 damage to ALL enemies. Heal HP equal to unblocked damage dealt.",2, CardType::Attack)
 {
-    this->damageAmount = 4;
+    damageAmount = 4;
 }
 
 void Reaper::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
@@ -85,6 +91,8 @@ void Reaper::upgrade()
 
     isUpgraded = true;
 
+    name = "Reaper+";
+
     damageAmount += 1;
 
     description =
@@ -94,7 +102,7 @@ void Reaper::upgrade()
 //  Bludgeon
 
 Bludgeon::Bludgeon()
-    : Card("Bludgeon", "Deal 32 damage. Exhaust.", 3, CardType::Attack)
+    : Card("Bludgeon", "Deal 32 damage.", 3, CardType::Attack)
 {
     damageAmount = 32;
 }
@@ -123,12 +131,51 @@ void Bludgeon::upgrade()
 
     isUpgraded = true;
 
+    name = "Bludgeon+";
+
     damageAmount += 10;
 
     description = "Deal 42 damage.";
 }
 
+//Feed
+Feed::Feed()
+    : Card("Feed", "Deal 10 damage. If Fatal, raise your Max HP by 3.",1,CardType::Attack)
+{
+    damageAmount = 10;
+}
 
 
+void Feed::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
+{
+    Q_UNUSED(enemies);
+
+    if(user == nullptr || target == nullptr)
+    {
+        return;
+    }
+
+    //target->takeDamage(damageAmount);
+
+    // TODO combat anahita:
+    // If this attack kills the target,
+    // increase the player's Max HP by 3.
+}
+
+void Feed::upgrade()
+{
+    if(isUpgraded)
+    {
+        return;
+    }
+
+    isUpgraded = true;
+
+    name = "Feed+";
+
+    damageAmount += 2;
+
+    description = "Deal 12 damage. If Fatal, raise your Max HP by 4.";
+}
 
 

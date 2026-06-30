@@ -45,4 +45,18 @@ public:
     void upgrade() override;
 };
 
+class Feed : public Card
+{
+private:
+    int damageAmount;
+
+public:
+    Feed();
+
+    void play(Player* user,QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
+
+    void upgrade() override;
+};
+
+
 #endif // ATTACK_CARDS_H
