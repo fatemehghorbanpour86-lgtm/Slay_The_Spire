@@ -7,7 +7,7 @@ Strike::Strike() : Card("Strike", "Deal 6 damage.", 1, CardType::Attack)
 }
 
 
-void Strike::play(Player* user , std ::vector<Enemy*>& enemies, Enemy* target)
+void Strike::play(Player* user , QVector<Enemy*>& enemies, Enemy* target)
 {
     Q_UNUSED(user)
     Q_UNUSED(enemies)
@@ -34,7 +34,7 @@ Reaper::Reaper() : Card("Reaper", "Deal 4 damage to ALL enemies. Heal HP equal t
     this->damageAmount = 4;
 }
 
-void Reaper::play(Player* user, std::vector<Enemy*>& enemies, Enemy* target)
+void Reaper::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
 {
     Q_UNUSED(target)
 

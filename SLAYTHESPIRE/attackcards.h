@@ -15,7 +15,7 @@ public:
 
     Strike();
 
-    void play(Player* user , std ::vector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void play(Player* user , QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
 };
 
@@ -27,7 +27,7 @@ private:
 public:
     Reaper();
 
-    void play(Player* user, std::vector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
 
     void upgrade() override;
 };
