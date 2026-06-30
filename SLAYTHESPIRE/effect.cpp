@@ -37,8 +37,11 @@ QString Effect::getName() const
 
     case Type::Frail:
         return "Frail";
-    }
 
+    case Type::Rage:
+        return "Rage";
+
+    }
     return "";
 }
 
@@ -96,7 +99,6 @@ void Effect::onTurnStart(Character *target)
 
     switch(type)
     {
-
     case Type::Strength:
         break;
 
@@ -115,6 +117,8 @@ void Effect::onTurnStart(Character *target)
     case Type::Metallicize:
         break;
 
+    case Type::Rage:
+        break;
     }
 }
 

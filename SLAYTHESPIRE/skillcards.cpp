@@ -203,3 +203,35 @@ void TrueGrit::upgrade()
     isUpgraded = true;
     description = "Gain 8 Block. Exhaust a card in your hand.";
 }
+
+
+Rage::Rage()
+    : Card("Rage", "Whenever you play an Attack this turn, gain 3 Block.",
+           0, CardType::Skill, false, false, false, false), blockPerAttack(3)
+{
+    //فقط یک Effect از نوع Rage با duration=1 میسازد (یعنی همین نوبت).
+    // خودِ کارت هیچ منطقی برای "هر بار Attack بازی شد" ندارد - این باید توسط
+    // CombatManager، هر بار یک کارت Attack بازی می‌شود، چک شود: اگر
+    // user->getEffect(Effect::Type::Rage) موجود بود، addBlock(amount) صدا زده شود.
+    // در پایان نوبت Effect خودش با onTurnEnd/decreaseDuration از بین میرود
+}
+void Rage::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->addEffect(Effect::Type::Rage, Effect::Category::Buff,
+                    blockPerAttack, 1);
+}
+void Rage::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    blockPerAttack = 5;
+    description = "Whenever you play an Attack this turn, gain 5 Block.";
+}

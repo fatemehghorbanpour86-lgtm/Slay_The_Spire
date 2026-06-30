@@ -74,4 +74,14 @@ public:
     void upgrade() override;
 };
 
+class Rage : public Card
+{
+private:
+    int blockPerAttack;
+
+public:
+    Rage();
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
 #endif // SKILLCARDS_H
