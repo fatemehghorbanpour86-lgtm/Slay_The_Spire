@@ -46,7 +46,7 @@ public:
 
     virtual ~Card() = default;
 
-    virtual void play(Player* user , Enemy* target = nullptr) = 0;
+    virtual void play(Player* user , QVector<Enemy*>& enemies, Enemy* target = nullptr) = 0;
     // Executes the card effect.
     // for each card type is diffrent.
 
