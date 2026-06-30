@@ -117,3 +117,29 @@ void Offering::upgrade()
     hpLoss = 5;
     description = "Lose 5 HP. Gain 2 Energy. Draw 3 cards.";
 }
+
+
+Impervious::Impervious()
+    : Card("Impervious", "Gain 30 Block.", 2, CardType::Skill,
+           true, false, false, false), blockAmount(30)
+{
+}
+void Impervious::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->addBlock(blockAmount);
+}
+void Impervious::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    blockAmount = 40;
+    description = "Gain 40 Block.";
+}

@@ -41,5 +41,14 @@ public:
     void upgrade() override;
 };
 
+class Impervious : public Card
+{
+private:
+    int blockAmount;
 
+public:
+    Impervious();
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
 #endif // SKILLCARDS_H
