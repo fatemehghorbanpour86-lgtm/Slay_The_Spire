@@ -29,3 +29,32 @@ void Inflame::upgrade()
     name = "Inflame+";
     description = "Gain 3 Strength.";
 }
+
+
+Metallicize::Metallicize()
+    : Card("Metallicize", "At the end of your turn, gain 3 Block.", 1,
+           CardType::Power, false, false, false, false),
+    blockAmount(3)
+{
+}
+void Metallicize::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->addEffect(Effect::Type::Metallicize, Effect::Category::Buff,
+                    blockAmount);
+}
+void Metallicize::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    blockAmount = 4;
+    name = "Metallicizie+";
+    description = "At the end of your turn, gain 4 Block.";
+}

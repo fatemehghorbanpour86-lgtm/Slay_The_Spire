@@ -14,4 +14,15 @@ public:
     void upgrade() override;
 };
 
+class Metallicize : public Card
+{
+private:
+    int blockAmount;
+
+public:
+    Metallicize();
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
+
 #endif // POWERCARD_H
