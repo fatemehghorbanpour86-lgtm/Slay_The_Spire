@@ -15,9 +15,21 @@ public:
 
     Strike();
 
-    void play(Player* user, Enemy* target = nullptr) override;
+    void play(Player* user , std ::vector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
 };
 
+class Reaper : public Card
+{
+private:
+    int damageAmount;
+
+public:
+    Reaper();
+
+    void play(Player* user, std::vector<Enemy*>& enemies, Enemy* target = nullptr) override;
+
+    void upgrade() override;
+};
 
 #endif // ATTACK_CARDS_H
