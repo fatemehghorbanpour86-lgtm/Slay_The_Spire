@@ -1,4 +1,5 @@
 #include "attackcards.h"
+#include "player.h"
 
 // Strike
 
@@ -273,6 +274,51 @@ void TwinStrike::upgrade()
     damageAmount = 7;
 
     description = "Deal 7 damage twice.";
+}
+
+// Hemokinesis
+
+Hemokinesis::Hemokinesis()
+    : Card("Hemokinesis", "Lose 2 HP. Deal 15 damage.",1,CardType::Attack)
+{
+    damageAmount = 15;
+    selfDamage = 2;
+}
+
+
+void Hemokinesis::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
+{
+    Q_UNUSED(enemies);
+
+    if(user == nullptr || target == nullptr)
+    {
+        return;
+    }
+
+    // The player loses HP before attacking.
+    user->takeDamage(selfDamage);
+
+    // target->takeDamage(damageAmount);
+
+    // TODO:
+    // Replace enemy damage with CombatCalculator
+}
+
+
+void Hemokinesis::upgrade()
+{
+    if(isUpgraded)
+    {
+        return;
+    }
+
+    isUpgraded = true;
+
+    name = "Hemokinesis+";
+
+    damageAmount = 20;
+
+    description = "Lose 2 HP. Deal 20 damage.";
 }
 
 

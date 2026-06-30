@@ -85,5 +85,19 @@ public:
     void upgrade() override;
 };
 
+class Hemokinesis : public Card
+{
+private:
+    int damageAmount;
+    int selfDamage;
+
+public:
+    Hemokinesis();
+
+    void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
+
+    void upgrade() override;
+};
+
 
 #endif // ATTACK_CARDS_H
