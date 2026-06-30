@@ -55,3 +55,35 @@ void Exhume::upgrade()
     setEnergyCost(0);
     description = "Costs 0. Put a card from your exhaust pile into your hand.";
 }
+
+
+LimitBreak::LimitBreak()
+    : Card("Limit Break", "Double your Strength.", 1, CardType::Skill,
+           true, false, false, false)
+{
+}
+void LimitBreak::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    Effect* strength = user->getEffect(Effect::Type::Strength);
+
+    if (strength)
+    {
+        user->addEffect(Effect::Type::Strength, Effect::Category::Buff,
+                        strength->getAmount());
+    }
+}
+void LimitBreak::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    isExhaust = false;
+    description = "Double your Strength.";
+}

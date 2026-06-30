@@ -3,9 +3,7 @@
 
 #include <QString>
 #include <QVector>
-
-// TODO //Done by f
-class Effect;
+#include "effect.h"
 
 
 class Character
@@ -16,7 +14,7 @@ protected:
     int maxHealth;
     int currentHealth;
     int block;
-    QVector<Effect*> activeEffects; //Done by f
+    QVector<Effect*> activeEffects;
 
 protected:
 
@@ -40,6 +38,9 @@ public:
 
     virtual void takeDamage(int damage);
     virtual void heal(int amount);
+
+    void addEffect(Effect::Type type, Effect::Category category, int amount, int duration = -1);
+    Effect* getEffect(Effect::Type type) const;
 
     bool isDead() const;
 };

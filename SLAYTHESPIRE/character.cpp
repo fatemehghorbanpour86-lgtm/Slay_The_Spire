@@ -131,6 +131,29 @@ void Character::heal(int amount)
 
 }
 
+void Character::addEffect(Effect::Type type, Effect::Category category, int amount, int duration)
+{
+    for (Effect* e : activeEffects)
+    {
+        if (e->getType() == type)
+        {
+            e->stack(amount);
+            return;
+        }
+    }
+    activeEffects.append(new Effect(type, category, amount, duration));
+}
+
+Effect* Character::getEffect(Effect::Type type) const
+{
+    for (Effect* e : activeEffects)
+    {
+        if (e->getType() == type)
+            return e;
+    }
+    return nullptr;
+}
+
 
 bool Character::isDead() const
 {

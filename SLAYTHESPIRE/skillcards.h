@@ -10,7 +10,7 @@ private:
 
 public:
     Defend();
-    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target) override;
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
 };
 
@@ -18,8 +18,15 @@ class Exhume : public Card
 {
 public:
     Exhume();
-    void play(Player* user , QVector<Enemy*>& enemies, Enemy* target) override;
+    void play(Player* user , QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
 };
 
+class LimitBreak : public Card
+{
+public:
+    LimitBreak();
+    void play(Player* user , QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
 #endif // SKILLCARDS_H
