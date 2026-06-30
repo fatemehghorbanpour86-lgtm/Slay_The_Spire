@@ -40,7 +40,7 @@ void Strike::upgrade()
 
 //Reaper
 
-Reaper::Reaper() : Card("Reaper", "Deal 4 damage to ALL enemies. Heal HP equal to unblocked damage dealt.",2, CardType::Attack)
+Reaper::Reaper() : Card("Reaper", "Deal 4 damage to ALL enemies. Heal HP equal to unblocked damage dealt.Exhaust.",2, CardType::Attack)
 {
     damageAmount = 4;
 }
@@ -96,7 +96,7 @@ void Reaper::upgrade()
     damageAmount += 1;
 
     description =
-        "Deal 5 damage to ALL enemies. Heal HP equal to unblocked damage dealt.";
+        "Deal 5 damage to ALL enemies. Heal HP equal to unblocked damage dealt.Exhaust";
 }
 
 //  Bludgeon
@@ -181,7 +181,7 @@ void Feed::upgrade()
 //Immolate
 
 Immolate::Immolate()
-    : Card("Immolate", "Deal 21 damage to ALL enemies. Add two Burns into your Discard Pile.", 2,CardType::Attack)
+    : Card("Immolate", "Deal 21 damage to ALL enemies. Add a Burn into your Discard Pile.", 2,CardType::Attack)
 {
     damageAmount = 21;
 }
@@ -228,6 +228,51 @@ void Immolate::upgrade()
     damageAmount = 28;
 
     description = "Deal 28 damage to ALL enemies. Add a Burn into your Discard Pile.";
+}
+
+//TwinStrike
+
+TwinStrike::TwinStrike()
+    : Card("Twin Strike","Deal 5 damage twice.",1,CardType::Attack)
+{
+    damageAmount = 5;
+}
+
+
+void TwinStrike::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
+{
+    Q_UNUSED(user)
+    Q_UNUSED(enemies)
+
+    if(target == nullptr)
+    {
+        return;
+    }
+
+    // First hit
+    // target->takeDamage(damageAmount);
+
+    // Second hit
+    // target->takeDamage(damageAmount);
+
+    // TODO
+    // Replace both attacks with CombatCalculator
+}
+
+void TwinStrike::upgrade()
+{
+    if(isUpgraded)
+    {
+        return;
+    }
+
+    isUpgraded = true;
+
+    name = "Twin Strike+";
+
+    damageAmount = 7;
+
+    description = "Deal 7 damage twice.";
 }
 
 

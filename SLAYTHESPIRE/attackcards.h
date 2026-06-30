@@ -72,4 +72,18 @@ public:
 };
 
 
+class TwinStrike : public Card
+{
+private:
+    int damageAmount;
+
+public:
+    TwinStrike();
+
+    void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
+
+    void upgrade() override;
+};
+
+
 #endif // ATTACK_CARDS_H
