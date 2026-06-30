@@ -178,4 +178,56 @@ void Feed::upgrade()
     description = "Deal 12 damage. If Fatal, raise your Max HP by 4.";
 }
 
+//Immolate
+
+Immolate::Immolate()
+    : Card("Immolate", "Deal 21 damage to ALL enemies. Add two Burns into your Discard Pile.", 2,CardType::Attack)
+{
+    damageAmount = 21;
+}
+
+void Immolate::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target);
+
+    if(user == nullptr)
+    {
+        return;
+    }
+
+    for(Enemy* enemy : enemies)
+    {
+        if(enemy == nullptr)
+        {
+            continue;
+        }
+
+        // enemy->takeDamage(damageAmount);
+
+        // todo anahita
+        // Replace with CombatCalculator after
+        // the combat system is implemented.
+    }
+
+    // TODO
+    // Add Burn Status Card to the player's DiscardPile.
+    // This should be handled through CombatDeck.
+}
+
+void Immolate::upgrade()
+{
+    if(isUpgraded)
+    {
+        return;
+    }
+
+    isUpgraded = true;
+
+    name = "Immolate+";
+
+    damageAmount = 28;
+
+    description = "Deal 28 damage to ALL enemies. Add a Burn into your Discard Pile.";
+}
+
 

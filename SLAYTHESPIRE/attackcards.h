@@ -58,5 +58,18 @@ public:
     void upgrade() override;
 };
 
+class Immolate : public Card
+{
+private:
+    int damageAmount;
+
+public:
+    Immolate();
+
+    void play(Player* user,QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
+
+    void upgrade() override;
+};
+
 
 #endif // ATTACK_CARDS_H
