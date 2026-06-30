@@ -27,3 +27,31 @@ void Defend::upgrade()
     blockAmount = 8;
     description = "Gain 8 Block.";
 }
+
+
+Exhume::Exhume()
+    : Card("Exhume", "Put a card from your exhaust pile into your hand.", 1,
+           CardType::Skill, true, false, false, false)
+{
+}
+void Exhume::play(Player* user,QVector <Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    // TODO: Player::returnRandomCardFromExhaustToHand()
+    // Deck/CombatManager (Anahita)
+    //user->returnRandomCardFromExhaustToHand();
+}
+void Exhume::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    setEnergyCost(0);
+    description = "Costs 0. Put a card from your exhaust pile into your hand.";
+}

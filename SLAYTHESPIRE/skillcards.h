@@ -14,4 +14,12 @@ public:
     void upgrade() override;
 };
 
+class Exhume : public Card
+{
+public:
+    Exhume();
+    void play(Player* user , QVector<Enemy*>& enemies, Enemy* target) override;
+    void upgrade() override;
+};
+
 #endif // SKILLCARDS_H
