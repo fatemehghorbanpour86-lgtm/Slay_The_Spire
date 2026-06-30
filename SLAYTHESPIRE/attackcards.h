@@ -32,4 +32,17 @@ public:
     void upgrade() override;
 };
 
+class Bludgeon : public Card
+{
+private:
+    int damageAmount;
+
+public:
+    Bludgeon();
+
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+
+    void upgrade() override;
+};
+
 #endif // ATTACK_CARDS_H
