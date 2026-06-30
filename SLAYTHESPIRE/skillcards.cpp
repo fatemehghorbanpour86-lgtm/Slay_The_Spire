@@ -172,3 +172,34 @@ void ShrugItOff::upgrade()
     blockAmount = 11;
     description = "Draw 1 card. Gain 11 Block.";
 }
+
+
+TrueGrit::TrueGrit()
+    : Card("True Grit", "Gain 8 Block. Exhaust a random card in your hand.",
+           1, CardType::Skill, false, false, false, false), blockAmount(8)
+{
+}
+void TrueGrit::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->addBlock(blockAmount);
+
+    // TODO: Deck/CombatManager - (َAnahita)
+    // if (isUpgraded)
+    //     user->exhaustChosenCardInHand();
+    // else
+    //     user->exhaustRandomCardInHand();
+}
+void TrueGrit::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    description = "Gain 8 Block. Exhaust a card in your hand.";
+}
