@@ -143,3 +143,32 @@ void Impervious::upgrade()
     blockAmount = 40;
     description = "Gain 40 Block.";
 }
+
+
+ShrugItOff::ShrugItOff()
+    : Card("Shrug It Off", "Draw 1 card. Gain 8 Block.", 1, CardType::Skill,
+           false, false, false, false),
+    blockAmount(8)
+{
+}
+void ShrugItOff::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    // TODO: Player::drawCards(int) — Deck/CombatManager (Anahita)
+    //user->drawCards(1);
+    user->addBlock(blockAmount);
+}
+void ShrugItOff::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    blockAmount = 11;
+    description = "Draw 1 card. Gain 11 Block.";
+}

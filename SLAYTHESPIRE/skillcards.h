@@ -51,4 +51,15 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
 };
+
+class ShrugItOff : public Card
+{
+private:
+    int blockAmount;
+
+public:
+    ShrugItOff();
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
 #endif // SKILLCARDS_H
