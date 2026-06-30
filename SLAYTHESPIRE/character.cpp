@@ -155,6 +155,14 @@ Effect* Character::getEffect(Effect::Type type) const
 }
 
 
+void Character::loseHP(int amount)
+{
+    if (amount <= 0) return;
+    currentHealth -= amount;
+    if (currentHealth < 0) currentHealth = 0;
+}
+
+
 bool Character::isDead() const
 {
     return currentHealth == 0;

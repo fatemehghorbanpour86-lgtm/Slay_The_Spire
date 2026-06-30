@@ -87,3 +87,33 @@ void LimitBreak::upgrade()
     isExhaust = false;
     description = "Double your Strength.";
 }
+
+
+Offering::Offering()
+    : Card("Offering", "Lose 6 HP. Gain 2 Energy. Draw 3 cards.", 0,
+           CardType::Skill, true, false, false, false), hpLoss(6)
+{
+}
+void Offering::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->loseHP(hpLoss);
+    user->gainEnergy(2);
+
+    // TODO: Player::drawCards(int) - Deck/CombatManager (Anahita)
+    //user->drawCards(3);
+}
+void Offering::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    hpLoss = 5;
+    description = "Lose 5 HP. Gain 2 Energy. Draw 3 cards.";
+}

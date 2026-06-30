@@ -29,4 +29,17 @@ public:
     void play(Player* user , QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
 };
+
+class Offering : public Card
+{
+private:
+    int hpLoss;
+
+public:
+    Offering();
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
+
+
 #endif // SKILLCARDS_H

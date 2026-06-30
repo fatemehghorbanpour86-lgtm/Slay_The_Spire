@@ -42,6 +42,8 @@ public:
     void addEffect(Effect::Type type, Effect::Category category, int amount, int duration = -1);
     Effect* getEffect(Effect::Type type) const;
 
+    void loseHP(int amount);
+
     bool isDead() const;
 };
 
