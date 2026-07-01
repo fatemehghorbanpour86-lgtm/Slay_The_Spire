@@ -68,12 +68,41 @@ void Character::addBlock(int amount)
     // Receives final block value.
     // CombatCalculator handles Dexterity and other modifiers.
 
+
+    if(Effect* dexterity = getEffect(Effect::Type::Dexterity))
+    {
+        amount += dexterity->getAmount();
+    }
+    if(getEffect(Effect::Type::Frail))
+    {
+        amount = static_cast<int>(amount * 0.75);
+    }
+
     block += amount;
+}
+
+void Character::loseBlock(int amount)
+{
+    removeBlock(amount);
 }
 
 void Character::clearBlock()
 {
     block = 0;
+}
+
+void Character::startTurnBlockReset()
+{
+    if(getEffect(Effect::Type::Barricade) == nullptr)
+    {
+        clearBlock();
+    }
+    // If Barricade is active, block is intentionally left untouched.
+}
+
+bool Character::hasBlock() const
+{
+    return block > 0;
 }
 
 void Character::removeBlock(int amount)
