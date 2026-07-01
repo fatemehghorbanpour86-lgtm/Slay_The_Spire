@@ -110,5 +110,6 @@ void Brutality::upgrade()
 
     isUpgraded = true;
     isInnate = true;
+    name = "Brutality+";
     description = "Innate. At the start of your turn, lose 1 HP and draw 1 card.";
 }
