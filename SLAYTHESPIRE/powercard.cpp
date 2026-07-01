@@ -210,3 +210,32 @@ void Berserk::upgrade()
     name = "Berserk+";
     description = "Gain 1 Vulnerable. At the start of your turn, gain 1 extra Energy.";
 }
+
+
+DarkEmbrace::DarkEmbrace()
+    : Card("Dark Embrace", "Whenever a card is Exhausted, draw 1 card.", 2,
+           CardType::Power, false, false, false, false)
+{
+    //CombatManager هر بار کارتی Exhaust می‌شود باید چک کند
+    // user->getEffect(Effect::Type::DarkEmbrace) و در صورت وجود
+    // user->drawCards(1) صدا بزند.
+}
+void DarkEmbrace::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->addEffect(Effect::Type::DarkEmbrace, Effect::Category::Buff, 1);
+}
+void DarkEmbrace::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    setEnergyCost(1);
+    name = "Dark Embrace+";
+}

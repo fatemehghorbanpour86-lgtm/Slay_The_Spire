@@ -56,6 +56,9 @@ QString Effect::getName() const
 
     case Type::Berserk:
         return "Berserk";
+
+    case Type::DarkEmbrace:
+        return "Dark Embrace";
     }
     return "";
 }
@@ -139,6 +142,9 @@ void Effect::onTurnStart(Character *target)
         break;
 
     case Type::FeelNoPain:
+        break;
+
+    case Type::DarkEmbrace:
         break;
 
     case Type::DemonForm:

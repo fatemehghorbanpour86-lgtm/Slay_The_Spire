@@ -73,4 +73,12 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
 };
+
+class DarkEmbrace : public Card
+{
+public:
+    DarkEmbrace();
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
 #endif // POWERCARD_H
