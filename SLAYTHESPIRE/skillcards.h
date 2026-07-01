@@ -33,7 +33,7 @@ public:
 class Offering : public Card
 {
 private:
-    int hpLoss;
+    int drawcards;
 
 public:
     Offering();

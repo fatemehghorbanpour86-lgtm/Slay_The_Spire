@@ -25,6 +25,7 @@ void Defend::upgrade()
 
     isUpgraded = true;
     blockAmount = 8;
+    name = "Defend+";
     description = "Gain 8 Block.";
 }
 
@@ -53,7 +54,7 @@ void Exhume::upgrade()
 
     isUpgraded = true;
     setEnergyCost(0);
-    description = "Costs 0. Put a card from your exhaust pile into your hand.";
+    name = "Exhume+";
 }
 
 
@@ -85,13 +86,14 @@ void LimitBreak::upgrade()
 
     isUpgraded = true;
     isExhaust = false;
+    name = "Limit Break+";
     description = "Double your Strength.";
 }
 
 
 Offering::Offering()
     : Card("Offering", "Lose 6 HP. Gain 2 Energy. Draw 3 cards.", 0,
-           CardType::Skill, true, false, false, false), hpLoss(6)
+           CardType::Skill, true, false, false, false), drawcards(3)
 {
 }
 void Offering::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
@@ -102,11 +104,11 @@ void Offering::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     if (!user)
         return;
 
-    user->loseHP(hpLoss);
+    user->loseHP(6);
     user->gainEnergy(2);
 
     // TODO: Player::drawCards(int) - Deck/CombatManager (Anahita)
-    //user->drawCards(3);
+    //user->drawCards(drawcards);
 }
 void Offering::upgrade()
 {
@@ -114,7 +116,8 @@ void Offering::upgrade()
         return;
 
     isUpgraded = true;
-    hpLoss = 5;
+    drawcards = 5;
+    name = "Offering+";
     description = "Lose 5 HP. Gain 2 Energy. Draw 3 cards.";
 }
 
@@ -141,6 +144,7 @@ void Impervious::upgrade()
 
     isUpgraded = true;
     blockAmount = 40;
+    name = "Impervious+";
     description = "Gain 40 Block.";
 }
 
@@ -170,13 +174,14 @@ void ShrugItOff::upgrade()
 
     isUpgraded = true;
     blockAmount = 11;
+    name = "Shrug It Off+";
     description = "Draw 1 card. Gain 11 Block.";
 }
 
 
 TrueGrit::TrueGrit()
     : Card("True Grit", "Gain 8 Block. Exhaust a random card in your hand.",
-           1, CardType::Skill, false, false, false, false), blockAmount(8)
+           1, CardType::Skill, false, false, false, false), blockAmount(7)
 {
 }
 void TrueGrit::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
@@ -201,7 +206,9 @@ void TrueGrit::upgrade()
         return;
 
     isUpgraded = true;
-    description = "Gain 8 Block. Exhaust a card in your hand.";
+    blockAmount = 9;
+    name = "True Grit+";
+    description = "Gain 9 Block. Exhaust a card in your hand.";
 }
 
 
@@ -233,5 +240,6 @@ void Rage::upgrade()
 
     isUpgraded = true;
     blockPerAttack = 5;
+    name = "Rage+";
     description = "Whenever you play an Attack this turn, gain 5 Block.";
 }
