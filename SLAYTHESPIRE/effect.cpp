@@ -47,6 +47,9 @@ QString Effect::getName() const
 
     case Type::Brutality:
         return "Brutality";
+
+    case Type::Barricade:
+        return "Barricade";
     }
     return "";
 }
@@ -124,6 +127,9 @@ void Effect::onTurnStart(Character *target)
         break;
 
     case Type::Rage:
+        break;
+
+    case Type::Barricade:
         break;
 
     case Type::DemonForm:

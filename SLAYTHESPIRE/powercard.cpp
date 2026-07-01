@@ -113,3 +113,35 @@ void Brutality::upgrade()
     name = "Brutality+";
     description = "Innate. At the start of your turn, lose 1 HP and draw 1 card.";
 }
+
+
+Barricade::Barricade()
+    : Card("Barricade", "Block is not removed at the start of your turn.", 3,
+           CardType::Power, false, false, false, false)
+{
+    // این کارت هیچ منطقی برای "پاک نکردن Block" ندارد - این باید توسط
+    // CombatManager رعایت شود: قبل از clearBlock() در شروع نوبت بازیکن، چک کند
+    // user->getEffect(Effect::Type::Barricade) و اگر موجود بود clearBlock صدا
+    // زده نشود.
+
+    //این کارت امتیازی است***************************************************
+}
+void Barricade::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->addEffect(Effect::Type::Barricade, Effect::Category::Buff, 1);
+}
+void Barricade::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    setEnergyCost(2);
+    name = "Barricade+";
+}

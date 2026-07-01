@@ -44,4 +44,11 @@ public:
     void upgrade() override;
 };
 
+class Barricade : public Card
+{
+public:
+    Barricade();
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
 #endif // POWERCARD_H
