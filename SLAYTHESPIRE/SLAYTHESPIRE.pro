@@ -9,6 +9,7 @@ CONFIG += c++17
 SOURCES += \
     attackcards.cpp \
     card.cpp \
+    cursecards.cpp \
     effect.cpp \
     loginpage.cpp \
     main.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
 HEADERS += \
     attackcards.h \
     card.h \
+    cursecards.h \
     effect.h \
     loginpage.h \
     mainpage.h \
