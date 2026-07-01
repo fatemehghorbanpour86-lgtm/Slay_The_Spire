@@ -11,6 +11,7 @@ SOURCES += \
     card.cpp \
     cursecards.cpp \
     effect.cpp \
+    enemy.cpp \
     loginpage.cpp \
     main.cpp \
     mainpage.cpp \
@@ -27,6 +28,7 @@ HEADERS += \
     card.h \
     cursecards.h \
     effect.h \
+    enemy.h \
     loginpage.h \
     mainpage.h \
     mainwindow.h \
