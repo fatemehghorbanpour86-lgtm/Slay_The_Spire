@@ -34,7 +34,10 @@ public:
 
 
     void addBlock(int amount);
+    void loseBlock(int amount);
     void clearBlock();
+    void startTurnBlockReset();
+    bool hasBlock() const;
 
     virtual void takeDamage(int damage);
     virtual void heal(int amount);
