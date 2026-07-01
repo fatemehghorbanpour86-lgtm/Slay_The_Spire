@@ -145,3 +145,38 @@ void Barricade::upgrade()
     setEnergyCost(2);
     name = "Barricade+";
 }
+
+
+FeelNoPain::FeelNoPain()
+    : Card("Feel No Pain", "Whenever a card is Exhausted, gain 3 Block.", 1,
+           CardType::Power, false, false, false, false),
+    blockPerExhaust(3)
+{
+    //باید CombatManager، هر بار
+    // کارتی را به Exhaust Pile منتقل می‌کند، چک کند user->getEffect(FeelNoPain)
+    // و در صورت وجود addBlock(amount) صدا بزند
+
+
+    //این کارت امتیازی است***************************************************
+}
+void FeelNoPain::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->addEffect(Effect::Type::FeelNoPain, Effect::Category::Buff,
+                    blockPerExhaust);
+}
+void FeelNoPain::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    blockPerExhaust = 4;
+    name = "Feel No Pain+";
+    description = "Whenever a card is Exhausted, gain 4 Block.";
+}

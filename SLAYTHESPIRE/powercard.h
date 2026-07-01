@@ -51,4 +51,15 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
 };
+
+class FeelNoPain : public Card
+{
+private:
+    int blockPerExhaust;
+
+public:
+    FeelNoPain();
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
 #endif // POWERCARD_H

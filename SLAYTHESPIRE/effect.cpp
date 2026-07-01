@@ -50,6 +50,9 @@ QString Effect::getName() const
 
     case Type::Barricade:
         return "Barricade";
+
+    case Type::FeelNoPain:
+        return "Feel No Pain";
     }
     return "";
 }
@@ -130,6 +133,9 @@ void Effect::onTurnStart(Character *target)
         break;
 
     case Type::Barricade:
+        break;
+
+    case Type::FeelNoPain:
         break;
 
     case Type::DemonForm:
