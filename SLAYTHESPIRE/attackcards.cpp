@@ -27,21 +27,23 @@ void Strike::play(Player* user , QVector<Enemy*>& enemies, Enemy* target)
 
 void Strike::upgrade()
 {
-    if (!isUpgraded)
+    if(isUpgraded)
     {
-        isUpgraded = true;
-
-        name = "Strike+";
-
-        damageAmount = 9;
-
-        description = "Deal 9 damage.";
+        return;
     }
+
+    isUpgraded = true;
+
+    name = "Strike+";
+
+    damageAmount = 9;
+
+    description = "Deal 9 damage.";
 }
 
 //Reaper
 
-Reaper::Reaper() : Card("Reaper", "Deal 4 damage to ALL enemies. Heal HP equal to unblocked damage dealt.Exhaust.",2, CardType::Attack)
+Reaper::Reaper() : Card("Reaper", "Deal 4 damage to ALL enemies. Heal HP equal to unblocked damage dealt. Exhaust.",2, CardType::Attack, true)
 {
     damageAmount = 4;
 }
@@ -97,7 +99,7 @@ void Reaper::upgrade()
     damageAmount += 1;
 
     description =
-        "Deal 5 damage to ALL enemies. Heal HP equal to unblocked damage dealt.Exhaust";
+        "Deal 5 damage to ALL enemies. Heal HP equal to unblocked damage dealt. Exhaust";
 }
 
 //  Bludgeon
