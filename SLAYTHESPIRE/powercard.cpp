@@ -180,3 +180,33 @@ void FeelNoPain::upgrade()
     name = "Feel No Pain+";
     description = "Whenever a card is Exhausted, gain 4 Block.";
 }
+
+
+Berserk::Berserk()
+    : Card("Berserk", "Gain 2 Vulnerable. At the start of your turn, gain 1 extra Energy.",
+           0, CardType::Power, false, false, false, false),
+    vulnerableAmount(2)
+{
+}
+void Berserk::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->addEffect(Effect::Type::Vulnerable, Effect::Category::Debuff,
+                    vulnerableAmount);
+    user->addEffect(Effect::Type::Berserk, Effect::Category::Buff, 1);
+}
+void Berserk::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    vulnerableAmount = 1;
+    name = "Berserk+";
+    description = "Gain 1 Vulnerable. At the start of your turn, gain 1 extra Energy.";
+}

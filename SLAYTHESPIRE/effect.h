@@ -29,7 +29,8 @@ public:
         DemonForm,
         Brutality,
         Barricade,
-        FeelNoPain
+        FeelNoPain,
+        Berserk
     };
 
     Effect(Type type, Category category, int amount, int duration = -1);

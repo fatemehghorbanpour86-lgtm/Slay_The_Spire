@@ -53,6 +53,9 @@ QString Effect::getName() const
 
     case Type::FeelNoPain:
         return "Feel No Pain";
+
+    case Type::Berserk:
+        return "Berserk";
     }
     return "";
 }
@@ -150,6 +153,10 @@ void Effect::onTurnStart(Character *target)
         }
         break;
 
+    case Type::Berserk:
+        if (Player* p = dynamic_cast<Player*>(target))
+            p->gainEnergy(amount);
+        break;
     }
 }
 

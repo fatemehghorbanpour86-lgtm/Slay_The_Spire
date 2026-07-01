@@ -62,4 +62,15 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
 };
+
+class Berserk : public Card
+{
+private:
+    int vulnerableAmount;
+
+public:
+    Berserk();
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
 #endif // POWERCARD_H
