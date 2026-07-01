@@ -35,4 +35,13 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
 };
+
+class Brutality : public Card
+{
+public:
+    Brutality();
+    void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void upgrade() override;
+};
+
 #endif // POWERCARD_H

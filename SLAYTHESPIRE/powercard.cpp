@@ -85,3 +85,30 @@ void DemonForm::upgrade()
     name = "Demon Form+";
     description = "At the start of your turn, gain 3 Strength.";
 }
+
+
+Brutality::Brutality()
+    : Card("Brutality", "At the start of your turn, lose 1 HP and draw 1 card.",
+           0, CardType::Power, false, false, false, false)
+{
+}
+void Brutality::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->addEffect(Effect::Type::Brutality, Effect::Category::Buff,
+                    1);
+}
+void Brutality::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    isInnate = true;
+    description = "Innate. At the start of your turn, lose 1 HP and draw 1 card.";
+}

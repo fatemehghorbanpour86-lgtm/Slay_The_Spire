@@ -44,6 +44,9 @@ QString Effect::getName() const
 
     case Type::DemonForm:
         return "Demon Form";
+
+    case Type::Brutality:
+        return "Brutality";
     }
     return "";
 }
@@ -126,6 +129,15 @@ void Effect::onTurnStart(Character *target)
     case Type::DemonForm:
         target->addEffect(Effect::Type::Strength, Effect::Category::Buff, amount);
         break;
+
+    case Type::Brutality:
+        if (Player* p = dynamic_cast<Player*>(target))
+        {
+            if (amount > 0) p->loseHP(amount);
+            //p->drawCards(1);
+        }
+        break;
+
     }
 }
 
