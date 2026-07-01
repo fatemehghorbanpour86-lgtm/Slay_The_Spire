@@ -25,7 +25,13 @@ public:
         Vulnerable,
         Frail,
 
-        Rage
+        Rage,
+        DemonForm,
+        Brutality,
+        Barricade,
+        FeelNoPain,
+        Berserk,
+        DarkEmbrace
     };
 
     Effect(Type type, Category category, int amount, int duration = -1);
