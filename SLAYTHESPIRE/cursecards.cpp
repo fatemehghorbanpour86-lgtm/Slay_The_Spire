@@ -1,4 +1,34 @@
 #include "cursecards.h"
+#include "player.h"
+
+//======================================================
+// J.A.X.
+//======================================================
+
+JAX::JAX()
+    : Card("J.A.X.","Lose 3 HP. Gain 2 Strength.",0,CardType::Curse)
+{
+}
+
+void JAX::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
+{
+    Q_UNUSED(enemies)
+    Q_UNUSED(target)
+
+    if(user == nullptr)
+    {
+        return;
+    }
+
+    user->loseHP(3);
+
+    user->addEffect( Effect::Type::Strength,Effect::Category::Buff, 2);
+}
+
+void JAX::upgrade()
+{
+    // Curse cards cannot be upgraded.
+}
 
 
 //======================================================

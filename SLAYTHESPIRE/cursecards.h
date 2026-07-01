@@ -6,6 +6,17 @@
 class Player;
 class Enemy;
 
+
+class JAX : public Card
+{
+public:
+    JAX();
+
+    void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
+
+    void upgrade() override;
+};
+
 class CurseOfTheBell : public Card
 {
 public:
