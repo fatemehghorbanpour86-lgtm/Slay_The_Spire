@@ -27,4 +27,15 @@ public:
     void upgrade() override;
 };
 
+
+class Regret : public Card
+{
+public:
+    Regret();
+
+    void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
+
+    void upgrade() override;
+};
+
 #endif // CURSECARDS_H
