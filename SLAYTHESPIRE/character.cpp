@@ -1,4 +1,5 @@
 #include "character.h"
+#include <utility>
 
 Character::Character()
 {
@@ -22,7 +23,12 @@ Character::Character(const QString& name, int maxHealth)
 
 Character::~Character()
 {
+    for(Effect* effect : std::as_const(activeEffects))
+    {
+        delete effect;
+    }
 
+    activeEffects.clear();
 }
 
 QString Character::getName() const
@@ -58,8 +64,9 @@ void Character::addBlock(int amount)
     if(amount <= 0)
         return;
 
-    // TODO (Combat System)
-    // Buffs or Relics can increase block
+    // TODO
+    // Receives final block value.
+    // CombatCalculator handles Dexterity and other modifiers.
 
     block += amount;
 }
@@ -99,12 +106,9 @@ void Character::takeDamage(int damage)
     if(damage <= 0)
         return;
 
-    // TODO (Combat System) dependent on
-    //  Strength
-    //  Weak
-    //  Vulnerable
-    //  Relics
-    //  Other Effects
+    // TODO
+    // Receives final calculated damage.
+    // CombatCalculator applies Strength, Weak, Vulnerable and similar effects.
 
     damage = absorbBlock(damage);
 
@@ -133,7 +137,7 @@ void Character::heal(int amount)
 
 void Character::addEffect(Effect::Type type, Effect::Category category, int amount, int duration)
 {
-    for (Effect* e : activeEffects)
+    for (Effect* e : std::as_const(activeEffects))
     {
         if (e->getType() == type)
         {
