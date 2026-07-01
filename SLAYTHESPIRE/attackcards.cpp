@@ -297,8 +297,7 @@ void Hemokinesis::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
         return;
     }
 
-    // The player loses HP before attacking.
-    user->takeDamage(selfDamage);
+    user->loseHP(selfDamage);
 
     // target->takeDamage(damageAmount);
 
