@@ -33,8 +33,7 @@ void Inflame::upgrade()
 
 Metallicize::Metallicize()
     : Card("Metallicize", "At the end of your turn, gain 3 Block.", 1,
-           CardType::Power, false, false, false, false),
-    blockAmount(3)
+           CardType::Power, false, false, false, false), blockAmount(3)
 {
 }
 void Metallicize::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
@@ -57,4 +56,32 @@ void Metallicize::upgrade()
     blockAmount = 4;
     name = "Metallicizie+";
     description = "At the end of your turn, gain 4 Block.";
+}
+
+
+DemonForm::DemonForm()
+    : Card("Demon Form", "At the start of your turn, gain 2 Strength.", 3,
+           CardType::Power, false, false, false, false), strengthPerTurn(2)
+{
+}
+void DemonForm::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(target)
+    Q_UNUSED(enemies)
+
+    if (!user)
+        return;
+
+    user->addEffect(Effect::Type::DemonForm, Effect::Category::Buff,
+                    strengthPerTurn);
+}
+void DemonForm::upgrade()
+{
+    if (isUpgraded)
+        return;
+
+    isUpgraded = true;
+    strengthPerTurn = 3;
+    name = "Demon Form+";
+    description = "At the start of your turn, gain 3 Strength.";
 }

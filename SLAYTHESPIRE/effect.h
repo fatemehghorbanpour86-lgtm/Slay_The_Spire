@@ -25,7 +25,8 @@ public:
         Vulnerable,
         Frail,
 
-        Rage
+        Rage,
+        DemonForm
     };
 
     Effect(Type type, Category category, int amount, int duration = -1);

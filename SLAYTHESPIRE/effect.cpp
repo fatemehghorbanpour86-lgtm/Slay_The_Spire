@@ -1,5 +1,6 @@
 #include "effect.h"
 #include "character.h"
+#include "player.h"
 
 Effect::Effect(Type type, Category category, int amount, int duration)
 {
@@ -41,6 +42,8 @@ QString Effect::getName() const
     case Type::Rage:
         return "Rage";
 
+    case Type::DemonForm:
+        return "Demon Form";
     }
     return "";
 }
@@ -119,6 +122,10 @@ void Effect::onTurnStart(Character *target)
 
     case Type::Rage:
         break;
+
+    case Type::DemonForm:
+        target->addEffect(Effect::Type::Strength, Effect::Category::Buff, amount);
+        break;
     }
 }
 
@@ -128,7 +135,6 @@ void Effect::onTurnEnd(Character *target)
     {
 
     case Type::Metallicize:
-
         target->addBlock(amount);
         break;
 
