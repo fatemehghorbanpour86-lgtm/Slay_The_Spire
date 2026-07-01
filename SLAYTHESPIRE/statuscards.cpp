@@ -52,3 +52,28 @@ void Slime::upgrade()
     // Status cards cannot be upgraded.
 }
 
+
+//======================================================
+// Wound
+//======================================================
+
+Wound::Wound()
+    : Card("Wound","Unplayable.",0,CardType::Status,
+           false, false, false, true)
+{
+}
+
+
+void Wound::play(Player* user,QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(user)
+    Q_UNUSED(enemies)
+    Q_UNUSED(target)
+
+}
+
+
+void Wound::upgrade()
+{
+    // Status cards cannot be upgraded.
+}

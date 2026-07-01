@@ -27,4 +27,14 @@ public:
     void upgrade() override;
 };
 
+class Wound : public Card
+{
+public:
+    Wound();
+
+    void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
+
+    void upgrade() override;
+};
+
 #endif // STATUSCARDS_H
