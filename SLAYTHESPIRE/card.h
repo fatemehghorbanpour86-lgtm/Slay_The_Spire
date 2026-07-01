@@ -18,7 +18,7 @@ enum class CardType
 
 class Card
 {
-  protected:
+protected:
     QString name;
     QString description;
     int energyCost;
@@ -32,6 +32,9 @@ class Card
 
     bool isRetain;
     // Checked by CombatManager when ending the turn.
+
+    bool isInnate;
+    // Checked by CombatManager at the start of each Combat.
 
     bool isUnplayable;
     bool isUpgraded;
@@ -62,6 +65,7 @@ public:
     bool doesExhaust() const;
     bool doesEthereal() const;
     bool doesRetain() const;
+    bool doesInnate() const;
     bool canPlay() const;
     bool getIsUpgraded() const;
 };

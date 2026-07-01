@@ -1,5 +1,6 @@
 #include "effect.h"
 #include "character.h"
+#include "player.h"
 
 Effect::Effect(Type type, Category category, int amount, int duration)
 {
@@ -41,6 +42,23 @@ QString Effect::getName() const
     case Type::Rage:
         return "Rage";
 
+    case Type::DemonForm:
+        return "Demon Form";
+
+    case Type::Brutality:
+        return "Brutality";
+
+    case Type::Barricade:
+        return "Barricade";
+
+    case Type::FeelNoPain:
+        return "Feel No Pain";
+
+    case Type::Berserk:
+        return "Berserk";
+
+    case Type::DarkEmbrace:
+        return "Dark Embrace";
     }
     return "";
 }
@@ -119,6 +137,32 @@ void Effect::onTurnStart(Character *target)
 
     case Type::Rage:
         break;
+
+    case Type::Barricade:
+        break;
+
+    case Type::FeelNoPain:
+        break;
+
+    case Type::DarkEmbrace:
+        break;
+
+    case Type::DemonForm:
+        target->addEffect(Effect::Type::Strength, Effect::Category::Buff, amount);
+        break;
+
+    case Type::Brutality:
+        if (Player* p = dynamic_cast<Player*>(target))
+        {
+            p->loseHP(amount);
+            //p->drawCards(1);
+        }
+        break;
+
+    case Type::Berserk:
+        if (Player* p = dynamic_cast<Player*>(target))
+            p->gainEnergy(amount);
+        break;
     }
 }
 
@@ -128,7 +172,6 @@ void Effect::onTurnEnd(Character *target)
     {
 
     case Type::Metallicize:
-
         target->addBlock(amount);
         break;
 

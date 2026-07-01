@@ -10,6 +10,7 @@ Card::Card(const QString& name, const QString& description, int energyCost, Card
     isExhaust(exhaust),
     isEthereal(ethereal),
     isRetain(retain),
+    isInnate(false),
     isUnplayable(unplayable),
     isUpgraded(false)
 {
@@ -49,6 +50,11 @@ bool Card::doesEthereal() const
 bool Card::doesRetain() const
 {
     return isRetain;
+}
+
+bool Card::doesInnate() const
+{
+    return isInnate;
 }
 
 bool Card::canPlay() const
