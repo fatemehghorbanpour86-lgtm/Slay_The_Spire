@@ -65,7 +65,7 @@ public:
     // Chooses the next intent.
     // Each enemy implements its own Logic.
 
-    virtual void takeTurn(Player* player) = 0;
+    virtual void executeAction(Player* player) = 0;
     // Executes the selected move.
     // Damage should be calculated through CombatCalculator.
     // Other effects (Block, Heal, Buffs, Debuffs, Card generation) should be applied directly here.
