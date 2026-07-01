@@ -100,7 +100,14 @@ bool Effect::isDebuff() const
 
 void Effect::stack(int value)
 {
-    amount += value;
+    if(type == Type::Weak || type == Type::Vulnerable || type == Type::Frail)
+    {
+        duration += value;
+    }
+    else
+    {
+        amount += value;
+    }
 }
 
 void Effect::decreaseDuration()

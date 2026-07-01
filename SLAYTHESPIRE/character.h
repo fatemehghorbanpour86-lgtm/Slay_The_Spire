@@ -42,6 +42,12 @@ public:
     virtual void takeDamage(int damage);
     virtual void heal(int amount);
 
+    void onTurnStartEffects();
+    void onTurnEndEffects();
+    void removeExpiredEffects();
+    void removeEffect(Effect::Type type);
+    bool hasEffect(Effect::Type type) const;
+    const QVector<Effect*>& getEffects() const;
     void addEffect(Effect::Type type, Effect::Category category, int amount, int duration = -1);
     Effect* getEffect(Effect::Type type) const;
 

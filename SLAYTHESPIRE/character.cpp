@@ -164,6 +164,93 @@ void Character::heal(int amount)
 
 }
 
+void Character::onTurnStartEffects()
+{
+    for (Effect* e : std::as_const(activeEffects))
+    {
+        if (e != nullptr)
+            e->onTurnStart(this);
+    }
+    // Explain:
+    // Called by CombatManager at the start of this character's turn.
+    // Loops through all active effects and triggers their onTurnStart logic
+    // (e.g. DemonForm, Brutality, Berserk).
+}
+
+void Character::onTurnEndEffects()
+{
+    for (Effect* e : std::as_const(activeEffects))
+    {
+        if (e != nullptr)
+            e->onTurnEnd(this); // also calls decreaseDuration()
+    }
+
+    removeExpiredEffects();
+
+    // Explain:
+    // Called by CombatManager at the end of this character's turn.
+    // Loops through all active effects, triggers onTurnEnd logic
+    // (e.g. Metallicize), and then removes expired effects.
+
+}
+
+void Character::removeExpiredEffects()
+{
+    for (int i = activeEffects.size() - 1; i >= 0; --i)
+    {
+        Effect* e = activeEffects[i];
+
+        if (e != nullptr && e->isExpired())
+        {
+            activeEffects.removeAt(i);
+            delete e;
+        }
+    }
+
+    // Explain:
+    // Deletes and removes any effect with duration == 0.
+    // Called automatically after onTurnEnd(); keeps activeEffects clean
+    // so UI and combat logic never see stale/expired effects.
+}
+
+void Character::removeEffect(Effect::Type type)
+{
+    for (int i = 0; i < activeEffects.size(); ++i)
+    {
+        if (activeEffects[i]->getType() == type)
+        {
+            delete activeEffects[i];
+            activeEffects.removeAt(i);
+            return;
+        }
+    }
+
+    // Explain:
+    // Manually removes a specific effect type (e.g. used by CombatManager
+    // for event-based effects like consuming Rage after it fires, or by
+    // relic/card logic that cleanses a debuff).
+}
+
+bool Character::hasEffect(Effect::Type type) const
+{
+    return getEffect(type) != nullptr;
+
+    // Explain:
+    // Quick check used by CombatManager/CombatCalculator to see if a
+    // character currently has a given effect (e.g. "if(hasEffect(Barricade))
+    // skip clearing block").
+}
+
+const QVector<Effect*>& Character::getEffects() const
+{
+    return activeEffects;
+
+    // Explain:
+    // Read-only access to all active effects, used by UI (to display
+    // buff/debuff icons) and by CombatManager for event-based checks
+    // (e.g. iterating to find Rage/FeelNoPain/DarkEmbrace).
+}
+
 void Character::addEffect(Effect::Type type, Effect::Category category, int amount, int duration)
 {
     for (Effect* e : std::as_const(activeEffects))

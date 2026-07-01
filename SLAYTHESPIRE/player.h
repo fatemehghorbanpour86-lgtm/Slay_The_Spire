@@ -34,6 +34,7 @@ class Player : public Character
     // QVector<Card*> hand;
     // QVector<Card*> drawPile;
     // QVector<Card*> discardPile;
+    // QVector<Card*> exhaustPile;
     // QVector<Relic*> relics;
     // QVector<Potion*> potions;
 
