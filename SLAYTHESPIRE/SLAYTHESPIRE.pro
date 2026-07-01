@@ -18,6 +18,7 @@ SOURCES += \
     skillcards.cpp \
     splashpage.cpp \
     character.cpp \
+    statuscards.cpp
 
 HEADERS += \
     attackcards.h \
@@ -30,6 +31,7 @@ HEADERS += \
     skillcards.h \
     splashpage.h \
     character.h \
+    statuscards.h
 
 FORMS += \
     mainwindow.ui
