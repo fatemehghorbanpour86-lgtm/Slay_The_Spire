@@ -1,17 +1,17 @@
 #include "statuscards.h"
 
 //======================================================
-// Dazed
+// Daze
 //======================================================
 
-Dazed::Dazed()
+Daze::Daze()
     : Card("Dazed","Unplayable. Ethereal.",0,CardType::Status,
            false,true,false,true)
 {
 }
 
 
-void Dazed::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
+void Daze::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
 {
     Q_UNUSED(user)
     Q_UNUSED(enemies)
@@ -22,7 +22,33 @@ void Dazed::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
 }
 
 
-void Dazed::upgrade()
+void Daze::upgrade()
 {
     // Status cards cannot be upgraded.
 }
+
+
+//======================================================
+// Slime
+//======================================================
+
+Slime::Slime()
+    : Card("Slimed","Exhaust.",1,CardType::Status,true)
+{
+}
+
+
+void Slime::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(user)
+    Q_UNUSED(enemies)
+    Q_UNUSED(target)
+
+}
+
+
+void Slime::upgrade()
+{
+    // Status cards cannot be upgraded.
+}
+
