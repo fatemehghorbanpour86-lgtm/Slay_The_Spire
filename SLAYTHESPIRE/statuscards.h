@@ -37,4 +37,15 @@ public:
     void upgrade() override;
 };
 
+
+class Burn : public Card
+{
+public:
+    Burn();
+
+    void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
+
+    void upgrade() override;
+};
+
 #endif // STATUSCARDS_H
