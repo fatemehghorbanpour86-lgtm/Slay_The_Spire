@@ -69,7 +69,7 @@ public:
 
     int getTurnCount() const;
 
-    virtual void chooseIntent() = 0;
+    virtual void chooseIntent(Player* player) = 0;
     // Chooses the next intent.
     // Each enemy implements its own Logic.
 
