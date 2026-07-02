@@ -385,6 +385,7 @@ void LargeSlime::performSplit()
     m_splitReady = false;
     m_splitExecuted = true;
     m_splitRequested = true; // Flag checked by CombatManager immediately after execution
+    // کمبت منیجر این اتریبیوت رو چک میکنه و در صورت ترو بودنش هندل میکنه که به دوتا مدیوم با سطح سلامتی فعلی تبدیل بشن
 }
 bool LargeSlime::isSplitRequested() const
 {
