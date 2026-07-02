@@ -10,6 +10,9 @@ JawWorm::JawWorm()
     setIntent(Intent::Attack);
     setCurrentMove(Chomp);
     setIntentDamage(11);
+    // TODO CombatCalculator
+    // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
     setIntentHits(1);
 }
 
@@ -20,6 +23,9 @@ void JawWorm::chooseIntent()
         setIntent(Intent::Attack);
         setCurrentMove(Chomp);
         setIntentDamage(11);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(1);
         return;
     }
@@ -31,6 +37,9 @@ void JawWorm::chooseIntent()
         setIntent(Intent::Attack);
         setCurrentMove(Chomp);
         setIntentDamage(11);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(1);
     }
     else if (roll <= 55)
@@ -38,6 +47,9 @@ void JawWorm::chooseIntent()
         setIntent(Intent::Attack);
         setCurrentMove(Thrash);
         setIntentDamage(7);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(1);
     }
     else
@@ -45,6 +57,9 @@ void JawWorm::chooseIntent()
         setIntent(Intent::DefendBuff);
         setCurrentMove(Bellow);
         setIntentDamage(0);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(0);
     }
 }
@@ -109,6 +124,9 @@ void Louse::chooseIntent()
         setIntent(Intent::Attack);
         setCurrentMove(Bite);
         setIntentDamage(randomizedBiteDamage);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(1);
     }
     else
@@ -116,6 +134,9 @@ void Louse::chooseIntent()
         setIntent(Intent::Buff);
         setCurrentMove(Grow);
         setIntentDamage(0);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(0);
     }
 }
@@ -172,14 +193,22 @@ void SmallSlime::chooseIntent()
     {
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
+
         setIntentDamage(3);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(1);
     }
     else
     {
         setIntent(Intent::Debuff);
         setCurrentMove(Lick);
+
         setIntentDamage(0);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(0);
     }
 }
@@ -227,21 +256,33 @@ void MediumSlime::chooseIntent()
     {
         setIntent(Intent::AttackDebuff);
         setCurrentMove(CorrosiveSpit);
+
         setIntentDamage(7);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(1);
     }
     else if (roll <= 70)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
+
         setIntentDamage(10);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(1);
     }
     else
     {
         setIntent(Intent::Debuff);
         setCurrentMove(Lick);
+
         setIntentDamage(0);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(0);
     }
 }
@@ -305,7 +346,11 @@ void LargeSlime::chooseIntent()
         m_splitReady = true;
         setIntent(Intent::Unknown);
         setCurrentMove(Split);
+
         setIntentDamage(0);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(0);
         return;
     }
@@ -316,21 +361,33 @@ void LargeSlime::chooseIntent()
     {
         setIntent(Intent::AttackDebuff);
         setCurrentMove(CorrosiveSpit);
+
         setIntentDamage(7);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(1);
     }
     else if (roll <= 70)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
+
         setIntentDamage(10);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(1);
     }
     else
     {
         setIntent(Intent::Debuff);
         setCurrentMove(Lick);
+
         setIntentDamage(0);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
         setIntentHits(0);
     }
 }
@@ -390,4 +447,68 @@ void LargeSlime::performSplit()
 bool LargeSlime::isSplitRequested() const
 {
     return m_splitRequested;
+}
+
+//======================================================
+//  Cultist
+//======================================================
+
+
+Cultist::Cultist()
+    : Enemy("Cultist", QRandomGenerator::global()->bounded(48,55))
+{
+
+}
+
+
+void Cultist::chooseIntent()
+{
+    if(getTurnCount() == 0)
+    {
+        setCurrentMove(Incantation);
+
+        setIntent(Intent::Buff);
+
+        setIntentDamage(0);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+        setIntentHits(1);
+
+        return;
+    }
+
+    setCurrentMove(Stab);
+
+    setIntent(Intent::Attack);
+
+    setIntentDamage(6);
+
+    setIntentHits(1);
+}
+
+
+void Cultist::executeMove(Player* player)
+{
+    if(player == nullptr)
+    {
+        return;
+    }
+
+    switch(getCurrentMove())
+    {
+
+    case Incantation:
+
+        break;
+
+    case Stab:
+
+        addEffect(Effect::Type::Strength, Effect::Category::Buff, 3,-1);
+
+        // TODO CombatCalculator (Ana)
+        // CombatCalculator::dealDamage(this, player, 6);
+
+        break;
+    }
 }

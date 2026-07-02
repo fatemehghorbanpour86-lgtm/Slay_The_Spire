@@ -124,4 +124,24 @@ private:
     bool m_splitRequested;  // Signal flagged to notify CombatManager to perform array substitution
 };
 
+
+class Cultist : public Enemy
+{
+private:
+
+    enum Move
+    {
+        Incantation,
+        Stab
+    };
+
+public:
+
+    Cultist();
+
+    void chooseIntent() override;
+
+    void executeMove(Player* player) override;
+};
+
 #endif // NORMALENEMIES_H
