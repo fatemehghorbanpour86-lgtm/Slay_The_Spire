@@ -213,3 +213,79 @@ void SmallSlime::performLick(Player* player)
     if (!player) return;
     player->addEffect(Effect::Type::Weak, Effect::Category::Debuff, 1, 1);
 }
+
+
+
+MediumSlime::MediumSlime()
+    : Enemy("Medium Slime", QRandomGenerator::global()->bounded(28, 33))
+{
+   chooseIntent();
+}
+void MediumSlime::chooseIntent()
+{
+    int roll = QRandomGenerator::global()->bounded(1, 101);
+
+    if (roll <= 30)
+    {
+        setIntent(Intent::AttackDebuff);
+        setCurrentMove(CorrosiveSpit);
+        setIntentDamage(7);
+        setIntentHits(1);
+    }
+    else if (roll <= 70)
+    {
+        setIntent(Intent::Attack);
+        setCurrentMove(Tackle);
+        setIntentDamage(10);
+        setIntentHits(1);
+    }
+    else
+    {
+        setIntent(Intent::Debuff);
+        setCurrentMove(Lick);
+        setIntentDamage(0);
+        setIntentHits(0);
+    }
+}
+void MediumSlime::executeMove(Player* player)
+{
+    switch (getCurrentMove())
+    {
+    case Move::CorrosiveSpit:
+        performCorrosiveSpit(player);
+        break;
+
+    case Move::Tackle:
+        performTackle(player);
+        break;
+
+    case Move::Lick:
+        performLick(player);
+        break;
+
+    default:
+        break;
+    }
+}
+void MediumSlime::performCorrosiveSpit(Player* player)
+{
+    if (!player) return;
+
+    int baseDamage = 7;
+    player->takeDamage(baseDamage);
+
+    // 2. Add SLIMED status card to the player's Discard Pile using the standard interface
+    // player->addCardToDiscard(new SlimedCard());
+}
+void MediumSlime::performTackle(Player* player)
+{
+    if (!player) return;
+
+    int baseDamage = 10;
+    player->takeDamage(baseDamage);
+}
+void MediumSlime::performLick(Player* player)
+{
+    if (!player) return;
+    player->addEffect(Effect::Type::Weak, Effect::Category::Debuff, 1, 1);
+}

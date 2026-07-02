@@ -72,4 +72,26 @@ private:
     void performLick(Player* player);
 };
 
+class MediumSlime : public Enemy
+{
+public:
+    enum Move
+    {
+        CorrosiveSpit,
+        Tackle,
+        Lick
+    };
+
+    MediumSlime();
+    virtual ~MediumSlime() override = default;
+
+    virtual void chooseIntent() override;
+    virtual void executeMove(Player* player) override;
+
+private:
+    void performCorrosiveSpit(Player* player);
+    void performTackle(Player* player);
+    void performLick(Player* player);
+};
+
 #endif // NORMALENEMIES_H
