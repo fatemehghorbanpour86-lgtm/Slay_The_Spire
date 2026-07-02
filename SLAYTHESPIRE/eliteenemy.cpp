@@ -16,8 +16,9 @@ bool GremlinNob::isEnraged() const
     return enrageActive;
 }
 
-void GremlinNob::chooseIntent()
+void GremlinNob::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
 
     if(getTurnCount() == 0)
     {
@@ -109,8 +110,10 @@ Sentry::Sentry(bool startsWithBeam)
     this->startsWithBeam = startsWithBeam;
 }
 
-void Sentry::chooseIntent()
+void Sentry::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
+
     // First turn depends on which Sentry this is.
     if(getTurnCount() == 0)
     {
@@ -195,8 +198,10 @@ BookOfStabbing::BookOfStabbing()
 {
     multiStabCount = 0;
 }
-void BookOfStabbing::chooseIntent()
+void BookOfStabbing::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
+
     int random = QRandomGenerator::global()->bounded(1,101);
 
     if(random <= 85)

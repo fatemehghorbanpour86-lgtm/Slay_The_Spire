@@ -22,7 +22,7 @@ public:
 
     bool isEnraged() const;
 
-    void chooseIntent() override;
+    void chooseIntent(Player* player) override;
 
     void executeMove(Player* player) override;
 };
@@ -49,7 +49,7 @@ public:
 
     explicit Sentry(bool startsWithBeam);
 
-    void chooseIntent() override;
+    void chooseIntent(Player* player) override;
 
     void executeMove(Player* player) override;
 };
@@ -70,7 +70,7 @@ private:
 
 public:
     BookOfStabbing();
-    void chooseIntent() override;
+    void chooseIntent(Player* player) override;
     void executeMove(Player* player) override;
 };
 
