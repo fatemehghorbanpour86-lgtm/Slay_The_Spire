@@ -26,20 +26,11 @@ private:
     void performChomp(Player* player);
     void performThrash(Player* player);
     void performBellow();
-
-    static int generateRandomHP();
-
-    std::mt19937 randomEngine;
 };
 
 class Louse : public Enemy
 {
 public:
-    enum class LouseType
-    {
-        Red,
-        Green
-    };
 
     enum class Move : int
     {
@@ -55,17 +46,11 @@ public:
     virtual void takeDamage(int damage) override;
 
 private:
-    Louse(LouseType randomType, int randomHP);
 
     void performBite(Player* player);
     void performGrow();
 
-    static int generateRandomHP();
-    static LouseType chooseRandomType();
-
-    LouseType type;
     bool firstHitTaken;
-    std::mt19937 randomEngine;
 };
 
 #endif // NORMALENEMIES_H
