@@ -144,4 +144,42 @@ public:
     void executeMove(Player* player) override;
 };
 
+class Thief : public Enemy
+{
+private:
+
+    enum Move
+    {
+        Mug,
+        SmokeBomb,
+        Flee
+    };
+
+public:
+
+    enum Type
+    {
+        Looter,
+        Mugger
+    };
+
+private:
+
+    Type thiefType;
+
+    int stolenGold;
+
+public:
+
+    explicit Thief(Type type);
+
+    Type getType() const;
+
+    int getStolenGold() const;
+
+    void chooseIntent() override;
+
+    void executeMove(Player *player) override;
+};
+
 #endif // NORMALENEMIES_H

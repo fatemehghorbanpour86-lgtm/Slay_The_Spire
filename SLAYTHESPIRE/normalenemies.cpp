@@ -512,3 +512,120 @@ void Cultist::executeMove(Player* player)
         break;
     }
 }
+
+
+//======================================================
+//  Thief
+//======================================================
+
+Thief::Thief(Type type)
+    : Enemy(type == Looter ?"Looter" : "Mugger",
+            type == Looter ?QRandomGenerator::global()->bounded(44,49) : QRandomGenerator::global()->bounded(52,57))
+{
+    thiefType = type;
+
+    stolenGold = 0;
+}
+
+
+Thief::Type Thief::getType() const
+{
+    return thiefType;
+}
+
+int Thief::getStolenGold() const
+{
+    return stolenGold;
+}
+
+void Thief::chooseIntent()
+{
+    if(getTurnCount() < 2)
+    {
+        setCurrentMove(Mug);
+
+        setIntent(Intent::Attack);
+
+        if(thiefType == Looter)
+        {
+            setIntentDamage(10);
+        }
+        else
+        {
+            setIntentDamage(14);
+        }
+
+        setIntentHits(1);
+
+        return;
+    }
+
+    // Turn 3
+    if(getTurnCount() == 2)
+    {
+        setCurrentMove(SmokeBomb);
+
+        setIntent(Intent::Defend);
+
+        setIntentDamage(0);
+
+        setIntentHits(1);
+
+        return;
+    }
+
+    // Turn 4
+    setCurrentMove(Flee);
+
+    setIntent(Intent::Escape);
+
+    setIntentDamage(0);
+
+    setIntentHits(1);
+}
+
+
+void Thief::executeMove(Player *player)
+{
+    if(player == nullptr)
+    {
+        return;
+    }
+
+    switch(getCurrentMove())
+    {
+
+    case Mug:
+
+        if(thiefType == Looter)
+        {
+            // TODO CombatCalculator(Ana)
+            // CombatCalculator::dealDamage(this, player, 10);
+        }
+        else
+        {
+            // TODO CombatCalculator(Ana)
+            // CombatCalculator::dealDamage(this, player, 14);
+        }
+
+
+        player->spendGold(15);
+        stolenGold += 15;
+
+        break;
+
+    case SmokeBomb:
+
+        addBlock(6);
+
+        break;
+    }
+
+    // Turn 4 Escape
+    if(getTurnCount() >= 3)
+    {
+        // TODO CombatManager
+        // Remove this enemy from combat.
+        // If killed before escaping, return stolenGold to the player.
+    }
+}
