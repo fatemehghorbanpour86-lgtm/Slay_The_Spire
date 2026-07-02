@@ -182,4 +182,28 @@ public:
     void executeMove(Player *player) override;
 };
 
+class BlueSlaver : public Enemy
+{
+private:
+
+    enum Move
+    {
+        None,
+        Stab,
+        Rake
+    };
+
+    Move lastMove;
+
+    int repeatCount;
+
+public:
+
+    BlueSlaver();
+
+    void chooseIntent() override;
+
+    void executeMove(Player* player) override;
+};
+
 #endif // NORMALENEMIES_H

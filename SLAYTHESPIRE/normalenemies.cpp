@@ -580,6 +580,9 @@ void Thief::chooseIntent()
     setIntent(Intent::Escape);
 
     setIntentDamage(0);
+    // TODO CombatCalculator
+    // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
 
     setIntentHits(1);
 }
@@ -629,3 +632,132 @@ void Thief::executeMove(Player *player)
         // If killed before escaping, return stolenGold to the player.
     }
 }
+
+
+//======================================================
+//  BlueSlaver
+//======================================================
+
+BlueSlaver::BlueSlaver()
+    : Enemy("Blue Slaver", QRandomGenerator::global()->bounded(46,51))
+{
+    lastMove = None;
+
+    repeatCount = 0;
+}
+
+
+
+void BlueSlaver::chooseIntent()
+{
+    Move selectedMove;
+
+    if(repeatCount >= 2)
+    {
+        if(lastMove == Stab)
+        {
+            selectedMove = Rake;
+        }
+        else
+        {
+            selectedMove = Stab;
+        }
+    }
+    else
+    {
+        int random = QRandomGenerator::global()->bounded(100);
+
+        if(random < 60)
+        {
+            selectedMove = Stab;
+        }
+        else
+        {
+            selectedMove = Rake;
+        }
+    }
+
+
+    if(selectedMove == lastMove)
+    {
+        repeatCount++;
+    }
+
+    else
+    {
+        lastMove = selectedMove;
+
+        repeatCount = 1;
+    }
+
+
+    switch(selectedMove)
+    {
+
+     case None:
+        break;
+
+     case Stab:
+
+        setCurrentMove(Stab);
+
+        setIntent(Intent::Attack);
+
+        setIntentDamage(12);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+
+        setIntentHits(1);
+
+        break;
+
+     case Rake:
+
+        setCurrentMove(Rake);
+
+        setIntent(Intent::AttackDebuff);
+
+        setIntentDamage(7);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+
+        setIntentHits(1);
+
+        break;
+    }
+
+}
+
+void BlueSlaver::executeMove(Player* player)
+{
+    if(player == nullptr)
+    {
+        return;
+    }
+
+    switch(getCurrentMove())
+    {
+
+     case Stab:
+
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 12);
+
+        break;
+
+
+     case Rake:
+
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 7);
+
+        player->addEffect(Effect::Type::Weak,
+            Effect::Category::Debuff,1,1);
+
+        break;
+    }
+}
+
+
