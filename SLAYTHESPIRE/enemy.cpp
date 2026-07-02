@@ -5,6 +5,8 @@ Enemy::Enemy(const QString& name, int maxHealth)
 {
     currentIntent = Intent::Unknown;
 
+    currentMove = 0;
+
     intentDamage = 0;
 
     intentHits = 1;
@@ -15,6 +17,11 @@ Enemy::Enemy(const QString& name, int maxHealth)
 Intent Enemy::getIntent() const
 {
     return currentIntent;
+}
+
+int Enemy::getCurrentMove() const
+{
+    return currentMove;
 }
 
 int Enemy::getIntentDamage() const
@@ -35,6 +42,11 @@ int Enemy::getTurnCount() const
 void Enemy::setIntent(Intent intent)
 {
     currentIntent = intent;
+}
+
+void Enemy::setCurrentMove(int move)
+{
+    currentMove = move;
 }
 
 void Enemy::setIntentDamage(int damage)
