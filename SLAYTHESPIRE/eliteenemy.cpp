@@ -227,20 +227,26 @@ void BookOfStabbing::executeMove(Player *player)
     {
     case MultiStab:
     {
-        int hits = getIntentHits();
-
-        for(int i = 0; i < hits; i++)
-        {
-            // TODO CombatCalculator(Ana)
-            // CombatCalculator::dealDamage(this, player, 6);
-        }
-
-        multiStabCount++;
+        performMultiStab(player);
         break;
     }
     case SingleStab:
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 21);
+        performSingleStab(player);
         break;
     }
+}
+void BookOfStabbing::performMultiStab(Player *player)
+{
+    int hits = getIntentHits();
+    for(int i = 0; i < hits; i++)
+    {
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 6);
+    }
+    multiStabCount++;
+}
+void BookOfStabbing::performSingleStab(Player *player)
+{
+    // TODO CombatCalculator(Ana)
+    // CombatCalculator::dealDamage(this, player, 21);
 }

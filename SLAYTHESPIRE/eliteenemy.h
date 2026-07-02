@@ -65,6 +65,8 @@ private:
     int multiStabCount;
     // Number of times Multi-Stab has been used so far.
     // N = multiStabCount + 2 hits on the NEXT Multi-Stab use.
+    void performMultiStab(Player *player);
+    void performSingleStab(Player *player);
 
 public:
     BookOfStabbing();
