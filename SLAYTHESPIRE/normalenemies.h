@@ -32,4 +32,40 @@ private:
     std::mt19937 randomEngine;
 };
 
+class Louse : public Enemy
+{
+public:
+    enum class LouseType
+    {
+        Red,
+        Green
+    };
+
+    enum class Move : int
+    {
+        Bite = 1,
+        Grow = 2
+    };
+
+    Louse();
+    virtual ~Louse() override = default;
+
+    virtual void chooseIntent() override;
+    virtual void executeMove(Player* player) override;
+    virtual void takeDamage(int damage) override;
+
+private:
+    Louse(LouseType randomType, int randomHP);
+
+    void performBite(Player* player);
+    void performGrow();
+
+    static int generateRandomHP();
+    static LouseType chooseRandomType();
+
+    LouseType type;
+    bool firstHitTaken;
+    std::mt19937 randomEngine;
+};
+
 #endif // NORMALENEMIES_H
