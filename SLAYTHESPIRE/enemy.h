@@ -24,6 +24,10 @@ protected:
 
     Intent currentIntent;
 
+    int currentMove;
+    // Stores the selected move.
+    // Each derived enemy defines its own move IDs using an enum.
+
     int intentDamage;
     // Damage shown in the enemy intent.
 
@@ -37,6 +41,8 @@ protected:
 
     void setIntent(Intent intent);
     // Used by derived enemies to update their next action.
+
+    void setCurrentMove(int move);
 
     void setIntentDamage(int damage);
     // Updates the displayed damage of the current intent.
@@ -55,6 +61,8 @@ public:
 
     Intent getIntent() const;
 
+    int getCurrentMove() const;
+
     int getIntentDamage() const;
 
     int getIntentHits() const;
@@ -65,7 +73,7 @@ public:
     // Chooses the next intent.
     // Each enemy implements its own Logic.
 
-    virtual void executeAction(Player* player) = 0;
+    virtual void executeMove(Player* player) = 0;
     // Executes the selected move.
     // Damage should be calculated through CombatCalculator.
     // Other effects (Block, Heal, Buffs, Debuffs, Card generation) should be applied directly here.
