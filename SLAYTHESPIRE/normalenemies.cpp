@@ -91,12 +91,12 @@ void JawWorm::performBellow()
 }
 
 
+
 Louse::Louse()
     : Enemy(QRandomGenerator::global()->bounded(0,2) == 0 ? "Red Louse" : "Green Louse",
-            QRandomGenerator::global()->bounded(10,16)),
+            QRandomGenerator::global()->bounded(10, 16)),
     firstHitTaken(false)
 {
-    chooseIntent();
 }
 void Louse::chooseIntent()
 {
@@ -163,7 +163,6 @@ void Louse::performGrow()
 SmallSlime::SmallSlime()
     : Enemy("Small Slime", QRandomGenerator::global()->bounded(8, 13))
 {
-    chooseIntent();
 }
 void SmallSlime::chooseIntent()
 {
@@ -219,7 +218,6 @@ void SmallSlime::performLick(Player* player)
 MediumSlime::MediumSlime()
     : Enemy("Medium Slime", QRandomGenerator::global()->bounded(28, 33))
 {
-   chooseIntent();
 }
 void MediumSlime::chooseIntent()
 {
@@ -288,4 +286,107 @@ void MediumSlime::performLick(Player* player)
 {
     if (!player) return;
     player->addEffect(Effect::Type::Weak, Effect::Category::Debuff, 1, 1);
+}
+
+
+
+
+LargeSlime::LargeSlime()
+    : Enemy("Large Slime", QRandomGenerator::global()->bounded(68, 73)),
+    m_splitReady(false),
+    m_splitExecuted(false),
+    m_splitRequested(false)
+{
+}
+void LargeSlime::chooseIntent()
+{
+    if (!m_splitExecuted && (getCurrentHealth() <= (getMaxHealth() / 2)))
+    {
+        m_splitReady = true;
+        setIntent(Intent::Unknown);
+        setCurrentMove(Split);
+        setIntentDamage(0);
+        setIntentHits(0);
+        return;
+    }
+
+    int roll = QRandomGenerator::global()->bounded(1, 101);
+
+    if (roll <= 30)
+    {
+        setIntent(Intent::AttackDebuff);
+        setCurrentMove(CorrosiveSpit);
+        setIntentDamage(7);
+        setIntentHits(1);
+    }
+    else if (roll <= 70)
+    {
+        setIntent(Intent::Attack);
+        setCurrentMove(Tackle);
+        setIntentDamage(10);
+        setIntentHits(1);
+    }
+    else
+    {
+        setIntent(Intent::Debuff);
+        setCurrentMove(Lick);
+        setIntentDamage(0);
+        setIntentHits(0);
+    }
+}
+void LargeSlime::executeMove(Player* player)
+{
+    switch (getCurrentMove())
+    {
+    case Move::CorrosiveSpit:
+        performCorrosiveSpit(player);
+        break;
+
+    case Move::Tackle:
+        performTackle(player);
+        break;
+
+    case Move::Lick:
+        performLick(player);
+        break;
+
+    case Move::Split:
+        performSplit();
+        break;
+
+    default:
+        break;
+    }
+}
+void LargeSlime::performCorrosiveSpit(Player* player)
+{
+    if (!player) return;
+
+    int baseDamage = 7;
+    player->takeDamage(baseDamage);
+
+    // Add SLIMED status card to the player's Discard Pile using the integrated Deck System
+    // player->addCardToDiscard(new SlimedCard());
+}
+void LargeSlime::performTackle(Player* player)
+{
+    if (!player) return;
+
+    int baseDamage = 10;
+    player->takeDamage(baseDamage);
+}
+void LargeSlime::performLick(Player* player)
+{
+    if (!player) return;
+    player->addEffect(Effect::Type::Weak, Effect::Category::Debuff, 1, 1);
+}
+void LargeSlime::performSplit()
+{
+    m_splitReady = false;
+    m_splitExecuted = true;
+    m_splitRequested = true; // Flag checked by CombatManager immediately after execution
+}
+bool LargeSlime::isSplitRequested() const
+{
+    return m_splitRequested;
 }

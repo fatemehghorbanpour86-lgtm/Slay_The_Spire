@@ -94,4 +94,34 @@ private:
     void performLick(Player* player);
 };
 
+class LargeSlime : public Enemy
+{
+public:
+    enum Move
+    {
+        CorrosiveSpit,
+        Tackle,
+        Lick,
+        Split
+    };
+
+    LargeSlime();
+    virtual ~LargeSlime() override = default;
+
+    virtual void chooseIntent() override;
+    virtual void executeMove(Player* player) override;
+
+    bool isSplitRequested() const;
+
+private:
+    void performCorrosiveSpit(Player* player);
+    void performTackle(Player* player);
+    void performLick(Player* player);
+    void performSplit();
+
+    bool m_splitReady;      // True if HP <= 50% and locked into Split intent for the next turn
+    bool m_splitExecuted;   // True once the Split move has run to prevent multiple activations
+    bool m_splitRequested;  // Signal flagged to notify CombatManager to perform array substitution
+};
+
 #endif // NORMALENEMIES_H
