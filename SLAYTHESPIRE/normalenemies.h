@@ -2,18 +2,17 @@
 #define NORMALENEMIES_H
 
 #include "enemy.h"
-#include <random>
 
 class Player;
 
 class JawWorm : public Enemy
 {
 public:
-    enum class Move : int
+    enum Move
     {
-        Chomp = 1,
-        Thrash = 2,
-        Bellow = 3
+        Chomp,
+        Thrash,
+        Bellow
     };
 
     JawWorm();
@@ -32,10 +31,10 @@ class Louse : public Enemy
 {
 public:
 
-    enum class Move : int
+    enum Move
     {
-        Bite = 1,
-        Grow = 2
+        Bite,
+        Grow
     };
 
     Louse();
@@ -51,6 +50,26 @@ private:
     void performGrow();
 
     bool firstHitTaken;
+};
+
+class SmallSlime : public Enemy
+{
+public:
+    enum Move
+    {
+        Tackle,
+        Lick
+    };
+
+    SmallSlime();
+    virtual ~SmallSlime() override = default;
+
+    virtual void chooseIntent() override;
+    virtual void executeMove(Player* player) override;
+
+private:
+    void performTackle(Player* player);
+    void performLick(Player* player);
 };
 
 #endif // NORMALENEMIES_H

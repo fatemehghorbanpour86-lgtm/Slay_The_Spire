@@ -4,11 +4,11 @@
 #include <QRandomGenerator>
 
 JawWorm::JawWorm()
-    : Enemy("Jaw Worm", QRandomGenerator::global()->bounded(42,46))
+    : Enemy("Jaw Worm", QRandomGenerator::global()->bounded(42,47))
 {
     //واسه ترن اول همیشه همینه
     setIntent(Intent::Attack);
-    setCurrentMove(static_cast<int>(Move::Chomp));
+    setCurrentMove(Chomp);
     setIntentDamage(11);
     setIntentHits(1);
 }
@@ -18,39 +18,39 @@ void JawWorm::chooseIntent()
     if (getTurnCount() == 0)
     {
         setIntent(Intent::Attack);
-        setCurrentMove(static_cast<int>(Move::Chomp));
+        setCurrentMove(Chomp);
         setIntentDamage(11);
         setIntentHits(1);
         return;
     }
 
-    int roll = QRandomGenerator::global()->bounded(1,100);
+    int roll = QRandomGenerator::global()->bounded(1,101);
 
     if (roll <= 25)
     {
         setIntent(Intent::Attack);
-        setCurrentMove(static_cast<int>(Move::Chomp));
+        setCurrentMove(Chomp);
         setIntentDamage(11);
         setIntentHits(1);
     }
     else if (roll <= 55)
     {
         setIntent(Intent::Attack);
-        setCurrentMove(static_cast<int>(Move::Thrash));
+        setCurrentMove(Thrash);
         setIntentDamage(7);
         setIntentHits(1);
     }
     else
     {
         setIntent(Intent::DefendBuff);
-        setCurrentMove(static_cast<int>(Move::Bellow));
+        setCurrentMove(Bellow);
         setIntentDamage(0);
         setIntentHits(0);
     }
 }
 void JawWorm::executeMove(Player* player)
 {
-    switch (static_cast<Move>(getCurrentMove()))
+    switch (getCurrentMove())
     {
     case Move::Chomp:
         performChomp(player);
@@ -92,36 +92,36 @@ void JawWorm::performBellow()
 
 
 Louse::Louse()
-    : Enemy(QRandomGenerator::global()->bounded(0,1) == 0 ? "Red Louse" : "Green Louse",
-            QRandomGenerator::global()->bounded(10,15)),
+    : Enemy(QRandomGenerator::global()->bounded(0,2) == 0 ? "Red Louse" : "Green Louse",
+            QRandomGenerator::global()->bounded(10,16)),
     firstHitTaken(false)
 {
-    Louse::chooseIntent();
+    chooseIntent();
 }
 void Louse::chooseIntent()
 {
-    int roll = QRandomGenerator::global()->bounded(1,100);
+    int roll = QRandomGenerator::global()->bounded(1,101);
 
     if (roll <= 75)
     {
-        int randomizedBiteDamage = QRandomGenerator::global()->bounded(5, 7);
+        int randomizedBiteDamage = QRandomGenerator::global()->bounded(5, 8);
 
         setIntent(Intent::Attack);
-        setCurrentMove(static_cast<int>(Move::Bite));
+        setCurrentMove(Bite);
         setIntentDamage(randomizedBiteDamage);
         setIntentHits(1);
     }
     else
     {
         setIntent(Intent::Buff);
-        setCurrentMove(static_cast<int>(Move::Grow));
+        setCurrentMove(Grow);
         setIntentDamage(0);
         setIntentHits(0);
     }
 }
 void Louse::executeMove(Player* player)
 {
-    switch (static_cast<Move>(getCurrentMove()))
+    switch (getCurrentMove())
     {
     case Move::Bite:
         performBite(player);
@@ -143,7 +143,7 @@ void Louse::takeDamage(int damage)
     {
         firstHitTaken = true;
 
-        int blockAmount = QRandomGenerator::global()->bounded(3, 7);
+        int blockAmount = QRandomGenerator::global()->bounded(3, 8);
 
         this->addBlock(blockAmount);
     }
@@ -159,3 +159,57 @@ void Louse::performGrow()
 }
 
 
+
+SmallSlime::SmallSlime()
+    : Enemy("Small Slime", QRandomGenerator::global()->bounded(8, 13))
+{
+    chooseIntent();
+}
+void SmallSlime::chooseIntent()
+{
+    int roll = QRandomGenerator::global()->bounded(1, 101);
+
+    if (roll <= 50)
+    {
+        setIntent(Intent::Attack);
+        setCurrentMove(Tackle);
+        setIntentDamage(3);
+        setIntentHits(1);
+    }
+    else
+    {
+        setIntent(Intent::Debuff);
+        setCurrentMove(Lick);
+        setIntentDamage(0);
+        setIntentHits(0);
+    }
+}
+void SmallSlime::executeMove(Player* player)
+{
+    switch (getCurrentMove())
+    {
+    case Move::Tackle:
+        performTackle(player);
+        break;
+
+    case Move::Lick:
+        performLick(player);
+        break;
+
+    default:
+        break;
+    }
+}
+void SmallSlime::performTackle(Player* player)
+{
+    if (!player) return;
+
+    int baseDamage = 3;
+
+    player->takeDamage(baseDamage);
+}
+void SmallSlime::performLick(Player* player)
+{
+    if (!player) return;
+    player->addEffect(Effect::Type::Weak, Effect::Category::Debuff, 1, 1);
+}
