@@ -187,3 +187,60 @@ void Sentry::executeMove(Player* player)
         break;
     }
 }
+
+
+
+BookOfStabbing::BookOfStabbing()
+    : Enemy("Book of Stabbing", QRandomGenerator::global()->bounded(160,163))
+{
+    multiStabCount = 0;
+}
+void BookOfStabbing::chooseIntent()
+{
+    int random = QRandomGenerator::global()->bounded(1,101);
+
+    if(random <= 85)
+    {
+        int hits = multiStabCount + 2;
+
+        setIntent(Intent::Attack);
+        setCurrentMove(MultiStab);
+        setIntentDamage(6);
+        setIntentHits(hits);
+    }
+    else
+    {
+        setIntent(Intent::Attack);
+        setCurrentMove(SingleStab);
+        setIntentDamage(21);
+        setIntentHits(1);
+    }
+}
+void BookOfStabbing::executeMove(Player *player)
+{
+    if(player == nullptr)
+    {
+        return;
+    }
+
+    switch(getCurrentMove())
+    {
+    case MultiStab:
+    {
+        int hits = getIntentHits();
+
+        for(int i = 0; i < hits; i++)
+        {
+            // TODO CombatCalculator(Ana)
+            // CombatCalculator::dealDamage(this, player, 6);
+        }
+
+        multiStabCount++;
+        break;
+    }
+    case SingleStab:
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 21);
+        break;
+    }
+}

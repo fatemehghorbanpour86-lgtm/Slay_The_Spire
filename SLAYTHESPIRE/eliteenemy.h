@@ -54,4 +54,22 @@ public:
     void executeMove(Player* player) override;
 };
 
+class BookOfStabbing : public Enemy
+{
+private:
+    enum Move
+    {
+        MultiStab,
+        SingleStab
+    };
+    int multiStabCount;
+    // Number of times Multi-Stab has been used so far.
+    // N = multiStabCount + 2 hits on the NEXT Multi-Stab use.
+
+public:
+    BookOfStabbing();
+    void chooseIntent() override;
+    void executeMove(Player* player) override;
+};
+
 #endif // ELITEENEMY_H
