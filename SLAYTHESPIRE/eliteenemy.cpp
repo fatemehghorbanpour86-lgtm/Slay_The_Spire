@@ -98,3 +98,92 @@ void GremlinNob::executeMove(Player *player)
         break;
     }
 }
+
+//======================================================
+//  Sentry
+//======================================================
+
+Sentry::Sentry(bool startsWithBeam)
+    : Enemy("Sentry", QRandomGenerator::global()->bounded(38,43))
+{
+    this->startsWithBeam = startsWithBeam;
+}
+
+void Sentry::chooseIntent()
+{
+    // First turn depends on which Sentry this is.
+    if(getTurnCount() == 0)
+    {
+        if(startsWithBeam)
+        {
+            setCurrentMove(Beam);
+
+            setIntent(Intent::Attack);
+
+            setIntentDamage(9);
+
+            setIntentHits(1);
+        }
+        else
+        {
+            setCurrentMove(Bolt);
+
+            setIntent(Intent::Debuff);
+
+            setIntentDamage(0);
+
+            setIntentHits(1);
+        }
+
+        return;
+    }
+
+
+    if(getCurrentMove() == Beam)
+    {
+        setCurrentMove(Bolt);
+
+        setIntent(Intent::Debuff);
+
+        setIntentDamage(0);
+
+        setIntentHits(1);
+    }
+    else
+    {
+        setCurrentMove(Beam);
+
+        setIntent(Intent::Attack);
+
+        setIntentDamage(9);
+
+        setIntentHits(1);
+    }
+}
+
+void Sentry::executeMove(Player* player)
+{
+    if(player == nullptr)
+    {
+        return;
+    }
+
+    switch(getCurrentMove())
+    {
+    case Beam:
+
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 9);
+
+        break;
+
+    case Bolt:
+
+        // TODO CombatDeck
+        // Shuffle 2 Dazed status cards into the player's Discard Pile.
+        // combatDeck->addToDiscardPile(new Dazed());
+        // combatDeck->addToDiscardPile(new Dazed());
+
+        break;
+    }
+}
