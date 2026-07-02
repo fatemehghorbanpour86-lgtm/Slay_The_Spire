@@ -8,6 +8,14 @@ class Player;
 class JawWorm : public Enemy
 {
 public:
+    JawWorm();
+    virtual ~JawWorm() override = default;
+
+    virtual void chooseIntent(Player* player) override;
+    virtual void executeMove(Player* player) override;
+
+private:
+
     enum Move
     {
         Chomp,
@@ -15,13 +23,6 @@ public:
         Bellow
     };
 
-    JawWorm();
-    virtual ~JawWorm() override = default;
-
-    virtual void chooseIntent() override;
-    virtual void executeMove(Player* player) override;
-
-private:
     void performChomp(Player* player);
     void performThrash(Player* player);
     void performBellow();
@@ -31,20 +32,20 @@ class Louse : public Enemy
 {
 public:
 
+    Louse();
+    virtual ~Louse() override = default;
+
+    virtual void chooseIntent(Player* player) override;
+    virtual void executeMove(Player* player) override;
+    virtual void takeDamage(int damage) override;
+
+private:
+
     enum Move
     {
         Bite,
         Grow
     };
-
-    Louse();
-    virtual ~Louse() override = default;
-
-    virtual void chooseIntent() override;
-    virtual void executeMove(Player* player) override;
-    virtual void takeDamage(int damage) override;
-
-private:
 
     void performBite(Player* player);
     void performGrow();
@@ -55,19 +56,21 @@ private:
 class SmallSlime : public Enemy
 {
 public:
+
+    SmallSlime();
+    virtual ~SmallSlime() override = default;
+
+    virtual void chooseIntent(Player* player) override;
+    virtual void executeMove(Player* player) override;
+
+private:
+
     enum Move
     {
         Tackle,
         Lick
     };
 
-    SmallSlime();
-    virtual ~SmallSlime() override = default;
-
-    virtual void chooseIntent() override;
-    virtual void executeMove(Player* player) override;
-
-private:
     void performTackle(Player* player);
     void performLick(Player* player);
 };
@@ -75,6 +78,15 @@ private:
 class MediumSlime : public Enemy
 {
 public:
+
+    MediumSlime();
+    virtual ~MediumSlime() override = default;
+
+    virtual void chooseIntent(Player* player) override;
+    virtual void executeMove(Player* player) override;
+
+private:
+
     enum Move
     {
         CorrosiveSpit,
@@ -82,13 +94,6 @@ public:
         Lick
     };
 
-    MediumSlime();
-    virtual ~MediumSlime() override = default;
-
-    virtual void chooseIntent() override;
-    virtual void executeMove(Player* player) override;
-
-private:
     void performCorrosiveSpit(Player* player);
     void performTackle(Player* player);
     void performLick(Player* player);
@@ -97,6 +102,17 @@ private:
 class LargeSlime : public Enemy
 {
 public:
+
+    LargeSlime();
+    virtual ~LargeSlime() override = default;
+
+    virtual void chooseIntent(Player* player) override;
+    virtual void executeMove(Player* player) override;
+
+    bool isSplitRequested() const;
+
+private:
+
     enum Move
     {
         CorrosiveSpit,
@@ -105,15 +121,6 @@ public:
         Split
     };
 
-    LargeSlime();
-    virtual ~LargeSlime() override = default;
-
-    virtual void chooseIntent() override;
-    virtual void executeMove(Player* player) override;
-
-    bool isSplitRequested() const;
-
-private:
     void performCorrosiveSpit(Player* player);
     void performTackle(Player* player);
     void performLick(Player* player);
@@ -139,7 +146,7 @@ public:
 
     Cultist();
 
-    void chooseIntent() override;
+    void chooseIntent(Player* player) override;
 
     void executeMove(Player* player) override;
 };
@@ -177,7 +184,7 @@ public:
 
     int getStolenGold() const;
 
-    void chooseIntent() override;
+    void chooseIntent(Player* player) override;
 
     void executeMove(Player *player) override;
 };
@@ -201,7 +208,7 @@ public:
 
     BlueSlaver();
 
-    void chooseIntent() override;
+    void chooseIntent(Player* player) override;
 
     void executeMove(Player* player) override;
 };

@@ -6,18 +6,12 @@
 JawWorm::JawWorm()
     : Enemy("Jaw Worm", QRandomGenerator::global()->bounded(42,47))
 {
-    //واسه ترن اول همیشه همینه
-    setIntent(Intent::Attack);
-    setCurrentMove(Chomp);
-    setIntentDamage(11);
-    // TODO CombatCalculator
-    // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
-    setIntentHits(1);
 }
 
-void JawWorm::chooseIntent()
+void JawWorm::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
+
     if (getTurnCount() == 0)
     {
         setIntent(Intent::Attack);
@@ -87,15 +81,17 @@ void JawWorm::performChomp(Player* player)
 {
     if (!player) return;
 
-    int baseDamage = 11;
-    player->takeDamage(baseDamage);
+    // TODO CombatCalculator(Ana)
+    // CombatCalculator::dealDamage(this, player, 11);
+
 }
 void JawWorm::performThrash(Player* player)
 {
     if (player)
     {
-        int baseDamage = 7;
-        player->takeDamage(baseDamage);
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 7);
+
     }
     this->addBlock(5);
 }
@@ -113,8 +109,10 @@ Louse::Louse()
     firstHitTaken(false)
 {
 }
-void Louse::chooseIntent()
+void Louse::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
+
     int roll = QRandomGenerator::global()->bounded(1,101);
 
     if (roll <= 75)
@@ -172,7 +170,10 @@ void Louse::takeDamage(int damage)
 void Louse::performBite(Player* player)
 {
     if (!player) return;
-    player->takeDamage(getIntentDamage());
+
+    // TODO CombatCalculator(Ana)
+    // CombatCalculator::dealDamage(this, player, getIntentDamage());
+
 }
 void Louse::performGrow()
 {
@@ -185,8 +186,10 @@ SmallSlime::SmallSlime()
     : Enemy("Small Slime", QRandomGenerator::global()->bounded(8, 13))
 {
 }
-void SmallSlime::chooseIntent()
+void SmallSlime::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
+
     int roll = QRandomGenerator::global()->bounded(1, 101);
 
     if (roll <= 50)
@@ -232,9 +235,9 @@ void SmallSlime::performTackle(Player* player)
 {
     if (!player) return;
 
-    int baseDamage = 3;
+    // TODO CombatCalculator(Ana)
+    // CombatCalculator::dealDamage(this, player, 3);
 
-    player->takeDamage(baseDamage);
 }
 void SmallSlime::performLick(Player* player)
 {
@@ -248,8 +251,10 @@ MediumSlime::MediumSlime()
     : Enemy("Medium Slime", QRandomGenerator::global()->bounded(28, 33))
 {
 }
-void MediumSlime::chooseIntent()
+void MediumSlime::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
+
     int roll = QRandomGenerator::global()->bounded(1, 101);
 
     if (roll <= 30)
@@ -310,8 +315,9 @@ void MediumSlime::performCorrosiveSpit(Player* player)
 {
     if (!player) return;
 
-    int baseDamage = 7;
-    player->takeDamage(baseDamage);
+    // TODO CombatCalculator(Ana)
+    // CombatCalculator::dealDamage(this, player, 7);
+
 
     // 2. Add SLIMED status card to the player's Discard Pile using the standard interface
     // player->addCardToDiscard(new SlimedCard());
@@ -320,8 +326,9 @@ void MediumSlime::performTackle(Player* player)
 {
     if (!player) return;
 
-    int baseDamage = 10;
-    player->takeDamage(baseDamage);
+    // TODO CombatCalculator(Ana)
+    // CombatCalculator::dealDamage(this, player, 10);
+
 }
 void MediumSlime::performLick(Player* player)
 {
@@ -339,8 +346,10 @@ LargeSlime::LargeSlime()
     m_splitRequested(false)
 {
 }
-void LargeSlime::chooseIntent()
+void LargeSlime::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
+
     if (!m_splitExecuted && (getCurrentHealth() <= (getMaxHealth() / 2)))
     {
         m_splitReady = true;
@@ -419,8 +428,9 @@ void LargeSlime::performCorrosiveSpit(Player* player)
 {
     if (!player) return;
 
-    int baseDamage = 7;
-    player->takeDamage(baseDamage);
+    // TODO CombatCalculator(Ana)
+    // CombatCalculator::dealDamage(this, player, 7);
+
 
     // Add SLIMED status card to the player's Discard Pile using the integrated Deck System
     // player->addCardToDiscard(new SlimedCard());
@@ -429,8 +439,9 @@ void LargeSlime::performTackle(Player* player)
 {
     if (!player) return;
 
-    int baseDamage = 10;
-    player->takeDamage(baseDamage);
+    // TODO CombatCalculator(Ana)
+    // CombatCalculator::dealDamage(this, player, 10);
+
 }
 void LargeSlime::performLick(Player* player)
 {
@@ -461,8 +472,10 @@ Cultist::Cultist()
 }
 
 
-void Cultist::chooseIntent()
+void Cultist::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
+
     if(getTurnCount() == 0)
     {
         setCurrentMove(Incantation);
@@ -538,8 +551,10 @@ int Thief::getStolenGold() const
     return stolenGold;
 }
 
-void Thief::chooseIntent()
+void Thief::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
+
     if(getTurnCount() < 2)
     {
         setCurrentMove(Mug);
@@ -648,8 +663,10 @@ BlueSlaver::BlueSlaver()
 
 
 
-void BlueSlaver::chooseIntent()
+void BlueSlaver::chooseIntent(Player* player)
 {
+    Q_UNUSED(player)
+
     Move selectedMove;
 
     if(repeatCount >= 2)
