@@ -302,3 +302,125 @@ void HexaGhost::performInferno(Player* player)
     // combatDeck->addToDiscardPile(new Burn());
     // combatDeck->upgradeAllOfType<Burn>();  // needs Deck-side support
 }
+
+
+
+TheChamp::TheChamp()
+    : Enemy("The Champ", 420),
+    isTauntTurn(true)
+{
+}
+void TheChamp::chooseIntent(Player* player)
+{
+    Q_UNUSED(player)
+
+    if(isTauntTurn)
+    {
+        setCurrentMove(Taunt);
+        setIntent(Intent::Debuff);
+        setIntentDamage(0);
+        setIntentHits(0);
+        return;
+    }
+
+    int roll = QRandomGenerator::global()->bounded(1,101);
+
+    if(roll <= 15)
+    {
+        setCurrentMove(DefensiveStance);
+        setIntent(Intent::DefendBuff);
+        setIntentDamage(0);
+        setIntentHits(0);
+    }
+    else if(roll <= 30)
+    {
+        setCurrentMove(Gloat);
+        setIntent(Intent::Buff);
+        setIntentDamage(0);
+        setIntentHits(0);
+    }
+    else if(roll <= 55)
+    {
+        setCurrentMove(FaceSlap);
+        setIntent(Intent::AttackDebuff);
+        setIntentDamage(12);
+        setIntentHits(1);
+    }
+    else
+    {
+        setCurrentMove(HeavySlash);
+        setIntent(Intent::Attack);
+        setIntentDamage(8);
+        setIntentHits(2);
+    }
+}
+void TheChamp::executeMove(Player *player)
+{
+    if(player == nullptr)
+    {
+        return;
+    }
+
+    switch(getCurrentMove())
+    {
+    case Taunt:
+        performTaunt(player);
+        break;
+
+    case DefensiveStance:
+        performDefensiveStance();
+        break;
+
+    case Gloat:
+        performGloat();
+        break;
+
+    case FaceSlap:
+        performFaceSlap(player);
+        break;
+
+    case HeavySlash:
+        performHeavySlash(player);
+        break;
+    }
+
+    isTauntTurn = !isTauntTurn;
+    // Toggle for next turn — guarantees strict alternation regardless of
+    // which non-Taunt move was randomly chosen.
+}
+void TheChamp::performTaunt(Player* player)
+{
+    if(!player) return;
+
+    player->addEffect(Effect::Type::Weak, Effect::Category::Debuff, 2, 2);
+    player->addEffect(Effect::Type::Vulnerable, Effect::Category::Debuff, 2, 2);
+}
+void TheChamp::performDefensiveStance()
+{
+    this->addBlock(15);
+    this->addEffect(Effect::Type::Metallicize, Effect::Category::Buff, 5, -1);
+}
+void TheChamp::performGloat()
+{
+    this->addEffect(Effect::Type::Strength, Effect::Category::Buff, 2, -1);
+}
+void TheChamp::performFaceSlap(Player* player)
+{
+    if(!player) return;
+
+    // TODO CombatCalculator(Ana)
+    // CombatCalculator::dealDamage(this, player, 12);
+
+    player->addEffect(Effect::Type::Frail, Effect::Category::Debuff, 2, 2);
+    player->addEffect(Effect::Type::Vulnerable, Effect::Category::Debuff, 2, 2);
+}
+void TheChamp::performHeavySlash(Player* player)
+{
+    if(!player) return;
+
+    for(int i = 0; i < getTurnCount(); i++)
+    {
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 8);
+    }
+}

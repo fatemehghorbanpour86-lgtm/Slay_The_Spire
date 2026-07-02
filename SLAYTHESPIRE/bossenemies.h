@@ -58,4 +58,32 @@ private:
     void performInferno(Player* player);
 };
 
+class TheChamp : public Enemy
+{
+private:
+    enum Move
+    {
+        Taunt,
+        DefensiveStance,
+        Gloat,
+        FaceSlap,
+        HeavySlash
+    };
+
+    bool isTauntTurn;
+    // Toggles every turn. True on turns 0, 2, 4... (every other turn is Taunt).
+
+public:
+    TheChamp();
+    void chooseIntent(Player* player) override;
+    void executeMove(Player* player) override;
+
+private:
+    void performTaunt(Player* player);
+    void performDefensiveStance();
+    void performGloat();
+    void performFaceSlap(Player* player);
+    void performHeavySlash(Player* player);
+};
+
 #endif // BOSSENEMIES_H
