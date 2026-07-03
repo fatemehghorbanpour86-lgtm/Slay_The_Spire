@@ -49,4 +49,15 @@ private:
     static const int ATTACKS_REQUIRED = 3;
 };
 
+class Kunai : public Relic
+{
+public:
+    Kunai();
+
+    void onCardPlayed(Player* player, Card* card) override;
+
+private:
+    static const int ATTACKS_REQUIRED = 3;
+};
+
 #endif // NORMALRELICS_H

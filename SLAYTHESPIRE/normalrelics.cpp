@@ -89,3 +89,27 @@ void Shuriken::onCardPlayed(Player* player, Card* card)
         setCounter(0);
     }
 }
+
+
+//امتیازی**************************************************************
+Kunai::Kunai()
+    : Relic("Kunai", "Every time you play 3 Attacks in a turn, gain 1 Dexterity.", Relic::Tier::Normal)
+{
+    setCounter(0);
+}
+void Kunai::onCardPlayed(Player* player, Card* card)
+{
+    if (!player || !card)
+        return;
+
+    if (card->getType() != CardType::Attack)
+        return;
+
+    setCounter(getCounter() + 1);
+
+    if (getCounter() >= ATTACKS_REQUIRED)
+    {
+        player->addEffect(Effect::Type::Dexterity, Effect::Category::Buff, 1);
+        setCounter(0);
+    }
+}
