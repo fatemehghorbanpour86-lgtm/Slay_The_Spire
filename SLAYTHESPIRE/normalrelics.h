@@ -60,4 +60,15 @@ private:
     static const int ATTACKS_REQUIRED = 3;
 };
 
+class Anchor : public Relic
+{
+public:
+    Anchor();
+
+    void onCombatStart(Player* player) override;
+
+private:
+    static const int BLOCK_AMOUNT = 10;
+};
+
 #endif // NORMALRELICS_H

@@ -113,3 +113,17 @@ void Kunai::onCardPlayed(Player* player, Card* card)
         setCounter(0);
     }
 }
+
+
+
+Anchor::Anchor()
+    : Relic("Anchor", "Start each combat with 10 Block.", Relic::Tier::Normal)
+{
+}
+void Anchor::onCombatStart(Player* player)
+{
+    if (!player)
+        return;
+
+    player->addBlock(BLOCK_AMOUNT);
+}
