@@ -47,3 +47,41 @@ void MarkOfPain::onCombatStart(Player* player)
     // player->addCardToDrawPile(new Wound());
     // player->addCardToDrawPile(new Wound());
 }
+
+
+
+//امتیازی***********************************************************
+VelvetChoker::VelvetChoker()
+    : Relic("Velvet Choker",
+            "Gain 1 extra Energy per turn. You can no longer play "
+            "more than 6 cards per turn.",
+            Relic::Tier::Boss)
+{
+    setCounter(0);
+}
+void VelvetChoker::onEquip(Player* player)
+{
+    if (!player)
+        return;
+
+    player->setEnergy(player->getMaxEnergy() + 1);
+}
+void VelvetChoker::onTurnStart(Player* player)
+{
+    Q_UNUSED(player)
+
+    setCounter(0);
+}
+void VelvetChoker::onCardPlayed(Player* player, Card* card)
+{
+    Q_UNUSED(player)
+    Q_UNUSED(card)
+
+    setCounter(getCounter() + 1);
+}
+bool VelvetChoker::canPlayCard(Player* player) const
+{
+    Q_UNUSED(player)
+
+    return getCounter() < MAX_CARDS_PER_TURN;
+}

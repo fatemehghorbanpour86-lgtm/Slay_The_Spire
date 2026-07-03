@@ -24,4 +24,18 @@ public:
     void onCombatStart(Player* player) override;
 };
 
+class VelvetChoker : public Relic
+{
+public:
+    VelvetChoker();
+
+    void onEquip(Player* player) override;
+    void onTurnStart(Player* player) override;
+    void onCardPlayed(Player* player, Card* card) override;
+    bool canPlayCard(Player* player) const override;
+
+private:
+    static const int MAX_CARDS_PER_TURN = 6;
+};
+
 #endif // BOSSRELICS_H

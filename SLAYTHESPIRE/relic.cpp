@@ -83,3 +83,9 @@ void Relic::onEquip(Player* player)
 {
     Q_UNUSED(player)
 }
+
+bool Relic::canPlayCard(Player* player) const
+{
+    Q_UNUSED(player)
+    return true;
+}
