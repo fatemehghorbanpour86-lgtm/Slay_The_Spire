@@ -255,3 +255,54 @@ void BookOfStabbing::performSingleStab(Player *player)
     // TODO CombatCalculator(Ana)
     // CombatCalculator::dealDamage(this, player, 21);
 }
+
+
+
+Taskmaster::Taskmaster()
+    : Enemy("Taskmaster", QRandomGenerator::global()->bounded(54,61))
+{
+    // Companions (1 Blue Slaver + 1 Red Slaver) are spawned together with
+    // this enemy by CombatManager when setting up this Elite encounter —
+    // not something Taskmaster itself needs to track.
+
+    // In CombatManager, when setting up "Taskmaster" elite encounter:
+    // QVector<Enemy*> encounter;
+    // encounter.append(new Taskmaster());
+    // encounter.append(new BlueSlaver());
+    // encounter.append(new RedSlaver());
+}
+void Taskmaster::chooseIntent(Player* player)
+{
+    Q_UNUSED(player)
+
+    // Only one move exists, so intent never changes turn to turn.
+    setIntent(Intent::Attack);
+    setCurrentMove(ScouringWhip);
+    setIntentDamage(7);
+    setIntentHits(1);
+}
+void Taskmaster::executeMove(Player *player)
+{
+    if(player == nullptr)
+    {
+        return;
+    }
+
+    switch(getCurrentMove())
+    {
+    case ScouringWhip:
+        performScouringWhip(player);
+        break;
+    }
+}
+void Taskmaster::performScouringWhip(Player* player)
+{
+    if(!player) return;
+
+    // TODO CombatCalculator(Ana)
+    // CombatCalculator::dealDamage(this, player, 7);
+
+    // TODO CombatDeck
+    // Add a WOUND status card to the player's Discard Pile.
+    // combatDeck->addToDiscardPile(new Wound());
+}

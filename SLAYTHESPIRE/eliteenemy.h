@@ -74,4 +74,20 @@ public:
     void executeMove(Player* player) override;
 };
 
+class Taskmaster : public Enemy
+{
+private:
+    enum Move
+    {
+        ScouringWhip
+    };
+
+    void performScouringWhip(Player* player);
+
+public:
+    Taskmaster();
+    void chooseIntent(Player* player) override;
+    void executeMove(Player* player) override;
+};
+
 #endif // ELITEENEMY_H
