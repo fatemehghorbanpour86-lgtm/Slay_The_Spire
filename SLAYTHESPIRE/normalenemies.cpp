@@ -778,3 +778,143 @@ void BlueSlaver::executeMove(Player* player)
 }
 
 
+//======================================================
+//  RedSlaver
+//======================================================
+
+
+RedSlaver::RedSlaver()
+    : Enemy("Red Slaver", QRandomGenerator::global()->bounded(46,51))
+{
+    entangleUsed = false;
+}
+
+
+void RedSlaver::chooseIntent(Player* player)
+{
+    Q_UNUSED(player)
+
+    if(getTurnCount() == 0)
+    {
+        setCurrentMove(Stab);
+
+        setIntent(Intent::Attack);
+
+        setIntentDamage(13);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+        setIntentHits(1);
+
+        return;
+    }
+
+    int random = QRandomGenerator::global()->bounded(100);
+
+    if(!entangleUsed)
+    {
+        if(random < 25)
+        {
+            setCurrentMove(Entangle);
+
+            setIntent(Intent::Debuff);
+
+            setIntentDamage(0);
+
+            setIntentHits(1);
+        }
+        else if(random < 75)
+        {
+            setCurrentMove(Stab);
+
+            setIntent(Intent::Attack);
+
+            setIntentDamage(13);
+            // TODO CombatCalculator
+            // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+            setIntentHits(1);
+        }
+        else
+        {
+            setCurrentMove(Rake);
+
+            setIntent(Intent::AttackDebuff);
+
+            setIntentDamage(8);
+            // TODO CombatCalculator
+            // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+            setIntentHits(1);
+        }
+    }
+
+
+    else
+    {
+        if(random < 50)
+        {
+            setCurrentMove(Stab);
+
+            setIntent(Intent::Attack);
+
+            setIntentDamage(13);
+            // TODO CombatCalculator
+            // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+            setIntentHits(1);
+        }
+        else
+        {
+            setCurrentMove(Rake);
+
+            setIntent(Intent::AttackDebuff);
+
+            setIntentDamage(8);
+            // TODO CombatCalculator
+            // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+            setIntentHits(1);
+        }
+    }
+}
+
+void RedSlaver::executeMove(Player *player)
+{
+    if(player == nullptr)
+    {
+        return;
+    }
+
+    switch(getCurrentMove())
+    {
+
+    case Stab:
+
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 13);
+
+        break;
+
+    case Rake:
+
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 8);
+
+        player->addEffect(
+            Effect::Type::Vulnerable,
+            Effect::Category::Debuff,1,1);
+
+        break;
+
+    case Entangle:
+
+        entangleUsed = true;
+
+        player->addEffect(Effect::Type::Entangle,
+                 Effect::Category::Debuff,1,1);
+
+        break;
+    }
+}
+

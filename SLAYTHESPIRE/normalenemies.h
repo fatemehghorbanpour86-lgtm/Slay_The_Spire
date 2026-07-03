@@ -213,4 +213,26 @@ public:
     void executeMove(Player* player) override;
 };
 
+class RedSlaver : public Enemy
+{
+private:
+
+    enum Move
+    {
+        Stab,
+        Rake,
+        Entangle
+    };
+
+    bool entangleUsed;
+
+public:
+
+    RedSlaver();
+
+    void chooseIntent(Player* player) override;
+
+    void executeMove(Player *player) override;
+};
+
 #endif // NORMALENEMIES_H
