@@ -93,4 +93,12 @@ private:
     static const int BLOCK_AMOUNT = 6;
 };
 
+class Vajra : public Relic
+{
+public:
+    Vajra();
+
+    void onEquip(Player* player) override;
+};
+
 #endif // NORMALRELICS_H

@@ -165,3 +165,14 @@ void Orichalcum::onTurnEnd(Player* player)
 
 
 
+Vajra::Vajra()
+    : Relic("Vajra", "Permanently gain 1 Strength upon pickup.", Relic::Tier::Normal)
+{
+}
+void Vajra::onEquip(Player* player)
+{
+    if (!player)
+        return;
+
+    player->addEffect(Effect::Type::Strength, Effect::Category::Buff, 1);
+}

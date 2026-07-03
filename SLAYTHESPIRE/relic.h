@@ -79,6 +79,11 @@ public:
 
     virtual void onChestOpened(Player* player);
     // Called when the player opens a Chest Used by relics with chest-related effects.
+
+    virtual void onEquip(Player* player);
+    // Called once when the relic is obtained.
+    // Used for relics with an immediate pickup effect.
+    // Default implementation does nothing.
 };
 
 #endif // RELIC_H

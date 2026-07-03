@@ -78,3 +78,8 @@ void Relic::onChestOpened(Player* player)
 {
     Q_UNUSED(player)
 }
+
+void Relic::onEquip(Player* player)
+{
+    Q_UNUSED(player)
+}
