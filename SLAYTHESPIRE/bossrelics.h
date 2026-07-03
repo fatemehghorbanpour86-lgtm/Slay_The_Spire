@@ -46,4 +46,13 @@ public:
     void onEnemyDeath(Player* player, Enemy* enemy) override;
 };
 
+class CoffeeDripper : public Relic
+{
+public:
+    CoffeeDripper();
+
+    void onEquip(Player* player) override;
+    bool canRest() const override;
+};
+
 #endif // BOSSRELICS_H

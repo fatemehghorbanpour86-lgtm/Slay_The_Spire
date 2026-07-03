@@ -109,3 +109,24 @@ void BlackStar::onEnemyDeath(Player* player, Enemy* enemy)
     // Example:
     // player->requestBonusRelicReward(1);
 }
+
+
+
+CoffeeDripper::CoffeeDripper()
+    : Relic("Coffee Dripper",
+            "Gain 1 extra Energy per turn. You can no longer Rest at "
+            "Rest sites.",
+            Relic::Tier::Boss)
+{
+}
+void CoffeeDripper::onEquip(Player* player)
+{
+    if (!player)
+        return;
+
+    player->setEnergy(player->getMaxEnergy() + 1);
+}
+bool CoffeeDripper::canRest() const
+{
+    return false;
+}
