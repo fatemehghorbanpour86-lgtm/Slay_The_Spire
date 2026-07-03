@@ -16,6 +16,7 @@ SOURCES += \
     main.cpp \
     mainpage.cpp \
     mainwindow.cpp \
+    normalenemies.cpp \
     player.cpp \
     powercard.cpp \
     relic.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     loginpage.h \
     mainpage.h \
     mainwindow.h \
+    normalenemies.h \
     player.h \
     powercard.h \
     relic.h \

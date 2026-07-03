@@ -59,7 +59,11 @@ QString Effect::getName() const
 
     case Type::DarkEmbrace:
         return "Dark Embrace";
+
+    case Type::Entangle:
+        return "Entangle";
     }
+
     return "";
 }
 
@@ -100,7 +104,11 @@ bool Effect::isDebuff() const
 
 void Effect::stack(int value)
 {
-    if(type == Type::Weak || type == Type::Vulnerable || type == Type::Frail)
+    if(type == Type::Entangle)
+    {
+        duration = 1;
+    }
+    else if(type == Type::Weak || type == Type::Vulnerable || type == Type::Frail)
     {
         duration += value;
     }
@@ -170,7 +178,11 @@ void Effect::onTurnStart(Character *target)
         if (Player* p = dynamic_cast<Player*>(target))
             p->gainEnergy(amount);
         break;
+
+    case Type::Entangle:
+        break;
     }
+
 }
 
 void Effect::onTurnEnd(Character *target)
