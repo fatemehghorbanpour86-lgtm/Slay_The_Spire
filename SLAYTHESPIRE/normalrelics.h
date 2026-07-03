@@ -71,4 +71,15 @@ private:
     static const int BLOCK_AMOUNT = 10;
 };
 
+class HappyFlower : public Relic
+{
+public:
+    HappyFlower();
+
+    void onTurnStart(Player* player) override;
+
+private:
+    static const int TURNS_REQUIRED = 3;
+};
+
 #endif // NORMALRELICS_H

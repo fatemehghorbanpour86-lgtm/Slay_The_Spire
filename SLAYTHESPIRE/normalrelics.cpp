@@ -127,3 +127,23 @@ void Anchor::onCombatStart(Player* player)
 
     player->addBlock(BLOCK_AMOUNT);
 }
+
+
+HappyFlower::HappyFlower()
+    : Relic("Happy Flower", "Every 3 turns, gain 1 Energy.", Relic::Tier::Normal)
+{
+    setCounter(0);
+}
+void HappyFlower::onTurnStart(Player* player)
+{
+    if (!player)
+        return;
+
+    setCounter(getCounter() + 1);
+
+    if (getCounter() >= TURNS_REQUIRED)
+    {
+        player->gainEnergy(1);
+        setCounter(0);
+    }
+}
