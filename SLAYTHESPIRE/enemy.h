@@ -11,9 +11,12 @@ enum class Intent
     Defend,
     Buff,
     Debuff,
+
+    AttackDefend,
     AttackBuff,
     AttackDebuff,
     DefendBuff,
+
     Escape,
     Unknown
 };

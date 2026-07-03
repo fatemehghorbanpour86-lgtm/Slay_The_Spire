@@ -235,4 +235,25 @@ public:
     void executeMove(Player *player) override;
 };
 
+class SphericGuardian : public Enemy
+{
+private:
+
+    enum Move
+    {
+        Attack,
+        Harden,
+        Slam
+    };
+
+public:
+
+    SphericGuardian();
+
+    void chooseIntent(Player *player) override;
+
+    void executeMove(Player *player) override;
+};
+
+
 #endif // NORMALENEMIES_H

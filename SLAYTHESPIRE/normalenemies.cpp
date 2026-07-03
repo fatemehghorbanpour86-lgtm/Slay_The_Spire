@@ -918,3 +918,101 @@ void RedSlaver::executeMove(Player *player)
     }
 }
 
+
+//======================================================
+//  SphericGuardian
+//======================================================
+
+SphericGuardian::SphericGuardian()
+    : Enemy("Spheric Guardian", QRandomGenerator::global()->bounded(20,25))
+{
+
+}
+
+void SphericGuardian::chooseIntent(Player *player)
+{
+    Q_UNUSED(player)
+
+    if(getTurnCount() == 0)
+    {
+        setCurrentMove(Attack);
+
+        setIntent(Intent::AttackDebuff);
+
+        setIntentDamage(10);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+        setIntentHits(1);
+
+        return;
+    }
+
+    if(QRandomGenerator::global()->bounded(100) < 50)
+    {
+        setCurrentMove(Harden);
+
+        setIntent(Intent::AttackDefend);
+
+        setIntentDamage(10);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+        setIntentHits(1);
+    }
+    else
+    {
+        setCurrentMove(Slam);
+
+        setIntent(Intent::Attack);
+
+        setIntentDamage(10);
+        // TODO CombatCalculator
+        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+
+        setIntentHits(2);
+    }
+
+}
+
+void SphericGuardian::executeMove(Player *player)
+{
+    if(player == nullptr)
+    {
+        return;
+    }
+
+    switch(getCurrentMove())
+    {
+
+    case Attack:
+
+        addBlock(25);
+
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 10);
+
+        player->addEffect(
+            Effect::Type::Frail,
+            Effect::Category::Debuff,1,5);
+
+        break;
+
+    case Harden:
+
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 10);
+
+        addBlock(15);
+
+        break;
+
+    case Slam:
+
+        // TODO CombatCalculator(Ana)
+        // CombatCalculator::dealDamage(this, player, 10);
+        // CombatCalculator::dealDamage(this, player, 10);
+
+        break;
+    }
+}
