@@ -35,3 +35,33 @@ void Girya::lift(Player* player)
     player->addEffect(Effect::Type::Strength, Effect::Category::Buff, 1);
     setCounter(getCounter() + 1);
 }
+
+
+//امتیازی**************************************************************
+IceCream::IceCream()
+    : Relic("Ice Cream", "Energy is now conserved between turns.", Relic::Tier::Normal)
+{
+    setCounter(0); // Energy saved from the end of the previous turn
+}
+void IceCream::onTurnEnd(Player* player)
+{
+    if (!player)
+        return;
+
+    // Save whatever Energy is still unspent, BEFORE CombatManager
+    // calls Player::resetEnergy() for the next turn and overwrites it.
+    setCounter(player->getCurrentEnergy());
+}
+void IceCream::onTurnStart(Player* player)
+{
+    if (!player)
+        return;
+
+    // At this point resetEnergy() has already run for the new turn.
+    // We add back the saved leftover through the normal Energy
+    // System entry point - no change to Player::resetEnergy() needed.
+    if (getCounter() > 0)
+        player->gainEnergy(getCounter());
+
+    setCounter(0);
+}

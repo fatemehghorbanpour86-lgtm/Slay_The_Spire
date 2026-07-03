@@ -29,4 +29,13 @@ private:
     static const int MAX_LIFTS = 3;
 };
 
+class IceCream : public Relic
+{
+public:
+    IceCream();
+
+    void onTurnEnd(Player* player) override;
+    void onTurnStart(Player* player) override;
+};
+
 #endif // NORMALRELICS_H
