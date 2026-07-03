@@ -82,4 +82,15 @@ private:
     static const int TURNS_REQUIRED = 3;
 };
 
+class Orichalcum : public Relic
+{
+public:
+    Orichalcum();
+
+    void onTurnEnd(Player* player) override;
+
+private:
+    static const int BLOCK_AMOUNT = 6;
+};
+
 #endif // NORMALRELICS_H

@@ -147,3 +147,21 @@ void HappyFlower::onTurnStart(Player* player)
         setCounter(0);
     }
 }
+
+
+
+Orichalcum::Orichalcum()
+    : Relic("Orichalcum", "If you end your turn with 0 Block, gain 6 Block.", Relic::Tier::Normal)
+{
+}
+void Orichalcum::onTurnEnd(Player* player)
+{
+    if (!player)
+        return;
+
+    if (!player->hasBlock())
+        player->addBlock(BLOCK_AMOUNT);
+}
+
+
+
