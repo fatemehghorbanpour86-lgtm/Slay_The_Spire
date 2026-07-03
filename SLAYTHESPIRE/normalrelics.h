@@ -38,4 +38,15 @@ public:
     void onTurnStart(Player* player) override;
 };
 
+class Shuriken : public Relic
+{
+public:
+    Shuriken();
+
+    void onCardPlayed(Player* player, Card* card) override;
+
+private:
+    static const int ATTACKS_REQUIRED = 3;
+};
+
 #endif // NORMALRELICS_H

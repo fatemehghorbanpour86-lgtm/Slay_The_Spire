@@ -65,3 +65,27 @@ void IceCream::onTurnStart(Player* player)
 
     setCounter(0);
 }
+
+
+//امتیازی**************************************************************
+Shuriken::Shuriken()
+    : Relic("Shuriken", "Every time you play 3 Attacks in a turn, gain 1 Strength.", Relic::Tier::Normal)
+{
+    setCounter(0);
+}
+void Shuriken::onCardPlayed(Player* player, Card* card)
+{
+    if (!player || !card)
+        return;
+
+    if (card->getType() != CardType::Attack)
+        return;
+
+    setCounter(getCounter() + 1);
+
+    if (getCounter() >= ATTACKS_REQUIRED)
+    {
+        player->addEffect(Effect::Type::Strength, Effect::Category::Buff, 1);
+        setCounter(0);
+    }
+}
