@@ -18,6 +18,7 @@ SOURCES += \
     mainwindow.cpp \
     player.cpp \
     powercard.cpp \
+    relic.cpp \
     skillcards.cpp \
     splashpage.cpp \
     character.cpp \
@@ -34,6 +35,7 @@ HEADERS += \
     mainwindow.h \
     player.h \
     powercard.h \
+    relic.h \
     skillcards.h \
     splashpage.h \
     character.h \
