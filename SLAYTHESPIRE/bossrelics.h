@@ -38,4 +38,12 @@ private:
     static const int MAX_CARDS_PER_TURN = 6;
 };
 
+class BlackStar : public Relic
+{
+public:
+    BlackStar();
+
+    void onEnemyDeath(Player* player, Enemy* enemy) override;
+};
+
 #endif // BOSSRELICS_H

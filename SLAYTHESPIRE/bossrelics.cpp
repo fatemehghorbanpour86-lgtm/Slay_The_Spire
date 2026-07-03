@@ -85,3 +85,27 @@ bool VelvetChoker::canPlayCard(Player* player) const
 
     return getCounter() < MAX_CARDS_PER_TURN;
 }
+
+
+
+BlackStar::BlackStar()
+    : Relic("Black Star", "Elites now drop 2 relics when defeated.",
+            Relic::Tier::Boss)
+{
+}
+void BlackStar::onEnemyDeath(Player* player, Enemy* enemy)
+{
+    if (!player || !enemy)
+        return;
+
+    if (enemy->getName() != "Gremlin Knob" || enemy->getName() != "Sentry" || enemy->getName() != "Book of Stabbing"
+        || enemy->getName() != "Taskmaster")
+        return;
+
+    // TODO (Reward System):
+    // Black Star never builds relics itself — it only requests one
+    // extra relic on top of the normal Elite reward. Reward System is
+    // the single owner of relic-reward generation.
+    // Example:
+    // player->requestBonusRelicReward(1);
+}
