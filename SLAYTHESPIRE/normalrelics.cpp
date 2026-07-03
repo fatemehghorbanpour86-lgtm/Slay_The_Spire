@@ -15,3 +15,23 @@ void BurningBlood::onCombatEnd(Player* player)
 
     player->heal(6);
 }
+
+
+Girya::Girya()
+    : Relic("Girya", "You may now lift at campsites.", Relic::Tier::Normal)
+{
+    setCounter(0); // number of Lifts used so far
+}
+bool Girya::canLift() const
+{
+    return getCounter() < MAX_LIFTS;
+}
+void Girya::lift(Player* player)
+{
+    if (!player || !canLift())
+        return;
+
+    // Permanent Strength -> default duration (-1) never expires.
+    player->addEffect(Effect::Type::Strength, Effect::Category::Buff, 1);
+    setCounter(getCounter() + 1);
+}

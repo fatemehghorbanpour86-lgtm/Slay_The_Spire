@@ -15,4 +15,18 @@ public:
     void onCombatEnd(Player* player) override;
 };
 
+
+//NORMAL RELICS**************************************************
+class Girya : public Relic
+{
+public:
+    Girya();
+
+    bool canLift() const;
+    void lift(Player* player);
+
+private:
+    static const int MAX_LIFTS = 3;
+};
+
 #endif // NORMALRELICS_H
