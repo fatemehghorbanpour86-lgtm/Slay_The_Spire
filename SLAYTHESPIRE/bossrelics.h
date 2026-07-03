@@ -15,4 +15,13 @@ public:
     void onEquip(Player* player) override;
 };
 
+class MarkOfPain : public Relic
+{
+public:
+    MarkOfPain();
+
+    void onEquip(Player* player) override;
+    void onCombatStart(Player* player) override;
+};
+
 #endif // BOSSRELICS_H

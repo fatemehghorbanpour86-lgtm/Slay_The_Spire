@@ -21,3 +21,29 @@ void CallingBell::onEquip(Player* player)
     // TODO (Relic Manager / Reward System):
     // RelicManager::grantRandomRelics(player, Relic::Tier::Normal, 3);
 }
+
+
+
+MarkOfPain::MarkOfPain()
+    : Relic("Mark of Pain",
+            "Gain 1 extra Energy per turn. At the start of combat, "
+            "2 Wounds are added to your draw pile.",
+            Relic::Tier::Boss)
+{
+}
+void MarkOfPain::onEquip(Player* player)
+{
+    if (!player)
+        return;
+
+    player->setEnergy(player->getMaxEnergy() + 1);
+}
+void MarkOfPain::onCombatStart(Player* player)
+{
+    if (!player)
+        return;
+
+    // TODO (Deck System):
+    // player->addCardToDrawPile(new Wound());
+    // player->addCardToDrawPile(new Wound());
+}
