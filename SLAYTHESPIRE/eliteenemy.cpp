@@ -1,6 +1,7 @@
 #include "eliteenemy.h"
 
 #include "player.h"
+#include "combatcalculator.h"
 
 #include <QRandomGenerator>
 
@@ -41,7 +42,7 @@ void GremlinNob::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(14);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,14));
 
         setIntentHits(1);
     }
@@ -52,7 +53,7 @@ void GremlinNob::chooseIntent(Player* player)
 
         setIntent(Intent::AttackDebuff);
 
-        setIntentDamage(6);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,6));
 
         setIntentHits(1);
     }
@@ -81,15 +82,13 @@ void GremlinNob::executeMove(Player *player)
 
      case Rush:
 
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 14);
+         CombatCalculator::dealDamage(this, player, 14);
 
         break;
 
     case SkullBash:
 
-        // TODO CombatCalculator
-        // CombatCalculator::dealDamage(this, player, 6);
+         CombatCalculator::dealDamage(this, player, 6);
 
         player->addEffect(
             Effect::Type::Vulnerable,
@@ -123,7 +122,7 @@ void Sentry::chooseIntent(Player* player)
 
             setIntent(Intent::Attack);
 
-            setIntentDamage(9);
+            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,9));
 
             setIntentHits(1);
         }
@@ -158,7 +157,7 @@ void Sentry::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(9);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,9));
 
         setIntentHits(1);
     }
@@ -175,8 +174,7 @@ void Sentry::executeMove(Player* player)
     {
     case Beam:
 
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 9);
+         CombatCalculator::dealDamage(this, player, 9);
 
         break;
 
@@ -210,14 +208,14 @@ void BookOfStabbing::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
         setCurrentMove(MultiStab);
-        setIntentDamage(6);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,6));
         setIntentHits(hits);
     }
     else
     {
         setIntent(Intent::Attack);
         setCurrentMove(SingleStab);
-        setIntentDamage(21);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,21));
         setIntentHits(1);
     }
 }
@@ -245,15 +243,13 @@ void BookOfStabbing::performMultiStab(Player *player)
     int hits = getIntentHits();
     for(int i = 0; i < hits; i++)
     {
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 6);
+         CombatCalculator::dealDamage(this, player, 6);
     }
     multiStabCount++;
 }
 void BookOfStabbing::performSingleStab(Player *player)
 {
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 21);
+     CombatCalculator::dealDamage(this, player, 21);
 }
 
 
@@ -278,7 +274,7 @@ void Taskmaster::chooseIntent(Player* player)
     // Only one move exists, so intent never changes turn to turn.
     setIntent(Intent::Attack);
     setCurrentMove(ScouringWhip);
-    setIntentDamage(7);
+    setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7));
     setIntentHits(1);
 }
 void Taskmaster::executeMove(Player *player)
@@ -299,8 +295,7 @@ void Taskmaster::performScouringWhip(Player* player)
 {
     if(!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 7);
+     CombatCalculator::dealDamage(this, player, 7);
 
     // TODO CombatDeck
     // Add a WOUND status card to the player's Discard Pile.
