@@ -20,6 +20,7 @@ SOURCES += \
     main.cpp \
     mainpage.cpp \
     mainwindow.cpp \
+    mapfloor.cpp \
     mapnode.cpp \
     normalenemies.cpp \
     normalrelics.cpp \
@@ -44,6 +45,7 @@ HEADERS += \
     loginpage.h \
     mainpage.h \
     mainwindow.h \
+    mapfloor.h \
     mapnode.h \
     normalenemies.h \
     normalrelics.h \
