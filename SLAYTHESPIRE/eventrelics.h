@@ -25,4 +25,13 @@ private:
     bool strengthActive;
 };
 
+class CultistHeadpiece : public Relic
+{
+public:
+    CultistHeadpiece();
+
+    void onCombatStart(Player* player) override;
+};
+
+
 #endif // EVENTRELICS_H

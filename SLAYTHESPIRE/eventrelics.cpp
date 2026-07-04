@@ -1,7 +1,10 @@
 #include "eventrelics.h"
 
 #include "player.h"
+
 #include "effect.h"
+
+#include <QDebug>
 
 //======================================================
 //  WarpedTongs
@@ -67,4 +70,27 @@ void MutagenicStrength::onTurnEnd(Player* player)
     player->addEffect(Effect::Type::Strength,Effect::Category::Buff,-3);
 
     strengthActive = false;
+}
+
+//======================================================
+//  CultistHeadpiece
+//======================================================
+
+CultistHeadpiece::CultistHeadpiece()
+    : Relic(
+          "Cultist Headpiece",
+          "At the start of each combat, CAW! CAAAW!",
+          Relic::Tier::Event)
+{
+}
+
+void CultistHeadpiece::onCombatStart(Player* player)
+{
+    Q_UNUSED(player)
+
+    qDebug() << "CAW! CAAAW!";
+
+    // TODO (UI / Audio System)
+    // TODO (AudioManager)
+    // AudioManager::playCultistCaw();
 }
