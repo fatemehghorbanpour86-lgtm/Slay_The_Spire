@@ -2,6 +2,8 @@
 
 #include "player.h"
 
+#include "enemy.h"
+
 #include "combatcalculator.h"
 
 
@@ -50,4 +52,24 @@ void BlockPotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
         return;
 
     CombatCalculator::grantBlock(user, blockAmount);
+}
+
+//======================================================
+//  FirePotion
+//======================================================
+
+
+FirePotion::FirePotion()
+    : Potion("Fire Potion", "Deal 20 damage.")
+{
+}
+
+void FirePotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(enemies)
+
+    if (!user || !target)
+        return;
+
+    CombatCalculator::dealDamage(user, target, 20);
 }
