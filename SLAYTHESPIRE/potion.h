@@ -59,4 +59,12 @@ public:
     void use(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
 };
 
+class SwiftPotion : public Potion
+{
+public:
+    SwiftPotion();
+
+    void use(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+};
+
 #endif // POTION_H

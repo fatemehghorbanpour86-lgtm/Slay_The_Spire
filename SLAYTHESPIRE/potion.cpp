@@ -95,3 +95,24 @@ void EnergyPotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     user->gainEnergy(2);
 }
 
+//======================================================
+//  SwiftPotion
+//======================================================
+
+SwiftPotion::SwiftPotion()
+    : Potion("Swift Potion", "Draw 3 cards.")
+{
+}
+
+void SwiftPotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(enemies)
+    Q_UNUSED(target)
+
+    if (!user)
+        return;
+
+    // TODO (Anahita)
+    // Draw 3 cards from the CombatDeck.
+    // Example: user->drawCards(3);
+}
