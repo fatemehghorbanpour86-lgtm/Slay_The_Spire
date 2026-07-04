@@ -1,7 +1,11 @@
 #include "attackcards.h"
 #include "player.h"
+#include "enemy.h"
+#include "combatcalculator.h"
 
-// Strike
+//======================================================
+//  Strike
+//======================================================
 
 Strike::Strike() : Card("Strike", "Deal 6 damage.", 1, CardType::Attack)
 {
@@ -11,7 +15,6 @@ Strike::Strike() : Card("Strike", "Deal 6 damage.", 1, CardType::Attack)
 
 void Strike::play(Player* user , QVector<Enemy*>& enemies, Enemy* target)
 {
-    Q_UNUSED(user)
     Q_UNUSED(enemies)
 
     if(target == nullptr)
@@ -19,9 +22,7 @@ void Strike::play(Player* user , QVector<Enemy*>& enemies, Enemy* target)
         return;
     }
 
-    //target->takeDamage(damageAmount);
-    //TODO anahita
-    // Replace with CombatCalculator after combat system is implemented.
+   CombatCalculator::dealDamage(user, target, damageAmount);
 
 }
 
@@ -41,7 +42,9 @@ void Strike::upgrade()
     description = "Deal 9 damage.";
 }
 
-//Reaper
+//======================================================
+//  Reaper
+//======================================================
 
 Reaper::Reaper() : Card("Reaper", "Deal 4 damage to ALL enemies. Heal HP equal to unblocked damage dealt. Exhaust.",2, CardType::Attack, true)
 {
@@ -57,7 +60,7 @@ void Reaper::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
         return;
     }
 
-    //int totalHeal = 0;
+    int totalHeal = 0;
 
     for(Enemy* enemy : enemies)
     {
@@ -66,22 +69,10 @@ void Reaper::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
             continue;
         }
 
-        //enemy->takeDamage(damageAmount);
-        // TODO :
-        // Deal damage using CombatCalculator.
-        // CombatCalculator should return the actual HP damage
-        // after applying Strength, Weak, Vulnerable and Block.
-
-        // Example:
-        // int dealtDamage =
-        // CombatCalculator::dealDamage(user, enemy, damageAmount);
-        // totalHeal += dealtDamage;
+        totalHeal += CombatCalculator::dealDamage(user,enemy, damageAmount);
     }
 
-    // TODO:
-    // Heal the player by the total unblocked damage dealt.
-    // Example:
-    // user->heal(totalHeal);
+    CombatCalculator::healCharacter( user,totalHeal);
 }
 
 
@@ -102,7 +93,9 @@ void Reaper::upgrade()
         "Deal 5 damage to ALL enemies. Heal HP equal to unblocked damage dealt. Exhaust";
 }
 
+//======================================================
 //  Bludgeon
+//======================================================
 
 Bludgeon::Bludgeon()
     : Card("Bludgeon", "Deal 32 damage.", 3, CardType::Attack)
@@ -112,7 +105,6 @@ Bludgeon::Bludgeon()
 
 void Bludgeon::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
 {
-    Q_UNUSED(user)
     Q_UNUSED(enemies)
 
     if(target == nullptr)
@@ -120,9 +112,7 @@ void Bludgeon::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
         return;
     }
 
-    //target->takeDamage(damageAmount);
-    //TODO anahita
-    // Replace with CombatCalculator after combat system is implemented.
+   CombatCalculator::dealDamage(user, target, damageAmount);
 }
 
 void Bludgeon::upgrade()
@@ -141,7 +131,10 @@ void Bludgeon::upgrade()
     description = "Deal 42 damage.";
 }
 
-//Feed
+//======================================================
+//  Feed
+//======================================================
+
 Feed::Feed()
     : Card("Feed", "Deal 10 damage. If Fatal, raise your Max HP by 3.",1,CardType::Attack)
 {
@@ -158,11 +151,13 @@ void Feed::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
         return;
     }
 
-    //target->takeDamage(damageAmount);
+    CombatCalculator::dealDamage( user,target, damageAmount);
 
-    // TODO combat anahita:
-    // If this attack kills the target,
-    // increase the player's Max HP by 3.
+    if(target->isDead())
+    {
+        user->increaseMaxHealth(3);
+    }
+
 }
 
 void Feed::upgrade()
@@ -181,7 +176,9 @@ void Feed::upgrade()
     description = "Deal 12 damage. If Fatal, raise your Max HP by 4.";
 }
 
-//Immolate
+//======================================================
+//  Immolate
+//======================================================
 
 Immolate::Immolate()
     : Card("Immolate", "Deal 21 damage to ALL enemies. Add a Burn into your Discard Pile.", 2,CardType::Attack)
@@ -205,11 +202,7 @@ void Immolate::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
             continue;
         }
 
-        // enemy->takeDamage(damageAmount);
-
-        // todo anahita
-        // Replace with CombatCalculator after
-        // the combat system is implemented.
+        CombatCalculator::dealDamage(user, enemy, damageAmount);
     }
 
     // TODO
@@ -233,7 +226,9 @@ void Immolate::upgrade()
     description = "Deal 28 damage to ALL enemies. Add a Burn into your Discard Pile.";
 }
 
-//TwinStrike
+//======================================================
+//  TwinStrike
+//======================================================
 
 TwinStrike::TwinStrike()
     : Card("Twin Strike","Deal 5 damage twice.",1,CardType::Attack)
@@ -244,7 +239,6 @@ TwinStrike::TwinStrike()
 
 void TwinStrike::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
 {
-    Q_UNUSED(user)
     Q_UNUSED(enemies)
 
     if(target == nullptr)
@@ -252,14 +246,9 @@ void TwinStrike::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
         return;
     }
 
-    // First hit
-    // target->takeDamage(damageAmount);
+    CombatCalculator::dealDamage(user, target, damageAmount);
 
-    // Second hit
-    // target->takeDamage(damageAmount);
-
-    // TODO
-    // Replace both attacks with CombatCalculator
+    CombatCalculator::dealDamage(user, target, damageAmount);
 }
 
 void TwinStrike::upgrade()
@@ -278,7 +267,9 @@ void TwinStrike::upgrade()
     description = "Deal 7 damage twice.";
 }
 
-// Hemokinesis
+//======================================================
+//  Hemokinesis
+//======================================================
 
 Hemokinesis::Hemokinesis()
     : Card("Hemokinesis", "Lose 2 HP. Deal 15 damage.",1,CardType::Attack)
@@ -299,10 +290,7 @@ void Hemokinesis::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
 
     user->loseHP(selfDamage);
 
-    // target->takeDamage(damageAmount);
-
-    // TODO:
-    // Replace enemy damage with CombatCalculator
+    CombatCalculator::dealDamage(user, target, damageAmount);
 }
 
 
@@ -322,7 +310,9 @@ void Hemokinesis::upgrade()
     description = "Lose 2 HP. Deal 20 damage.";
 }
 
-// Carnage
+//======================================================
+//  Carnage
+//======================================================
 
 Carnage::Carnage()
     : Card("Carnage","Deal 20 damage. Ethereal.", 2, CardType::Attack, false, true)
@@ -333,7 +323,6 @@ Carnage::Carnage()
 
 void Carnage::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
 {
-    Q_UNUSED(user)
     Q_UNUSED(enemies)
 
     if(target == nullptr)
@@ -341,10 +330,7 @@ void Carnage::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
         return;
     }
 
-    // target->takeDamage(damageAmount);
-
-    // TODO
-    // Replace with CombatCalculator
+   CombatCalculator::dealDamage(user, target, damageAmount);
 }
 
 void Carnage::upgrade()
@@ -362,4 +348,3 @@ void Carnage::upgrade()
 
     description = "Deal 28 damage. Ethereal.";
 }
-
