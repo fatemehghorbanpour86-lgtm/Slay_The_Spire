@@ -26,7 +26,7 @@ public:
     QString getDescription() const;
 
 
-    virtual void use(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) = 0;
+    virtual void use(Player* user, Enemy* target = nullptr) = 0;
 
 
     virtual bool canUse(Player* user) const; //Default: true
@@ -40,7 +40,7 @@ private:
 public:
     BlockPotion();
 
-    void use(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void use(Player* user, Enemy* target = nullptr) override;
 };
 
 class FirePotion : public Potion
@@ -48,7 +48,7 @@ class FirePotion : public Potion
 public:
     FirePotion();
 
-    void use(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void use(Player* user, Enemy* target = nullptr) override;
 };
 
 class EnergyPotion : public Potion
@@ -56,7 +56,7 @@ class EnergyPotion : public Potion
 public:
     EnergyPotion();
 
-    void use(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void use(Player* user, Enemy* target = nullptr) override;
 };
 
 class SwiftPotion : public Potion
@@ -64,7 +64,17 @@ class SwiftPotion : public Potion
 public:
     SwiftPotion();
 
-    void use(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+    void use(Player* user, Enemy* target = nullptr) override;
+};
+
+class FairyInABottle : public Potion
+{
+public:
+    FairyInABottle();
+
+    void use(Player* user, Enemy* target = nullptr) override;
+
+    bool canUse(Player* user) const override;
 };
 
 #endif // POTION_H

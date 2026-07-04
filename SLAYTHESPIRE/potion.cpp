@@ -43,9 +43,8 @@ BlockPotion::BlockPotion()
     blockAmount = 12;
 }
 
-void BlockPotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+void BlockPotion::use(Player* user, Enemy* target)
 {
-    Q_UNUSED(enemies)
     Q_UNUSED(target)
 
     if (!user)
@@ -64,9 +63,8 @@ FirePotion::FirePotion()
 {
 }
 
-void FirePotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+void FirePotion::use(Player* user, Enemy* target)
 {
-    Q_UNUSED(enemies)
 
     if (!user || !target)
         return;
@@ -84,9 +82,8 @@ EnergyPotion::EnergyPotion()
 {
 }
 
-void EnergyPotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+void EnergyPotion::use(Player* user, Enemy* target)
 {
-    Q_UNUSED(enemies)
     Q_UNUSED(target)
 
     if (!user)
@@ -104,9 +101,8 @@ SwiftPotion::SwiftPotion()
 {
 }
 
-void SwiftPotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+void SwiftPotion::use(Player* user, Enemy* target)
 {
-    Q_UNUSED(enemies)
     Q_UNUSED(target)
 
     if (!user)
@@ -115,4 +111,30 @@ void SwiftPotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     // TODO (Anahita)
     // Draw 3 cards from the CombatDeck.
     // Example: user->drawCards(3);
+}
+
+
+//======================================================
+//  Fairy In A Bottle
+//======================================================
+
+FairyInABottle::FairyInABottle()
+    : Potion("Fairy in a Bottle",
+             "When you would die, heal to 30% of your Max HP instead.")
+{
+}
+
+void FairyInABottle::use(Player* user, Enemy* target)
+{
+    Q_UNUSED(user)
+    Q_UNUSED(target)
+
+    // Unplayable.
+    // CombatManager automatically activates this Potion when the player would die.
+}
+
+bool FairyInABottle::canUse(Player* user) const
+{
+    Q_UNUSED(user)
+    return false;
 }
