@@ -9,6 +9,7 @@ CONFIG += c++17
 SOURCES += \
     attackcards.cpp \
     bossenemies.cpp \
+    bossrelics.cpp \
     card.cpp \
     cursecards.cpp \
     effect.cpp \
@@ -31,6 +32,7 @@ SOURCES += \
 HEADERS += \
     attackcards.h \
     bossenemies.h \
+    bossrelics.h \
     card.h \
     cursecards.h \
     effect.h \
