@@ -154,7 +154,7 @@ FeelNoPain::FeelNoPain()
 {
     //باید CombatManager، هر بار
     // کارتی را به Exhaust Pile منتقل می‌کند، چک کند user->getEffect(FeelNoPain)
-    // و در صورت وجود addBlock(amount) صدا بزند
+    // و در صورت وجود addBlock(CombatCalculator::calculateBlock(player, effect->getAmount())) صدا بزند
 
 
     //این کارت امتیازی است***************************************************
