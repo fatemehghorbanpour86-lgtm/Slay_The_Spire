@@ -32,4 +32,15 @@ public:
     virtual bool canUse(Player* user) const; //Default: true
 };
 
+class BlockPotion : public Potion
+{
+private:
+     int blockAmount;
+
+public:
+    BlockPotion();
+
+    void use(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+};
+
 #endif // POTION_H
