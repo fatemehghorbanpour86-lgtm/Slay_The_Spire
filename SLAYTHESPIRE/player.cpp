@@ -94,3 +94,17 @@ bool Player::spendGold(int amount)
 
     return true;
 }
+
+void Player::increaseMaxHealth(int amount)
+{
+    if(amount <= 0)
+        return;
+
+    maxHealth += amount;
+    currentHealth += amount;
+
+    if(currentHealth > maxHealth)
+    {
+        currentHealth = maxHealth;
+    }
+}

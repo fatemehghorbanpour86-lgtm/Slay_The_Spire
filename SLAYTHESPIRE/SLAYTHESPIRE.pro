@@ -11,6 +11,7 @@ SOURCES += \
     bossenemies.cpp \
     bossrelics.cpp \
     card.cpp \
+    combatcalculator.cpp \
     cursecards.cpp \
     effect.cpp \
     eliteenemy.cpp \
@@ -34,6 +35,7 @@ HEADERS += \
     bossenemies.h \
     bossrelics.h \
     card.h \
+    combatcalculator.h \
     cursecards.h \
     effect.h \
     eliteenemy.h \

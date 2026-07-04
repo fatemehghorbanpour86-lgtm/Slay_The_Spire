@@ -1,6 +1,8 @@
 #include "skillcards.h"
 #include "effect.h"
 #include "player.h"
+#include "combatcalculator.h"
+
 //#include "enemy.h"
 
 
@@ -16,7 +18,7 @@ void Defend::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     if (!user)
         return;
 
-    user->addBlock(blockAmount);
+    user->addBlock(CombatCalculator::calculateBlock(user, blockAmount));
 }
 void Defend::upgrade()
 {
@@ -135,7 +137,8 @@ void Impervious::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     if (!user)
         return;
 
-    user->addBlock(blockAmount);
+    user->addBlock(CombatCalculator::calculateBlock(user, blockAmount));
+
 }
 void Impervious::upgrade()
 {
@@ -165,7 +168,7 @@ void ShrugItOff::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
 
     // TODO: Player::drawCards(int) — Deck/CombatManager (Anahita)
     //user->drawCards(1);
-    user->addBlock(blockAmount);
+    user->addBlock(CombatCalculator::calculateBlock(user, blockAmount));
 }
 void ShrugItOff::upgrade()
 {
@@ -192,7 +195,7 @@ void TrueGrit::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     if (!user)
         return;
 
-    user->addBlock(blockAmount);
+    user->addBlock(CombatCalculator::calculateBlock(user, blockAmount));
 
     // TODO: Deck/CombatManager - (َAnahita)
     // if (isUpgraded)

@@ -1,6 +1,7 @@
 #include "normalenemies.h"
 
 #include "player.h"
+#include "combatcalculator.h"
 #include <QRandomGenerator>
 
 JawWorm::JawWorm()
@@ -16,10 +17,7 @@ void JawWorm::chooseIntent(Player* player)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Chomp);
-        setIntentDamage(11);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,11) );
         setIntentHits(1);
         return;
     }
@@ -30,20 +28,14 @@ void JawWorm::chooseIntent(Player* player)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Chomp);
-        setIntentDamage(11);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,11) );
         setIntentHits(1);
     }
     else if (roll <= 55)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Thrash);
-        setIntentDamage(7);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
         setIntentHits(1);
     }
     else
@@ -51,9 +43,6 @@ void JawWorm::chooseIntent(Player* player)
         setIntent(Intent::DefendBuff);
         setCurrentMove(Bellow);
         setIntentDamage(0);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
         setIntentHits(0);
     }
 }
@@ -81,24 +70,21 @@ void JawWorm::performChomp(Player* player)
 {
     if (!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 11);
+     CombatCalculator::dealDamage(this, player, 11);
 
 }
 void JawWorm::performThrash(Player* player)
 {
     if (player)
     {
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 7);
-
+         CombatCalculator::dealDamage(this, player, 7);
     }
-    this->addBlock(5);
+    this->addBlock(CombatCalculator::calculateBlock(this, 5));
 }
 void JawWorm::performBellow()
 {
     this->addEffect(Effect::Type::Strength, Effect::Category::Buff, 3, -1);
-    this->addBlock(6);
+    this->addBlock(CombatCalculator::calculateBlock(this,6));
 }
 
 
@@ -121,10 +107,7 @@ void Louse::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
         setCurrentMove(Bite);
-        setIntentDamage(randomizedBiteDamage);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,randomizedBiteDamage) );
         setIntentHits(1);
     }
     else
@@ -132,9 +115,6 @@ void Louse::chooseIntent(Player* player)
         setIntent(Intent::Buff);
         setCurrentMove(Grow);
         setIntentDamage(0);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
         setIntentHits(0);
     }
 }
@@ -164,15 +144,14 @@ void Louse::takeDamage(int damage)
 
         int blockAmount = QRandomGenerator::global()->bounded(3, 8);
 
-        this->addBlock(blockAmount);
+        this->addBlock(CombatCalculator::calculateBlock(this, blockAmount));
     }
 }
 void Louse::performBite(Player* player)
 {
     if (!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, getIntentDamage());
+     CombatCalculator::dealDamage(this, player, getIntentDamage());
 
 }
 void Louse::performGrow()
@@ -196,11 +175,7 @@ void SmallSlime::chooseIntent(Player* player)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
-
-        setIntentDamage(3);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,3) );
         setIntentHits(1);
     }
     else
@@ -209,8 +184,6 @@ void SmallSlime::chooseIntent(Player* player)
         setCurrentMove(Lick);
 
         setIntentDamage(0);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
 
         setIntentHits(0);
     }
@@ -235,8 +208,7 @@ void SmallSlime::performTackle(Player* player)
 {
     if (!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 3);
+     CombatCalculator::dealDamage(this, player, 3);
 
 }
 void SmallSlime::performLick(Player* player)
@@ -262,9 +234,7 @@ void MediumSlime::chooseIntent(Player* player)
         setIntent(Intent::AttackDebuff);
         setCurrentMove(CorrosiveSpit);
 
-        setIntentDamage(7);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
 
         setIntentHits(1);
     }
@@ -273,9 +243,7 @@ void MediumSlime::chooseIntent(Player* player)
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
 
-        setIntentDamage(10);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
 
         setIntentHits(1);
     }
@@ -285,8 +253,6 @@ void MediumSlime::chooseIntent(Player* player)
         setCurrentMove(Lick);
 
         setIntentDamage(0);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
 
         setIntentHits(0);
     }
@@ -315,8 +281,7 @@ void MediumSlime::performCorrosiveSpit(Player* player)
 {
     if (!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 7);
+     CombatCalculator::dealDamage(this, player, 7);
 
 
     // 2. Add SLIMED status card to the player's Discard Pile using the standard interface
@@ -326,8 +291,7 @@ void MediumSlime::performTackle(Player* player)
 {
     if (!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 10);
+     CombatCalculator::dealDamage(this, player, 10);
 
 }
 void MediumSlime::performLick(Player* player)
@@ -357,8 +321,6 @@ void LargeSlime::chooseIntent(Player* player)
         setCurrentMove(Split);
 
         setIntentDamage(0);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
 
         setIntentHits(0);
         return;
@@ -371,9 +333,8 @@ void LargeSlime::chooseIntent(Player* player)
         setIntent(Intent::AttackDebuff);
         setCurrentMove(CorrosiveSpit);
 
-        setIntentDamage(7);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
+
 
         setIntentHits(1);
     }
@@ -382,9 +343,7 @@ void LargeSlime::chooseIntent(Player* player)
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
 
-        setIntentDamage(10);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
 
         setIntentHits(1);
     }
@@ -394,8 +353,6 @@ void LargeSlime::chooseIntent(Player* player)
         setCurrentMove(Lick);
 
         setIntentDamage(0);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
 
         setIntentHits(0);
     }
@@ -428,8 +385,7 @@ void LargeSlime::performCorrosiveSpit(Player* player)
 {
     if (!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 7);
+     CombatCalculator::dealDamage(this, player, 7);
 
 
     // Add SLIMED status card to the player's Discard Pile using the integrated Deck System
@@ -439,8 +395,7 @@ void LargeSlime::performTackle(Player* player)
 {
     if (!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 10);
+     CombatCalculator::dealDamage(this, player, 10);
 
 }
 void LargeSlime::performLick(Player* player)
@@ -483,8 +438,6 @@ void Cultist::chooseIntent(Player* player)
         setIntent(Intent::Buff);
 
         setIntentDamage(0);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
 
         setIntentHits(1);
 
@@ -495,7 +448,8 @@ void Cultist::chooseIntent(Player* player)
 
     setIntent(Intent::Attack);
 
-    setIntentDamage(6);
+    setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,6) );
+
 
     setIntentHits(1);
 }
@@ -519,8 +473,7 @@ void Cultist::executeMove(Player* player)
 
         addEffect(Effect::Type::Strength, Effect::Category::Buff, 3,-1);
 
-        // TODO CombatCalculator (Ana)
-        // CombatCalculator::dealDamage(this, player, 6);
+         CombatCalculator::dealDamage(this, player, 6);
 
         break;
     }
@@ -563,11 +516,11 @@ void Thief::chooseIntent(Player* player)
 
         if(thiefType == Looter)
         {
-            setIntentDamage(10);
+            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
         }
         else
         {
-            setIntentDamage(14);
+            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,14) );
         }
 
         setIntentHits(1);
@@ -595,9 +548,6 @@ void Thief::chooseIntent(Player* player)
     setIntent(Intent::Escape);
 
     setIntentDamage(0);
-    // TODO CombatCalculator
-    // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
 
     setIntentHits(1);
 }
@@ -617,13 +567,11 @@ void Thief::executeMove(Player *player)
 
         if(thiefType == Looter)
         {
-            // TODO CombatCalculator(Ana)
-            // CombatCalculator::dealDamage(this, player, 10);
+             CombatCalculator::dealDamage(this, player, 10);
         }
         else
         {
-            // TODO CombatCalculator(Ana)
-            // CombatCalculator::dealDamage(this, player, 14);
+             CombatCalculator::dealDamage(this, player, 14);
         }
 
 
@@ -634,7 +582,7 @@ void Thief::executeMove(Player *player)
 
     case SmokeBomb:
 
-        addBlock(6);
+        addBlock(CombatCalculator::calculateBlock(this, 6));
 
         break;
     }
@@ -720,10 +668,7 @@ void BlueSlaver::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(12);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,12) );
 
         setIntentHits(1);
 
@@ -735,10 +680,7 @@ void BlueSlaver::chooseIntent(Player* player)
 
         setIntent(Intent::AttackDebuff);
 
-        setIntentDamage(7);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
-
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
 
         setIntentHits(1);
 
@@ -759,16 +701,14 @@ void BlueSlaver::executeMove(Player* player)
 
      case Stab:
 
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 12);
+         CombatCalculator::dealDamage(this, player, 12);
 
         break;
 
 
      case Rake:
 
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 7);
+         CombatCalculator::dealDamage(this, player, 7);
 
         player->addEffect(Effect::Type::Weak,
             Effect::Category::Debuff,1,1);
@@ -800,9 +740,7 @@ void RedSlaver::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(13);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,13) );
 
         setIntentHits(1);
 
@@ -829,9 +767,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::Attack);
 
-            setIntentDamage(13);
-            // TODO CombatCalculator
-            // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,13) );
 
             setIntentHits(1);
         }
@@ -841,9 +777,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::AttackDebuff);
 
-            setIntentDamage(8);
-            // TODO CombatCalculator
-            // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,8) );
 
             setIntentHits(1);
         }
@@ -858,9 +792,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::Attack);
 
-            setIntentDamage(13);
-            // TODO CombatCalculator
-            // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,13) );
 
             setIntentHits(1);
         }
@@ -870,9 +802,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::AttackDebuff);
 
-            setIntentDamage(8);
-            // TODO CombatCalculator
-            // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,8) );
 
             setIntentHits(1);
         }
@@ -891,15 +821,13 @@ void RedSlaver::executeMove(Player *player)
 
     case Stab:
 
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 13);
+         CombatCalculator::dealDamage(this, player, 13);
 
         break;
 
     case Rake:
 
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 8);
+         CombatCalculator::dealDamage(this, player, 8);
 
         player->addEffect(
             Effect::Type::Vulnerable,
@@ -939,9 +867,7 @@ void SphericGuardian::chooseIntent(Player *player)
 
         setIntent(Intent::AttackDebuff);
 
-        setIntentDamage(10);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
 
         setIntentHits(1);
 
@@ -954,9 +880,7 @@ void SphericGuardian::chooseIntent(Player *player)
 
         setIntent(Intent::AttackDefend);
 
-        setIntentDamage(10);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
 
         setIntentHits(1);
     }
@@ -966,9 +890,7 @@ void SphericGuardian::chooseIntent(Player *player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(10);
-        // TODO CombatCalculator
-        // UI should display the final calculated damage after all buffs/debuffs are applied., not the base damage.
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
 
         setIntentHits(2);
     }
@@ -987,10 +909,9 @@ void SphericGuardian::executeMove(Player *player)
 
     case Attack:
 
-        addBlock(25);
+        addBlock(CombatCalculator::calculateBlock(this, 25));
 
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 10);
+         CombatCalculator::dealDamage(this, player, 10);
 
         player->addEffect(
             Effect::Type::Frail,
@@ -1000,18 +921,16 @@ void SphericGuardian::executeMove(Player *player)
 
     case Harden:
 
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 10);
+         CombatCalculator::dealDamage(this, player, 10);
 
-        addBlock(15);
+        addBlock(CombatCalculator::calculateBlock(this, 15));
 
         break;
 
     case Slam:
 
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 10);
-        // CombatCalculator::dealDamage(this, player, 10);
+         CombatCalculator::dealDamage(this, player, 10);
+         CombatCalculator::dealDamage(this, player, 10);
 
         break;
     }

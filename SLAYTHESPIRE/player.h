@@ -69,6 +69,11 @@ public:
     void gainGold(int amount);
     bool spendGold(int amount);
 
+    void increaseMaxHealth(int amount);
+    // Permanently increases the player's maximum HP.
+    // Current HP is also increased by the same amount.
+
+
 };
 
 #endif

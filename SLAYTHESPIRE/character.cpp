@@ -62,23 +62,10 @@ void Character::setBlock(int value)
 void Character::addBlock(int amount)
 {
     if(amount <= 0)
-        return;
+       return;
 
-    // TODO
-    // Receives final block value.
-    // CombatCalculator handles Dexterity and other modifiers.
+        block += amount;
 
-
-    if(Effect* dexterity = getEffect(Effect::Type::Dexterity))
-    {
-        amount += dexterity->getAmount();
-    }
-    if(getEffect(Effect::Type::Frail))
-    {
-        amount = static_cast<int>(amount * 0.75);
-    }
-
-    block += amount;
 }
 
 void Character::loseBlock(int amount)
@@ -135,9 +122,6 @@ void Character::takeDamage(int damage)
     if(damage <= 0)
         return;
 
-    // TODO
-    // Receives final calculated damage.
-    // CombatCalculator applies Strength, Weak, Vulnerable and similar effects.
 
     damage = absorbBlock(damage);
 

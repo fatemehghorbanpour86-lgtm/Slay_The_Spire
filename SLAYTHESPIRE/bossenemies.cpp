@@ -1,5 +1,7 @@
 #include "bossenemies.h"
 #include "player.h"
+#include "combatcalculator.h"
+
 #include <QRandomGenerator>
 
 
@@ -39,7 +41,7 @@ void KingSlime::chooseIntent(Player* player)
     case Preparing:
         setCurrentMove(Slam);
         setIntent(Intent::Attack);
-        setIntentDamage(35);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,35));
         setIntentHits(1);
         break;
 
@@ -90,8 +92,7 @@ void KingSlime::performSlam(Player* player)
 {
     if(!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 35);
+     CombatCalculator::dealDamage(this, player, 35);
 }
 void KingSlime::performGoopSpray()
 {
@@ -147,7 +148,7 @@ void HexaGhost::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
         setCurrentMove(Divider);
-        setIntentDamage(perHit);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,perHit));
         setIntentHits(6);
         return;
     }
@@ -157,21 +158,21 @@ void HexaGhost::chooseIntent(Player* player)
     case 0:
         setCurrentMove(Sear);
         setIntent(Intent::AttackDebuff);
-        setIntentDamage(6);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,6));
         setIntentHits(1);
         break;
 
     case 1:
         setCurrentMove(Tackle);
         setIntent(Intent::Attack);
-        setIntentDamage(5);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,5));
         setIntentHits(2);
         break;
 
     case 2:
         setCurrentMove(Sear);
         setIntent(Intent::AttackDebuff);
-        setIntentDamage(6);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,6));
         setIntentHits(1);
         break;
 
@@ -185,21 +186,21 @@ void HexaGhost::chooseIntent(Player* player)
     case 4:
         setCurrentMove(Tackle);
         setIntent(Intent::Attack);
-        setIntentDamage(5);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,5));
         setIntentHits(2);
         break;
 
     case 5:
         setCurrentMove(Sear);
         setIntent(Intent::AttackDebuff);
-        setIntentDamage(6);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,6));
         setIntentHits(1);
         break;
 
     case 6:
         setCurrentMove(Inferno);
         setIntent(Intent::Attack);
-        setIntentDamage(2);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,2));
         setIntentHits(6);
         break;
     }
@@ -253,8 +254,7 @@ void HexaGhost::performDivider(Player* player)
 
     for(int i = 0; i < getIntentHits(); i++)
     {
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, perHit);
+         CombatCalculator::dealDamage(this, player, perHit);
     }
 
     dividerUsed = true;
@@ -264,8 +264,7 @@ void HexaGhost::performSear(Player* player)
 {
     if(!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 6);
+     CombatCalculator::dealDamage(this, player, 6);
 
     // TODO CombatDeck
     // combatDeck->addToDiscardPile(new Burn());
@@ -276,14 +275,13 @@ void HexaGhost::performTackle(Player* player)
 
     for(int i = 0; i < getIntentHits(); i++)
     {
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 5);
+         CombatCalculator::dealDamage(this, player, 5);
     }
 }
 void HexaGhost::performInflame()
 {
     this->addEffect(Effect::Type::Strength, Effect::Category::Buff, 2, -1);
-    this->addBlock(12);
+    this->addBlock(CombatCalculator::calculateBlock(this, 12));
 }
 void HexaGhost::performInferno(Player* player)
 {
@@ -291,8 +289,7 @@ void HexaGhost::performInferno(Player* player)
 
     for(int i = 0; i < getIntentHits(); i++)
     {
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 2);
+         CombatCalculator::dealDamage(this, player, 2);
     }
 
     // TODO CombatDeck
@@ -343,14 +340,14 @@ void TheChamp::chooseIntent(Player* player)
     {
         setCurrentMove(FaceSlap);
         setIntent(Intent::AttackDebuff);
-        setIntentDamage(12);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,12));
         setIntentHits(1);
     }
     else
     {
         setCurrentMove(HeavySlash);
         setIntent(Intent::Attack);
-        setIntentDamage(8);
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,8));
         setIntentHits(2);
     }
 }
@@ -397,7 +394,7 @@ void TheChamp::performTaunt(Player* player)
 }
 void TheChamp::performDefensiveStance()
 {
-    this->addBlock(15);
+    this->addBlock(CombatCalculator::calculateBlock(this, 15));
     this->addEffect(Effect::Type::Metallicize, Effect::Category::Buff, 5, -1);
 }
 void TheChamp::performGloat()
@@ -408,8 +405,7 @@ void TheChamp::performFaceSlap(Player* player)
 {
     if(!player) return;
 
-    // TODO CombatCalculator(Ana)
-    // CombatCalculator::dealDamage(this, player, 12);
+     CombatCalculator::dealDamage(this, player, 12);
 
     player->addEffect(Effect::Type::Frail, Effect::Category::Debuff, 2, 2);
     player->addEffect(Effect::Type::Vulnerable, Effect::Category::Debuff, 2, 2);
@@ -420,7 +416,6 @@ void TheChamp::performHeavySlash(Player* player)
 
     for(int i = 0; i < getTurnCount(); i++)
     {
-        // TODO CombatCalculator(Ana)
-        // CombatCalculator::dealDamage(this, player, 8);
+         CombatCalculator::dealDamage(this, player, 8);
     }
 }

@@ -1,6 +1,7 @@
 #include "effect.h"
 #include "character.h"
 #include "player.h"
+#include "combatcalculator.h"
 
 Effect::Effect(Type type, Category category, int amount, int duration)
 {
@@ -191,7 +192,7 @@ void Effect::onTurnEnd(Character *target)
     {
 
     case Type::Metallicize:
-        target->addBlock(amount);
+        target->addBlock(CombatCalculator::calculateBlock(target, amount));
         break;
 
     default:
