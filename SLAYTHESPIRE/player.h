@@ -16,9 +16,10 @@
 /*
  * Forward(TODO)
  * class Card;
- * class Potion;
  * class Relic;
  */
+
+class Potion;
 
 
 
@@ -36,7 +37,7 @@ class Player : public Character
     // QVector<Card*> discardPile;
     // QVector<Card*> exhaustPile;
     // QVector<Relic*> relics;
-    // QVector<Potion*> potions;
+     QVector<Potion*> potions;
 
 
     // TODO (Anahita)
@@ -48,13 +49,13 @@ class Player : public Character
     // TODO (Fateme)
     // Add RelicInventory after Relic System is implemented.
 
-    // TODO (Anahita)
-    // Add PotionInventory after Potion System is implemented.
 
 
 public:
 
     Player(const QString& name, int maxHealth);
+
+    ~Player() override;
 
 
     int getCurrentEnergy() const;
@@ -76,6 +77,13 @@ public:
     void increaseMaxEnergy(int amount);
     //Permanently increases maxEnergy
     //Does NOT touch currentEnergy directly;
+
+
+    void addPotion(Potion* potion);
+    bool removePotion(Potion* potion);
+    Potion* getPotion(int index) const;
+    int getPotionCount() const;
+    const QVector<Potion*>& getPotions() const;
 };
 
 #endif

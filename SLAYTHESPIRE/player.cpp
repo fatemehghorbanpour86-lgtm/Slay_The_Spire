@@ -1,4 +1,5 @@
 #include "player.h"
+#include "potion.h"
 
 Player::Player(const QString& name, int maxHealth)
     : Character(name, maxHealth),
@@ -7,6 +8,12 @@ Player::Player(const QString& name, int maxHealth)
     gold(0)
 {
 
+}
+
+Player::~Player()
+{
+    qDeleteAll(potions);
+    potions.clear();
 }
 
 
@@ -115,4 +122,45 @@ void Player::increaseMaxEnergy(int amount)
         return;
 
     maxEnergy += amount;
+}
+
+void Player::addPotion(Potion* potion)
+{
+    if (potion == nullptr)
+        return;
+
+    potions.append(potion);
+}
+
+bool Player::removePotion(Potion* potion)
+{
+    int index = potions.indexOf(potion);
+
+    if(index == -1)
+        return false;
+
+    delete potions[index];
+    potions.removeAt(index);
+
+    return true;
+}
+
+
+Potion* Player::getPotion(int index) const
+{
+    if(index < 0 || index >= potions.size())
+        return nullptr;
+
+    return potions[index];
+}
+
+
+int Player::getPotionCount() const
+{
+    return potions.size();
+}
+
+const QVector<Potion*>& Player::getPotions() const
+{
+    return potions;
 }
