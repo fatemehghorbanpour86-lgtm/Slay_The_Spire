@@ -33,5 +33,12 @@ public:
     void onCombatStart(Player* player) override;
 };
 
+class GremlinVisage : public Relic
+{
+public:
+    GremlinVisage();
+
+    void onCombatStart(Player* player) override;
+};
 
 #endif // EVENTRELICS_H

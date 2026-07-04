@@ -94,3 +94,23 @@ void CultistHeadpiece::onCombatStart(Player* player)
     // TODO (AudioManager)
     // AudioManager::playCultistCaw();
 }
+
+//======================================================
+//  GremlinVisage
+//======================================================
+
+GremlinVisage::GremlinVisage()
+    : Relic(
+          "Gremlin Visage",
+          "At the start of combat, gain 1 Weak.",
+          Relic::Tier::Event)
+{
+}
+
+void GremlinVisage::onCombatStart(Player* player)
+{
+    if (!player)
+        return;
+
+    player->addEffect(Effect::Type::Weak, Effect::Category::Debuff,1,1);
+}
