@@ -41,4 +41,12 @@ public:
     void onCombatStart(Player* player) override;
 };
 
+class FaceOfCleric : public Relic
+{
+public:
+    FaceOfCleric();
+
+    void onCombatEnd(Player* player) override;
+};
+
 #endif // EVENTRELICS_H

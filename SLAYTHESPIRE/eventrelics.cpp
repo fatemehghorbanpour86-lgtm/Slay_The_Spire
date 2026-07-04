@@ -114,3 +114,23 @@ void GremlinVisage::onCombatStart(Player* player)
 
     player->addEffect(Effect::Type::Weak, Effect::Category::Debuff,1,1);
 }
+
+//======================================================
+//  FaceOfCleric
+//======================================================
+
+FaceOfCleric::FaceOfCleric()
+    : Relic(
+          "Face Of Cleric",
+          "Increase your Max HP by 1 after every combat.",
+          Relic::Tier::Event)
+{
+}
+
+void FaceOfCleric::onCombatEnd(Player* player)
+{
+    if (!player)
+        return;
+
+    player->increaseMaxHealth(1);
+}
