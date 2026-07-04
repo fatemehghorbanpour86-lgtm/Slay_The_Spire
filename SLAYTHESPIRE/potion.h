@@ -51,4 +51,12 @@ public:
     void use(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
 };
 
+class EnergyPotion : public Potion
+{
+public:
+    EnergyPotion();
+
+    void use(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+};
+
 #endif // POTION_H

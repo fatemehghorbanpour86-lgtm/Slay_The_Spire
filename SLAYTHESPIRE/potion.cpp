@@ -73,3 +73,25 @@ void FirePotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
 
     CombatCalculator::dealDamage(user, target, 20);
 }
+
+
+//======================================================
+//  EnergyPotion
+//======================================================
+
+EnergyPotion::EnergyPotion()
+    : Potion("Energy Potion", "Gain 2 Energy.")
+{
+}
+
+void EnergyPotion::use(Player* user, QVector<Enemy*>& enemies, Enemy* target)
+{
+    Q_UNUSED(enemies)
+    Q_UNUSED(target)
+
+    if (!user)
+        return;
+
+    user->gainEnergy(2);
+}
+
