@@ -84,6 +84,11 @@ public:
     // Called once when the relic is obtained.
     // Used for relics with an immediate pickup effect.
     // Default implementation does nothing.
+
+    virtual bool canPlayCard(Player* player) const;
+    // Called before a card is played.
+    // Returns whether the card can be played.
+    // Default implementation returns true. (for VelvetChoker relic)
 };
 
 #endif // RELIC_H
