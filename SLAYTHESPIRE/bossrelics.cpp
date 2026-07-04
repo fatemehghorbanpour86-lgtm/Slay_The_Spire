@@ -36,7 +36,7 @@ void MarkOfPain::onEquip(Player* player)
     if (!player)
         return;
 
-    player->increaseMaxHealth(1);
+    player->increaseMaxEnergy(1);
 }
 void MarkOfPain::onCombatStart(Player* player)
 {
@@ -64,7 +64,7 @@ void VelvetChoker::onEquip(Player* player)
     if (!player)
         return;
 
-    player->increaseMaxHealth(1);
+    player->increaseMaxEnergy(1);
 }
 void VelvetChoker::onTurnStart(Player* player)
 {
@@ -124,7 +124,7 @@ void CoffeeDripper::onEquip(Player* player)
     if (!player)
         return;
 
-    player->increaseMaxHealth(1);
+    player->increaseMaxEnergy(1);
 }
 bool CoffeeDripper::canRest() const
 {
