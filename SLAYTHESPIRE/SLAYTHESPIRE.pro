@@ -24,6 +24,7 @@ SOURCES += \
     normalenemies.cpp \
     normalrelics.cpp \
     player.cpp \
+    potion.cpp \
     powercard.cpp \
     relic.cpp \
     skillcards.cpp \
@@ -48,6 +49,7 @@ HEADERS += \
     normalenemies.h \
     normalrelics.h \
     player.h \
+    potion.h \
     powercard.h \
     relic.h \
     skillcards.h \
