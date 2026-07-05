@@ -1,10 +1,14 @@
 #include "relic.h"
 
-Relic::Relic(const QString& name, const QString& description, Tier tier)
-    : name(name), description(description), tier(tier), counter(-1)
+Relic::Relic(RelicId id,const QString& name, const QString& description, Tier tier)
+    : id(id), name(name), description(description), tier(tier), counter(-1)
 {
 }
 
+RelicId Relic::getId() const
+{
+    return id;
+}
 QString Relic::getName() const
 {
     return name;

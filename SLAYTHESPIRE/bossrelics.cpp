@@ -5,7 +5,7 @@
 #include "effect.h"
 
 CallingBell::CallingBell()
-    : Relic("Calling Bell",
+    : Relic(RelicId::CallingBell, "Calling Bell",
             "Obtain the Curse of the Bell and 3 random Normal relics.",
             Relic::Tier::Boss)
 {
@@ -18,14 +18,13 @@ void CallingBell::onEquip(Player* player)
     // TODO (Deck System):
     // player->addCardToDeck(new CurseOfTheBell());
 
-    // TODO (Relic Manager / Reward System):
-    // RelicManager::grantRandomRelics(player, Relic::Tier::Normal, 3);
+    RelicSystem::grantRandomRelics(player, Relic::Tier::Normal, 3);
 }
 
 
 
 MarkOfPain::MarkOfPain()
-    : Relic("Mark of Pain",
+    : Relic(RelicId::MarkOfPain, "Mark of Pain",
             "Gain 1 extra Energy per turn. At the start of combat, "
             "2 Wounds are added to your draw pile.",
             Relic::Tier::Boss)
@@ -52,7 +51,7 @@ void MarkOfPain::onCombatStart(Player* player)
 
 //امتیازی***********************************************************
 VelvetChoker::VelvetChoker()
-    : Relic("Velvet Choker",
+    : Relic(RelicId::VelvetChoker, "Velvet Choker",
             "Gain 1 extra Energy per turn. You can no longer play "
             "more than 6 cards per turn.",
             Relic::Tier::Boss)
@@ -89,7 +88,7 @@ bool VelvetChoker::canPlayCard(Player* player) const
 
 
 BlackStar::BlackStar()
-    : Relic("Black Star", "Elites now drop 2 relics when defeated.",
+    : Relic(RelicId::BlackStar, "Black Star", "Elites now drop 2 relics when defeated.",
             Relic::Tier::Boss)
 {
 }
@@ -113,7 +112,7 @@ void BlackStar::onEnemyDeath(Player* player, Enemy* enemy)
 
 
 CoffeeDripper::CoffeeDripper()
-    : Relic("Coffee Dripper",
+    : Relic(RelicId::CoffeeDripper, "Coffee Dripper",
             "Gain 1 extra Energy per turn. You can no longer Rest at "
             "Rest sites.",
             Relic::Tier::Boss)

@@ -7,6 +7,34 @@ class Player;
 class Card;
 class Enemy;
 
+
+enum class RelicId
+{
+    BurningBlood,
+
+    Girya,
+    IceCream,
+    Shuriken,
+    Kunai,
+    Anchor,
+    HappyFlower,
+    Orichalcum,
+    Vajra,
+
+    CallingBell,
+    MarkOfPain,
+    VelvetChoker,
+    BlackStar,
+    CoffeeDripper,
+
+    WarpedTongs,
+    MutagenicStrength,
+    CultistHeadpiece,
+    GremlinVisage,
+    FaceOfCleric
+};
+
+
 class Relic
 {
 public:
@@ -20,15 +48,17 @@ public:
 
 
 protected:
+    RelicId id;
     QString name;
     QString description;
     Tier tier;
     int counter;
 
 public:
-    Relic(const QString& name, const QString& description, Tier tier);
+    Relic(RelicId id, const QString& name, const QString& description, Tier tier);
     virtual ~Relic() = default;
 
+    RelicId getId() const;
     QString getName() const;
     QString getDescription() const;
     Tier getTier() const;

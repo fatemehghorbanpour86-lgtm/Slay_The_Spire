@@ -11,7 +11,7 @@
 //======================================================
 
 WarpedTongs::WarpedTongs()
-    : Relic("Warped Tongs",
+    : Relic(RelicId::WarpedTongs, "Warped Tongs",
    "At the start of combat, upgrade a random card for the rest of this combat.",
             Relic::Tier::Event)
 {
@@ -41,7 +41,7 @@ void WarpedTongs::onCombatStart(Player* player)
 
 
 MutagenicStrength::MutagenicStrength()
-    : Relic("Mutagenic Strength",
+    : Relic(RelicId::MutagenicStrength, "Mutagenic Strength",
             "At the start of combat gain 3 Strength and lose it after that turn. ",
             Relic::Tier::Event),
 
@@ -77,7 +77,7 @@ void MutagenicStrength::onTurnEnd(Player* player)
 //======================================================
 
 CultistHeadpiece::CultistHeadpiece()
-    : Relic(
+    : Relic(RelicId::CultistHeadpiece,
           "Cultist Headpiece",
           "At the start of each combat, CAW! CAAAW!",
           Relic::Tier::Event)
@@ -100,7 +100,7 @@ void CultistHeadpiece::onCombatStart(Player* player)
 //======================================================
 
 GremlinVisage::GremlinVisage()
-    : Relic(
+    : Relic(RelicId::GremlinVisage,
           "Gremlin Visage",
           "At the start of combat, gain 1 Weak.",
           Relic::Tier::Event)
@@ -120,7 +120,7 @@ void GremlinVisage::onCombatStart(Player* player)
 //======================================================
 
 FaceOfCleric::FaceOfCleric()
-    : Relic(
+    : Relic(RelicId::FaceOfCleric,
           "Face Of Cleric",
           "Increase your Max HP by 1 after every combat.",
           Relic::Tier::Event)
