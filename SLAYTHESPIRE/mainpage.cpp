@@ -2,20 +2,30 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QApplication>
+#include <QLabel>
+#include <QMovie>
 
 mainpage::mainpage(QWidget *parent)
     : QWidget{parent}
 {
     setObjectName("MainMenuPage");
+
+    QLabel *bg = new QLabel(this);
+    bg->setGeometry(0, 0, 1280, 720);
+    bg->setScaledContents(true);
+    bg->lower();
+    QMovie *movie = new QMovie(":/MainMenu.gif");
+    bg->setMovie(movie);
+    movie->start();
+
     setStyleSheet(
-        "QWidget#MainMenuPage { border-image: url(:/MainMenupage.png); }"
         "QToolTip { color: #facc15; background-color: #1f2937; border: 1px solid #b91c1c;"
         "border-radius: 4px; padding: 6px; font-weight: bold; font-family: Tahoma;"
         "}"
         );
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0, 0, 480 , 160);
+    mainLayout->setContentsMargins(0, 0, 650 , 50);
     mainLayout->addStretch();
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout;

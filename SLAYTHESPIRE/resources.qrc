@@ -10,5 +10,6 @@
         <file>multiPalyerBtn.png</file>
         <file>settingBtn.png</file>
         <file>singlePlayerBtn.png</file>
+        <file>MainMenu.gif</file>
     </qresource>
 </RCC>
