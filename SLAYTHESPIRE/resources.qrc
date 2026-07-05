@@ -11,5 +11,7 @@
         <file>settingBtn.png</file>
         <file>singlePlayerBtn.png</file>
         <file>MainMenu.gif</file>
+        <file>LoginPage.gif</file>
+        <file>SplashPage.gif</file>
     </qresource>
 </RCC>
