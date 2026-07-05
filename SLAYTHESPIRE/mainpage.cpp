@@ -32,28 +32,54 @@ mainpage::mainpage(QWidget *parent)
     buttonsLayout->setAlignment(Qt::AlignCenter);
 
     singlePlayerBtn = new QPushButton(this);
+    singlePlayerBtn->setCursor(Qt::PointingHandCursor);
     singlePlayerBtn->setFixedSize(100, 75);
-    singlePlayerBtn->setStyleSheet("QPushButton { border-image: url(:/singlePlayerBtn.png); }");
+    singlePlayerBtn->setStyleSheet(
+        "QPushButton { border-image: url(:/singlePlayerBtn.png); }"
+        "QPushButton:pressed { "
+        "   margin: 5px 8px 5px 8px; "
+        "}"
+        );
     singlePlayerBtn->setToolTip("Start Battle!");
 
     multiPlayerBtn = new QPushButton(this);
+    multiPlayerBtn->setCursor(Qt::PointingHandCursor);
     multiPlayerBtn->setFixedSize(100, 75);
-    multiPlayerBtn->setStyleSheet("QPushButton { border-image: url(:/multiPalyerBtn.png); }");
+    multiPlayerBtn->setStyleSheet(
+        "QPushButton { border-image: url(:/multiPalyerBtn.png); }"
+        "QPushButton:pressed { "
+        "   margin: 5px 8px 5px 8px; "
+        "}");
     multiPlayerBtn->setToolTip("Battle in the Tower with Friends!");
 
     leaderBoardBtn = new QPushButton(this);
+    leaderBoardBtn->setCursor(Qt::PointingHandCursor);
     leaderBoardBtn->setFixedSize(100, 75);
-    leaderBoardBtn->setStyleSheet("QPushButton { border-image: url(:/leaderBoardBtn.png); }");
+    leaderBoardBtn->setStyleSheet(
+        "QPushButton { border-image: url(:/leaderBoardBtn.png); }"
+        "QPushButton:pressed { "
+        "   margin: 5px 8px 5px 8px; "
+        "}");
     leaderBoardBtn->setToolTip("Top Tower Slayers!");
 
     settingBtn = new QPushButton(this);
+    settingBtn->setCursor(Qt::PointingHandCursor);
     settingBtn->setFixedSize(100, 75);
-    settingBtn->setStyleSheet("QPushButton { border-image: url(:/settingBtn.png); }");
+    settingBtn->setStyleSheet(
+        "QPushButton { border-image: url(:/settingBtn.png); }"
+        "QPushButton:pressed { "
+        "   margin: 5px 8px 5px 8px; "
+        "}");
     settingBtn->setToolTip("Game Settings");
 
     exitBtn = new QPushButton(this);
+    exitBtn->setCursor(Qt::PointingHandCursor);
     exitBtn->setFixedSize(100, 75);
-    exitBtn->setStyleSheet("QPushButton { border-image: url(:/ExitBtn.png); }");
+    exitBtn->setStyleSheet(
+        "QPushButton { border-image: url(:/ExitBtn.png); }"
+        "QPushButton:pressed { "
+        "   margin: 5px 8px 5px 8px; "
+        "}");
     exitBtn->setToolTip("Leave the Tower");
 
     buttonsLayout->addWidget(singlePlayerBtn);
