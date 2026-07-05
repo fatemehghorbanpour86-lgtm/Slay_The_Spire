@@ -2,24 +2,22 @@
 #define PLAYER_H
 
 #include "character.h"
-#include "relic.h"
-#include "combatdeck.h"
 
 /*
  *  Player Responsibilities:
  *  - Manage Energy.
  *  - Manage Gold.
- *  - Own Player Decks.
- *  - Own Potion Inventory.
+ *  - Own Player Decks.(TODO)
+ *  - Own Potion Inventory.(TODO)
  *  - Own Relic Inventory.(TODO)
  */
 
 
-
-  class Card;
-  class CombatDeck;
-  class Relic;
-
+/*
+ * Forward(TODO)
+ * class Card;
+ * class Relic;
+ */
 
 class Potion;
 
@@ -34,14 +32,23 @@ class Player : public Character
 
     int gold;
 
-     CombatDeck* combatDeck;
-
-     QVector<Relic*> relics;
+    // QVector<Card*> hand;
+    // QVector<Card*> drawPile;
+    // QVector<Card*> discardPile;
+    // QVector<Card*> exhaustPile;
+    // QVector<Relic*> relics;
      QVector<Potion*> potions;
 
 
+    // TODO (Anahita)
+    // Add MasterDeck* after MasterDeck is implemented.
+
+    // TODO (Anahita)
+    // Add CombatDeck* after CombatDeck is implemented.
+
     // TODO (Fateme)
     // Add RelicInventory after Relic System is implemented.
+
 
 
 public:
