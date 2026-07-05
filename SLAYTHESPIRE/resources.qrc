@@ -1,12 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>SplashPage.png</file>
         <file>LoginBtn.png</file>
         <file>RegisterBtn.png</file>
-        <file>loginpage.png</file>
         <file>ExitBtn.png</file>
         <file>leaderBoardBtn.png</file>
-        <file>MainMenupage.png</file>
         <file>multiPalyerBtn.png</file>
         <file>settingBtn.png</file>
         <file>singlePlayerBtn.png</file>

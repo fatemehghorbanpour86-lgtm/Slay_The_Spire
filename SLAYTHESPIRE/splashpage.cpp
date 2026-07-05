@@ -1,11 +1,19 @@
 #include "splashpage.h"
 #include <QVBoxLayout>
+#include <QLabel>
+#include <QMovie>
 
 SplashPage::SplashPage(QWidget *parent): QWidget(parent)
 {
     setObjectName("splashPage");
 
-    setStyleSheet("QWidget#splashPage { border-image: url(:/SplashPage.png); }");
+    QLabel *bg = new QLabel(this);
+    bg->setGeometry(0, 0, 1280, 720);
+    bg->setScaledContents(true);
+    bg->lower();
+    QMovie *movie = new QMovie(":/SplashPage.gif");
+    bg->setMovie(movie);
+    movie->start();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addStretch();
