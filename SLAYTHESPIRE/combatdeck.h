@@ -8,18 +8,18 @@ class MasterDeck;
 
 class CombatDeck
 {
- private:
+private:
 
     QVector<Card*> drawPile;
     QVector<Card*> hand;
     QVector<Card*> discardPile;
     QVector<Card*> exhaustPile;
 
- private:
+private:
 
-    void moveCard(QVector<Card*>& from, QVector<Card*>& to, Card* card);
+    bool moveCard(QVector<Card*>& from, QVector<Card*>& to, Card* card);
 
- public:
+public:
 
     CombatDeck();
     ~CombatDeck();
@@ -33,9 +33,10 @@ class CombatDeck
     void drawCards(int count);
 
     void discardHand();
-    void exhaustCardFromHand(Card* card);
+    bool exhaustCardFromHand(Card* card);
 
     bool removeFromHand(Card* card);
+
     bool addToDiscard(Card* card);
     bool addToExhaust(Card* card);
 

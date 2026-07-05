@@ -5,7 +5,9 @@
 #include <QRandomGenerator>
 #include <algorithm>
 
-CombatDeck::CombatDeck() {}
+CombatDeck::CombatDeck()
+{
+}
 
 CombatDeck::~CombatDeck()
 {
@@ -27,7 +29,7 @@ void CombatDeck::initializeFromMasterDeck(const MasterDeck& masterDeck)
     discardPile.clear();
     exhaustPile.clear();
 
-    for (Card* card : masterDeck.getCards())
+    for(Card* card : masterDeck.getCards())
     {
         drawPile.append(card->clone());
     }
@@ -36,30 +38,36 @@ void CombatDeck::initializeFromMasterDeck(const MasterDeck& masterDeck)
 }
 
 //----------------------------------
-//  Move Helper
+// Move Helper
 //----------------------------------
-void CombatDeck::moveCard(QVector<Card*>& from, QVector<Card*>& to, Card* card)
+
+bool CombatDeck::moveCard(QVector<Card*>& from, QVector<Card*>& to, Card* card)
 {
     int index = from.indexOf(card);
-    if (index == -1)
-        return;
+
+    if(index == -1)
+        return false;
 
     from.removeAt(index);
     to.append(card);
+
+    return true;
 }
 
 //----------------------------------
 // Draw System
 //----------------------------------
+
 Card* CombatDeck::drawCard()
 {
-    if (drawPile.isEmpty())
+    if(drawPile.isEmpty())
         reshuffleDiscardIntoDrawPile();
 
-    if (drawPile.isEmpty())
+    if(drawPile.isEmpty())
         return nullptr;
 
     Card* card = drawPile.takeLast();
+
     hand.append(card);
 
     return card;
@@ -67,9 +75,9 @@ Card* CombatDeck::drawCard()
 
 void CombatDeck::drawCards(int count)
 {
-    for (int i = 0; i < count; i++)
+    for(int i = 0; i < count; i++)
     {
-        if (!drawCard())
+        if(drawCard() == nullptr)
             return;
     }
 }
@@ -77,51 +85,68 @@ void CombatDeck::drawCards(int count)
 //----------------------------------
 // Play / Discard / Exhaust Flow
 //----------------------------------
+
 bool CombatDeck::removeFromHand(Card* card)
 {
-    moveCard(hand, discardPile, card);
+    int index = hand.indexOf(card);
+
+    if(index == -1)
+        return false;
+
+    hand.removeAt(index);
+
     return true;
 }
 
 bool CombatDeck::addToDiscard(Card* card)
 {
+    if(card == nullptr)
+        return false;
+
     discardPile.append(card);
+
     return true;
 }
 
 bool CombatDeck::addToExhaust(Card* card)
 {
+    if(card == nullptr)
+        return false;
+
     exhaustPile.append(card);
+
     return true;
 }
 
 void CombatDeck::discardHand()
 {
-    while (!hand.isEmpty())
+    while(!hand.isEmpty())
     {
         discardPile.append(hand.takeLast());
     }
 }
 
-void CombatDeck::exhaustCardFromHand(Card* card)
+bool CombatDeck::exhaustCardFromHand(Card* card)
 {
-    moveCard(hand, exhaustPile, card);
+    return moveCard(hand, exhaustPile, card);
 }
 
 //----------------------------------
 // Shuffle System
 //----------------------------------
+
 void CombatDeck::shuffleDrawPile()
 {
-    std::shuffle(drawPile.begin(),drawPile.end(), *QRandomGenerator::global());
+    std::shuffle(drawPile.begin(), drawPile.end(), *QRandomGenerator::global());
 }
 
 void CombatDeck::reshuffleDiscardIntoDrawPile()
 {
-    if (discardPile.isEmpty())
+    if(discardPile.isEmpty())
         return;
 
     drawPile += discardPile;
+
     discardPile.clear();
 
     shuffleDrawPile();
@@ -130,18 +155,22 @@ void CombatDeck::reshuffleDiscardIntoDrawPile()
 //----------------------------------
 // Getters
 //----------------------------------
+
 const QVector<Card*>& CombatDeck::getHand() const
 {
     return hand;
 }
+
 const QVector<Card*>& CombatDeck::getDrawPile() const
 {
     return drawPile;
 }
+
 const QVector<Card*>& CombatDeck::getDiscardPile() const
 {
     return discardPile;
 }
+
 const QVector<Card*>& CombatDeck::getExhaustPile() const
 {
     return exhaustPile;
@@ -151,14 +180,17 @@ int CombatDeck::handSize() const
 {
     return hand.size();
 }
+
 int CombatDeck::drawPileSize() const
 {
     return drawPile.size();
 }
+
 int CombatDeck::discardPileSize() const
 {
     return discardPile.size();
 }
+
 int CombatDeck::exhaustPileSize() const
 {
     return exhaustPile.size();
