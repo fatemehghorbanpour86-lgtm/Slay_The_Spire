@@ -24,6 +24,7 @@ SOURCES += \
     map.cpp \
     mapfloor.cpp \
     mapnode.cpp \
+    masterdeck.cpp \
     normalenemies.cpp \
     normalrelics.cpp \
     player.cpp \
@@ -52,6 +53,7 @@ HEADERS += \
     map.h \
     mapfloor.h \
     mapnode.h \
+    masterdeck.h \
     normalenemies.h \
     normalrelics.h \
     player.h \
