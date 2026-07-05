@@ -14,6 +14,9 @@ public:
     void play(Player* user,QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
+
 };
 
 
@@ -25,6 +28,8 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
 };
 
 class Wound : public Card
@@ -35,6 +40,9 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
+
 };
 
 
@@ -46,6 +54,8 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
 };
 
 #endif // STATUSCARDS_H

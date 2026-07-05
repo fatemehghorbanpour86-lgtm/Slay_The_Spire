@@ -42,6 +42,11 @@ void Strike::upgrade()
     description = "Deal 9 damage.";
 }
 
+Card* Strike::clone() const
+{
+    return new Strike(*this);
+}
+
 //======================================================
 //  Reaper
 //======================================================
@@ -93,6 +98,11 @@ void Reaper::upgrade()
         "Deal 5 damage to ALL enemies. Heal HP equal to unblocked damage dealt. Exhaust";
 }
 
+Card* Reaper::clone() const
+{
+    return new Reaper(*this);
+}
+
 //======================================================
 //  Bludgeon
 //======================================================
@@ -129,6 +139,11 @@ void Bludgeon::upgrade()
     damageAmount += 10;
 
     description = "Deal 42 damage.";
+}
+
+Card* Bludgeon::clone() const
+{
+    return new Bludgeon(*this);
 }
 
 //======================================================
@@ -174,6 +189,11 @@ void Feed::upgrade()
     damageAmount += 2;
 
     description = "Deal 12 damage. If Fatal, raise your Max HP by 4.";
+}
+
+Card* Feed::clone() const
+{
+    return new Feed(*this);
 }
 
 //======================================================
@@ -226,6 +246,11 @@ void Immolate::upgrade()
     description = "Deal 28 damage to ALL enemies. Add a Burn into your Discard Pile.";
 }
 
+Card* Immolate::clone() const
+{
+    return new Immolate(*this);
+}
+
 //======================================================
 //  TwinStrike
 //======================================================
@@ -265,6 +290,11 @@ void TwinStrike::upgrade()
     damageAmount = 7;
 
     description = "Deal 7 damage twice.";
+}
+
+Card* TwinStrike::clone() const
+{
+    return new TwinStrike(*this);
 }
 
 //======================================================
@@ -310,6 +340,11 @@ void Hemokinesis::upgrade()
     description = "Lose 2 HP. Deal 20 damage.";
 }
 
+Card* Hemokinesis::clone() const
+{
+    return new Hemokinesis(*this);
+}
+
 //======================================================
 //  Carnage
 //======================================================
@@ -347,4 +382,9 @@ void Carnage::upgrade()
     damageAmount = 28;
 
     description = "Deal 28 damage. Ethereal.";
+}
+
+Card* Carnage::clone() const
+{
+    return new Carnage(*this);
 }

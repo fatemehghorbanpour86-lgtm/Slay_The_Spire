@@ -16,7 +16,11 @@ public:
     Strike();
 
     void play(Player* user , QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+
     void upgrade() override;
+
+    virtual Card* clone() const override;
+
 };
 
 class Reaper : public Card
@@ -30,7 +34,11 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
+
 };
+
 
 class Bludgeon : public Card
 {
@@ -43,6 +51,9 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
+
 };
 
 class Feed : public Card
@@ -56,6 +67,9 @@ public:
     void play(Player* user,QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
+
 };
 
 class Immolate : public Card
@@ -69,6 +83,9 @@ public:
     void play(Player* user,QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
+
 };
 
 
@@ -83,6 +100,9 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
+
 };
 
 class Hemokinesis : public Card
@@ -97,6 +117,9 @@ public:
     void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
+
 };
 
 class Carnage : public Card
@@ -110,6 +133,9 @@ public:
     void play(Player* user,QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    virtual Card* clone() const override;
+
 };
 
 

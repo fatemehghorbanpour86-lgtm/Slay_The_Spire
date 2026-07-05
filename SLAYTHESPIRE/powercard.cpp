@@ -30,6 +30,11 @@ void Inflame::upgrade()
     description = "Gain 3 Strength.";
 }
 
+Card* Inflame::clone() const
+{
+    return new Inflame(*this);
+}
+
 
 Metallicize::Metallicize()
     : Card("Metallicize", "At the end of your turn, gain 3 Block.", 1,
@@ -56,6 +61,11 @@ void Metallicize::upgrade()
     blockAmount = 4;
     name = "Metallicizie+";
     description = "At the end of your turn, gain 4 Block.";
+}
+
+Card* Metallicize::clone() const
+{
+    return new Metallicize(*this);
 }
 
 
@@ -86,6 +96,12 @@ void DemonForm::upgrade()
     description = "At the start of your turn, gain 3 Strength.";
 }
 
+Card* DemonForm::clone() const
+{
+    return new DemonForm(*this);
+}
+
+
 
 Brutality::Brutality()
     : Card("Brutality", "At the start of your turn, lose 1 HP and draw 1 card.",
@@ -112,6 +128,11 @@ void Brutality::upgrade()
     isInnate = true;
     name = "Brutality+";
     description = "Innate. At the start of your turn, lose 1 HP and draw 1 card.";
+}
+
+Card* Brutality::clone() const
+{
+    return new Brutality(*this);
 }
 
 
@@ -144,6 +165,11 @@ void Barricade::upgrade()
     isUpgraded = true;
     setEnergyCost(2);
     name = "Barricade+";
+}
+
+Card* Barricade::clone() const
+{
+    return new Barricade(*this);
 }
 
 
@@ -181,6 +207,11 @@ void FeelNoPain::upgrade()
     description = "Whenever a card is Exhausted, gain 4 Block.";
 }
 
+Card* FeelNoPain::clone() const
+{
+    return new FeelNoPain(*this);
+}
+
 
 Berserk::Berserk()
     : Card("Berserk", "Gain 2 Vulnerable. At the start of your turn, gain 1 extra Energy.",
@@ -211,6 +242,11 @@ void Berserk::upgrade()
     description = "Gain 1 Vulnerable. At the start of your turn, gain 1 extra Energy.";
 }
 
+Card* Berserk::clone() const
+{
+    return new Berserk(*this);
+}
+
 
 DarkEmbrace::DarkEmbrace()
     : Card("Dark Embrace", "Whenever a card is Exhausted, draw 1 card.", 2,
@@ -238,4 +274,9 @@ void DarkEmbrace::upgrade()
     isUpgraded = true;
     setEnergyCost(1);
     name = "Dark Embrace+";
+}
+
+Card* DarkEmbrace::clone() const
+{
+    return new DarkEmbrace(*this);
 }

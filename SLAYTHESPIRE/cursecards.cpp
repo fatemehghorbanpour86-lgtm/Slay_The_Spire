@@ -30,6 +30,11 @@ void JAX::upgrade()
     // Curse cards cannot be upgraded.
 }
 
+Card* JAX::clone() const
+{
+    return new JAX(*this);
+}
+
 
 //======================================================
 // CurseOfTheBell
@@ -58,6 +63,11 @@ void CurseOfTheBell::upgrade()
     // Curse cards cannot be upgraded.
 }
 
+Card* CurseOfTheBell::clone() const
+{
+    return new CurseOfTheBell(*this);
+}
+
 //======================================================
 // Regret
 //======================================================
@@ -84,4 +94,9 @@ void Regret::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
 void Regret::upgrade()
 {
     // Curse cards cannot be upgraded.
+}
+
+Card* Regret::clone() const
+{
+    return new Regret(*this);
 }

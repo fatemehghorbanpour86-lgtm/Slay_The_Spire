@@ -57,6 +57,8 @@ public:
     virtual void upgrade() = 0;
     // Each card type defines its own upgrade.
 
+    virtual Card* clone() const = 0;
+
     QString getName() const;
     QString getDescription() const;
     int getEnergyCost() const;

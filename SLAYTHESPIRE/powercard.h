@@ -12,6 +12,8 @@ public:
     Inflame();
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
+
+    virtual Card* clone() const override;
 };
 
 class Metallicize : public Card
@@ -23,6 +25,8 @@ public:
     Metallicize();
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
+
+    virtual Card* clone() const override;
 };
 
 class DemonForm : public Card
@@ -34,6 +38,8 @@ public:
     DemonForm();
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
+
+    virtual Card* clone() const override;
 };
 
 class Brutality : public Card
@@ -42,6 +48,8 @@ public:
     Brutality();
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
+
+    virtual Card* clone() const override;
 };
 
 class Barricade : public Card
@@ -50,6 +58,8 @@ public:
     Barricade();
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
+
+    virtual Card* clone() const override;
 };
 
 class FeelNoPain : public Card
@@ -61,6 +71,8 @@ public:
     FeelNoPain();
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
+
+    virtual Card* clone() const override;
 };
 
 class Berserk : public Card
@@ -72,6 +84,8 @@ public:
     Berserk();
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
+
+    virtual Card* clone() const override;
 };
 
 class DarkEmbrace : public Card
@@ -80,5 +94,7 @@ public:
     DarkEmbrace();
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
     void upgrade() override;
+
+    virtual Card* clone() const override;
 };
 #endif // POWERCARD_H

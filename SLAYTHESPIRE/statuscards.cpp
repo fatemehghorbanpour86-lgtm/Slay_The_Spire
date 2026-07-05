@@ -27,6 +27,11 @@ void Daze::upgrade()
     // Status cards cannot be upgraded.
 }
 
+Card* Daze::clone() const
+{
+    return new Daze(*this);
+}
+
 
 //======================================================
 // Slime
@@ -50,6 +55,11 @@ void Slime::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
 void Slime::upgrade()
 {
     // Status cards cannot be upgraded.
+}
+
+Card* Slime::clone() const
+{
+    return new Slime(*this);
 }
 
 
@@ -76,6 +86,11 @@ void Wound::play(Player* user,QVector<Enemy*>& enemies, Enemy* target)
 void Wound::upgrade()
 {
     // Status cards cannot be upgraded.
+}
+
+Card* Wound::clone() const
+{
+    return new Wound(*this);
 }
 
 
@@ -116,3 +131,9 @@ void Burn::upgrade()
 
     description = "Unplayable. At the end of your turn, take 4 damage.";
 }
+
+Card* Burn::clone() const
+{
+    return new Burn(*this);
+}
+

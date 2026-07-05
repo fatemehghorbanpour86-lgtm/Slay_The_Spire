@@ -31,6 +31,11 @@ void Defend::upgrade()
     description = "Gain 8 Block.";
 }
 
+Card* Defend::clone() const
+{
+    return new Defend(*this);
+}
+
 
 Exhume::Exhume()
     : Card("Exhume", "Put a card from your exhaust pile into your hand.", 1,
@@ -57,6 +62,11 @@ void Exhume::upgrade()
     isUpgraded = true;
     setEnergyCost(0);
     name = "Exhume+";
+}
+
+Card* Exhume::clone() const
+{
+    return new Exhume(*this);
 }
 
 
@@ -92,6 +102,11 @@ void LimitBreak::upgrade()
     description = "Double your Strength.";
 }
 
+Card* LimitBreak::clone() const
+{
+    return new LimitBreak(*this);
+}
+
 
 Offering::Offering()
     : Card("Offering", "Lose 6 HP. Gain 2 Energy. Draw 3 cards.", 0,
@@ -123,6 +138,11 @@ void Offering::upgrade()
     description = "Lose 5 HP. Gain 2 Energy. Draw 3 cards.";
 }
 
+Card* Offering::clone() const
+{
+    return new Offering(*this);
+}
+
 
 Impervious::Impervious()
     : Card("Impervious", "Gain 30 Block.", 2, CardType::Skill,
@@ -151,6 +171,10 @@ void Impervious::upgrade()
     description = "Gain 40 Block.";
 }
 
+Card* Impervious::clone() const
+{
+    return new Impervious(*this);
+}
 
 ShrugItOff::ShrugItOff()
     : Card("Shrug It Off", "Draw 1 card. Gain 8 Block.", 1, CardType::Skill,
@@ -179,6 +203,11 @@ void ShrugItOff::upgrade()
     blockAmount = 11;
     name = "Shrug It Off+";
     description = "Draw 1 card. Gain 11 Block.";
+}
+
+Card* ShrugItOff::clone() const
+{
+    return new ShrugItOff(*this);
 }
 
 
@@ -214,6 +243,12 @@ void TrueGrit::upgrade()
     description = "Gain 9 Block. Exhaust a card in your hand.";
 }
 
+Card* TrueGrit::clone() const
+{
+    return new TrueGrit(*this);
+}
+
+
 
 Rage::Rage()
     : Card("Rage", "Whenever you play an Attack this turn, gain 3 Block.",
@@ -245,4 +280,9 @@ void Rage::upgrade()
     blockPerAttack = 5;
     name = "Rage+";
     description = "Whenever you play an Attack this turn, gain 5 Block.";
+}
+
+Card* Rage::clone() const
+{
+    return new Rage(*this);
 }
