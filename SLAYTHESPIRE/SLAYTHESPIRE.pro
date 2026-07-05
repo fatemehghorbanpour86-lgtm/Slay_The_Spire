@@ -30,6 +30,7 @@ SOURCES += \
     potion.cpp \
     powercard.cpp \
     relic.cpp \
+    relicsystem.cpp \
     skillcards.cpp \
     splashpage.cpp \
     character.cpp \
@@ -58,6 +59,7 @@ HEADERS += \
     potion.h \
     powercard.h \
     relic.h \
+    relicsystem.h \
     skillcards.h \
     splashpage.h \
     character.h \

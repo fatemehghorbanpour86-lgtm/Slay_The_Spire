@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include "character.h"
+#include "relicsystem.h"
 
 /*
  *  Player Responsibilities:
@@ -36,18 +37,14 @@ class Player : public Character
     // QVector<Card*> drawPile;
     // QVector<Card*> discardPile;
     // QVector<Card*> exhaustPile;
-    // QVector<Relic*> relics;
-     QVector<Potion*> potions;
-
+    QVector<Potion*> potions;
+    RelicSystem relicSystem;
 
     // TODO (Anahita)
     // Add MasterDeck* after MasterDeck is implemented.
 
     // TODO (Anahita)
     // Add CombatDeck* after CombatDeck is implemented.
-
-    // TODO (Fateme)
-    // Add RelicInventory after Relic System is implemented.
 
 
 
@@ -84,6 +81,16 @@ public:
     Potion* getPotion(int index) const;
     int getPotionCount() const;
     const QVector<Potion*>& getPotions() const;
+
+    void addRelic(Relic* relic);
+    bool hasRelic(RelicId id) const;
+    Relic* getRelic(RelicId id) const;
+    const QVector<Relic*>& getAllRelics() const;
+    bool canRest() const;
+    bool canUsePotions() const;
+    bool canPlayCard();
+    RelicSystem& getRelicSystem();
+    const RelicSystem& getRelicSystem() const;
 };
 
 #endif

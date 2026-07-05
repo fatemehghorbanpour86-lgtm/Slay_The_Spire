@@ -5,7 +5,7 @@
 
 //STARTER RELIC
 BurningBlood::BurningBlood()
-    : Relic("Burning Blood", "At the end of combat, heal 6 HP.", Relic::Tier::Starter)
+    : Relic(RelicId::BurningBlood, "Burning Blood", "At the end of combat, heal 6 HP.", Relic::Tier::Starter)
 {
 }
 void BurningBlood::onCombatEnd(Player* player)
@@ -18,7 +18,7 @@ void BurningBlood::onCombatEnd(Player* player)
 
 
 Girya::Girya()
-    : Relic("Girya", "You may now lift at campsites.", Relic::Tier::Normal)
+    : Relic(RelicId::Girya, "Girya", "You may now lift at campsites.", Relic::Tier::Normal)
 {
     setCounter(0); // number of Lifts used so far
 }
@@ -39,7 +39,7 @@ void Girya::lift(Player* player)
 
 //امتیازی**************************************************************
 IceCream::IceCream()
-    : Relic("Ice Cream", "Energy is now conserved between turns.", Relic::Tier::Normal)
+    : Relic(RelicId::IceCream, "Ice Cream", "Energy is now conserved between turns.", Relic::Tier::Normal)
 {
     setCounter(0); // Energy saved from the end of the previous turn
 }
@@ -69,7 +69,7 @@ void IceCream::onTurnStart(Player* player)
 
 //امتیازی**************************************************************
 Shuriken::Shuriken()
-    : Relic("Shuriken", "Every time you play 3 Attacks in a turn, gain 1 Strength.", Relic::Tier::Normal)
+    : Relic(RelicId::Shuriken, "Shuriken", "Every time you play 3 Attacks in a turn, gain 1 Strength.", Relic::Tier::Normal)
 {
     setCounter(0);
 }
@@ -93,7 +93,7 @@ void Shuriken::onCardPlayed(Player* player, Card* card)
 
 //امتیازی**************************************************************
 Kunai::Kunai()
-    : Relic("Kunai", "Every time you play 3 Attacks in a turn, gain 1 Dexterity.", Relic::Tier::Normal)
+    : Relic(RelicId::Kunai, "Kunai", "Every time you play 3 Attacks in a turn, gain 1 Dexterity.", Relic::Tier::Normal)
 {
     setCounter(0);
 }
@@ -117,7 +117,7 @@ void Kunai::onCardPlayed(Player* player, Card* card)
 
 
 Anchor::Anchor()
-    : Relic("Anchor", "Start each combat with 10 Block.", Relic::Tier::Normal)
+    : Relic(RelicId::Anchor, "Anchor", "Start each combat with 10 Block.", Relic::Tier::Normal)
 {
 }
 void Anchor::onCombatStart(Player* player)
@@ -130,7 +130,7 @@ void Anchor::onCombatStart(Player* player)
 
 
 HappyFlower::HappyFlower()
-    : Relic("Happy Flower", "Every 3 turns, gain 1 Energy.", Relic::Tier::Normal)
+    : Relic(RelicId::HappyFlower, "Happy Flower", "Every 3 turns, gain 1 Energy.", Relic::Tier::Normal)
 {
     setCounter(0);
 }
@@ -151,7 +151,7 @@ void HappyFlower::onTurnStart(Player* player)
 
 
 Orichalcum::Orichalcum()
-    : Relic("Orichalcum", "If you end your turn with 0 Block, gain 6 Block.", Relic::Tier::Normal)
+    : Relic(RelicId::Orichalcum, "Orichalcum", "If you end your turn with 0 Block, gain 6 Block.", Relic::Tier::Normal)
 {
 }
 void Orichalcum::onTurnEnd(Player* player)
@@ -166,7 +166,7 @@ void Orichalcum::onTurnEnd(Player* player)
 
 
 Vajra::Vajra()
-    : Relic("Vajra", "Permanently gain 1 Strength upon pickup.", Relic::Tier::Normal)
+    : Relic(RelicId::Vajra, "Vajra", "Permanently gain 1 Strength upon pickup.", Relic::Tier::Normal)
 {
 }
 void Vajra::onEquip(Player* player)

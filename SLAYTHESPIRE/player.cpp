@@ -164,3 +164,48 @@ const QVector<Potion*>& Player::getPotions() const
 {
     return potions;
 }
+
+void Player::addRelic(Relic* relic)
+{
+    relicSystem.addRelic(relic, this);
+}
+
+bool Player::hasRelic(RelicId id) const
+{
+    return relicSystem.hasRelic(id);
+}
+
+Relic* Player::getRelic(RelicId id) const
+{
+    return relicSystem.getRelic(id);
+}
+
+const QVector<Relic*>& Player::getAllRelics() const
+{
+    return relicSystem.getAllRelics();
+}
+
+bool Player::canRest() const
+{
+    return relicSystem.canRest();
+}
+
+bool Player::canUsePotions() const
+{
+    return relicSystem.canUsePotions();
+}
+
+bool Player::canPlayCard()
+{
+    return relicSystem.canPlayCard(this);
+}
+
+RelicSystem& Player::getRelicSystem()
+{
+    return relicSystem;
+}
+
+const RelicSystem& Player::getRelicSystem() const
+{
+    return relicSystem;
+}
