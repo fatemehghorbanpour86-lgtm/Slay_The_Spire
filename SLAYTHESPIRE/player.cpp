@@ -1,17 +1,21 @@
 #include "player.h"
+#include "combatdeck.h"
 #include "potion.h"
 
 Player::Player(const QString& name, int maxHealth)
     : Character(name, maxHealth),
     currentEnergy(3),
     maxEnergy(3),
-    gold(0)
+    gold(0),
+    combatDeck(nullptr)
 {
 
 }
 
 Player::~Player()
 {
+    delete combatDeck;
+
     qDeleteAll(potions);
     potions.clear();
 }

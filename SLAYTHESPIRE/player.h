@@ -8,19 +8,17 @@
  *  Player Responsibilities:
  *  - Manage Energy.
  *  - Manage Gold.
- *  - Own Player Decks.(TODO)
- *  - Own Potion Inventory.(TODO)
- *  - Own Relic Inventory.(TODO)
+ *  - Own Player Decks.
+ *  - Own Potion Inventory.
+ *  - Own Relic Inventory.
  */
 
 
-/*
- * Forward(TODO)
- * class Card;
- * class Relic;
- */
 
+class Relic;
 class Potion;
+class Card;
+class CombatDeck;
 
 
 
@@ -33,19 +31,14 @@ class Player : public Character
 
     int gold;
 
+    CombatDeck* combatDeck;
+
     // QVector<Card*> hand;
     // QVector<Card*> drawPile;
     // QVector<Card*> discardPile;
     // QVector<Card*> exhaustPile;
     QVector<Potion*> potions;
     RelicSystem relicSystem;
-
-    // TODO (Anahita)
-    // Add MasterDeck* after MasterDeck is implemented.
-
-    // TODO (Anahita)
-    // Add CombatDeck* after CombatDeck is implemented.
-
 
 
 public:
