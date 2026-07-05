@@ -17,6 +17,10 @@ CombatDeck::~CombatDeck()
     qDeleteAll(exhaustPile);
 }
 
+//----------------------------------
+// Setup
+//----------------------------------
+
 void CombatDeck::initializeFromMasterDeck(const MasterDeck& masterDeck)
 {
     qDeleteAll(drawPile);
@@ -38,7 +42,7 @@ void CombatDeck::initializeFromMasterDeck(const MasterDeck& masterDeck)
 }
 
 //----------------------------------
-// Move Helper
+// Internal Move Helper
 //----------------------------------
 
 bool CombatDeck::moveCard(QVector<Card*>& from, QVector<Card*>& to, Card* card)
@@ -67,7 +71,6 @@ Card* CombatDeck::drawCard()
         return nullptr;
 
     Card* card = drawPile.takeLast();
-
     hand.append(card);
 
     return card;
@@ -83,40 +86,8 @@ void CombatDeck::drawCards(int count)
 }
 
 //----------------------------------
-// Play / Discard / Exhaust Flow
+// Turn Management
 //----------------------------------
-
-bool CombatDeck::removeFromHand(Card* card)
-{
-    int index = hand.indexOf(card);
-
-    if(index == -1)
-        return false;
-
-    hand.removeAt(index);
-
-    return true;
-}
-
-bool CombatDeck::addToDiscard(Card* card)
-{
-    if(card == nullptr)
-        return false;
-
-    discardPile.append(card);
-
-    return true;
-}
-
-bool CombatDeck::addToExhaust(Card* card)
-{
-    if(card == nullptr)
-        return false;
-
-    exhaustPile.append(card);
-
-    return true;
-}
 
 void CombatDeck::discardHand()
 {
@@ -126,9 +97,24 @@ void CombatDeck::discardHand()
     }
 }
 
-bool CombatDeck::exhaustCardFromHand(Card* card)
+//----------------------------------
+// Card Transitions
+//----------------------------------
+
+bool CombatDeck::moveFromHandToDiscard(Card* card)
 {
-    return moveCard(hand, exhaustPile, card);
+    if(!moveCard(hand, discardPile, card))
+        return false;
+
+    return true;
+}
+
+bool CombatDeck::moveFromHandToExhaust(Card* card)
+{
+    if(!moveCard(hand, exhaustPile, card))
+        return false;
+
+    return true;
 }
 
 //----------------------------------
@@ -146,7 +132,6 @@ void CombatDeck::reshuffleDiscardIntoDrawPile()
         return;
 
     drawPile += discardPile;
-
     discardPile.clear();
 
     shuffleDrawPile();
@@ -175,6 +160,10 @@ const QVector<Card*>& CombatDeck::getExhaustPile() const
 {
     return exhaustPile;
 }
+
+//----------------------------------
+// Sizes
+//----------------------------------
 
 int CombatDeck::handSize() const
 {

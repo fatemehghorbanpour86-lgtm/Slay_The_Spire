@@ -27,21 +27,42 @@ public:
     CombatDeck(const CombatDeck&) = delete;
     CombatDeck& operator=(const CombatDeck&) = delete;
 
+    //----------------------------------
+    // Setup
+    //----------------------------------
+
     void initializeFromMasterDeck(const MasterDeck& masterDeck);
+
+    //----------------------------------
+    // Draw System
+    //----------------------------------
 
     Card* drawCard();
     void drawCards(int count);
 
+    //----------------------------------
+    // Turn Management
+    //----------------------------------
+
     void discardHand();
-    bool exhaustCardFromHand(Card* card);
 
-    bool removeFromHand(Card* card);
+    //----------------------------------
+    // Card State Transitions (ONLY valid API)
+    //----------------------------------
 
-    bool addToDiscard(Card* card);
-    bool addToExhaust(Card* card);
+    bool moveFromHandToDiscard(Card* card);
+    bool moveFromHandToExhaust(Card* card);
+
+    //----------------------------------
+    // Shuffle
+    //----------------------------------
 
     void shuffleDrawPile();
     void reshuffleDiscardIntoDrawPile();
+
+    //----------------------------------
+    // Getters
+    //----------------------------------
 
     const QVector<Card*>& getHand() const;
     const QVector<Card*>& getDrawPile() const;
@@ -54,4 +75,4 @@ public:
     int exhaustPileSize() const;
 };
 
-#endif // COMBATDECK_H
+#endif
