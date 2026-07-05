@@ -23,6 +23,10 @@ enum class Intent
 
 class Enemy : public Character
 {
+
+signals:
+    void died(Enemy* self);
+
 protected:
 
     Intent currentIntent;
@@ -57,6 +61,8 @@ protected:
     // Called by CombatManager after this enemy finishes its turn.
 
 public:
+
+    void takeDamage(int amount) override;
 
     Enemy(const QString& name, int maxHealth);
 

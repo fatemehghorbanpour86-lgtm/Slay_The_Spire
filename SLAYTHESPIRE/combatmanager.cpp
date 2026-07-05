@@ -18,6 +18,11 @@ CombatManager::CombatManager(Player* p, QVector<Enemy*> e, QObject* parent)
     calculator(new CombatCalculator()),
     turnCount(0)
 {
+    for (Enemy* enemy : enemies)
+    {
+        connect(enemy, &Enemy::died,
+                this, &CombatManager::onEnemyDied);
+    }
 }
 
 CombatManager::~CombatManager()
@@ -176,8 +181,6 @@ void CombatManager::handleEnemyTurn()
 
 void CombatManager::checkWinLossCondition()
 {
-    cleanupDeadEnemies();
-
     if (enemies.isEmpty())
     {
         changeState(CombatState::BattleWon);
@@ -190,14 +193,18 @@ void CombatManager::checkWinLossCondition()
     }
 }
 
-void CombatManager::cleanupDeadEnemies()
+void CombatManager::onEnemyDied(Enemy* enemy)
 {
-    for (int i = enemies.size() - 1; i >= 0; --i)
-    {
-        if (enemies[i]->isDead())
-        {
-            player->getRelicSystem().onEnemyDeath(player, enemies[i]);
-            enemies.removeAt(i);
-        }
-    }
+    if (!enemy)
+        return;
+
+    player->getRelicSystem().onEnemyDeath(player, enemy);
+
+    enemies.removeOne(enemy);
+
+    enemy->deleteLater();
+
+    emit statsUpdated();
+
+    checkWinLossCondition();
 }

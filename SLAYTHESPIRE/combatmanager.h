@@ -53,7 +53,6 @@ private:
     void handleEnemyTurn();
 
     void checkWinLossCondition();
-    void cleanupDeadEnemies();
 
 private:
     CombatState currentState;
@@ -62,6 +61,10 @@ private:
 
     CombatCalculator* calculator;
     int turnCount;
+
+private slots:
+    void onEnemyDied(Enemy* enemy);
+
 };
 
 #endif // COMBATMANAGER_H

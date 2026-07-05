@@ -3,10 +3,11 @@
 
 #include <QString>
 #include <QVector>
+#include <QObject>
 #include "effect.h"
 
 
-class Character
+class Character : public QObject
 {
 protected:
 
