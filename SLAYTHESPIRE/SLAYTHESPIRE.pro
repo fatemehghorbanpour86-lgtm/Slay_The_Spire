@@ -10,6 +10,7 @@ SOURCES += \
     attackcards.cpp \
     bossenemies.cpp \
     bossrelics.cpp \
+    campfire.cpp \
     card.cpp \
     combatcalculator.cpp \
     combatdeck.cpp \
@@ -42,6 +43,7 @@ HEADERS += \
     attackcards.h \
     bossenemies.h \
     bossrelics.h \
+    campfire.h \
     card.h \
     combatcalculator.h \
     combatdeck.h \

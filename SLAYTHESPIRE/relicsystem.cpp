@@ -120,11 +120,31 @@ bool RelicSystem::canRest() const
 {
     for (Relic* relic : std::as_const(relics))
     {
-        if (!relic->canRest())
+        if (relic != nullptr && !relic->canRest())
             return false;
     }
 
     return true;
+}
+
+bool RelicSystem::canLift() const
+{
+    for (Relic* relic : std::as_const(relics))
+    {
+        if (relic != nullptr && relic->canLift())
+            return true;
+    }
+    return false;
+}
+
+bool RelicSystem::lift(Player* player)
+{
+    for (Relic* relic : std::as_const(relics))
+    {
+        if (relic != nullptr && relic->canLift())
+            return relic->lift(player);
+    }
+    return false;
 }
 
 bool RelicSystem::canUsePotions() const

@@ -213,3 +213,13 @@ const RelicSystem& Player::getRelicSystem() const
 {
     return relicSystem;
 }
+
+bool Player::canLift() const
+{
+    return relicSystem.canLift();
+}
+
+bool Player::lift()
+{
+    return relicSystem.lift(this);
+}

@@ -119,6 +119,15 @@ public:
     // Called before a card is played.
     // Returns whether the card can be played.
     // Default implementation returns true. (for VelvetChoker relic)
+
+    virtual bool canLift() const;
+    // Returns whether this relic currently allows the player to Lift at campfires.
+    // Default: false. Only relics like Girya override this.
+
+    virtual bool lift(Player* player);
+    // Attempts to perform this relic's Lift effect.
+    // Returns whether the Lift succeeded.
+
 };
 
 #endif // RELIC_H

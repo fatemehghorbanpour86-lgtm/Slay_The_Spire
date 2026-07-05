@@ -26,14 +26,15 @@ bool Girya::canLift() const
 {
     return getCounter() < MAX_LIFTS;
 }
-void Girya::lift(Player* player)
+bool Girya::lift(Player* player)
 {
     if (!player || !canLift())
-        return;
+        return false;
 
     // Permanent Strength -> default duration (-1) never expires.
     player->addEffect(Effect::Type::Strength, Effect::Category::Buff, 1);
     setCounter(getCounter() + 1);
+    return true;
 }
 
 

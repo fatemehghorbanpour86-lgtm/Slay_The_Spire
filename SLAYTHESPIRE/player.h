@@ -84,6 +84,8 @@ public:
     bool canPlayCard();
     RelicSystem& getRelicSystem();
     const RelicSystem& getRelicSystem() const;
+    bool canLift() const;
+    bool lift();
 };
 
 #endif

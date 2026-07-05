@@ -93,3 +93,14 @@ bool Relic::canPlayCard(Player* player) const
     Q_UNUSED(player)
     return true;
 }
+
+bool Relic::canLift() const
+{
+    return false;
+}
+
+bool Relic::lift(Player* player)
+{
+    Q_UNUSED(player)
+    return false;
+}

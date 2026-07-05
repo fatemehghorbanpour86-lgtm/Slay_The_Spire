@@ -58,6 +58,8 @@ public:
     int modifyDamageDealt(int damage) const;
 
     bool canRest() const;
+    bool canLift() const;
+    bool lift(Player* player);
     bool canUsePotions() const;
     bool canPlayCard(Player* player) const;
 

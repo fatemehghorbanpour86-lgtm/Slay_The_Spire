@@ -22,8 +22,8 @@ class Girya : public Relic
 public:
     Girya();
 
-    bool canLift() const;
-    void lift(Player* player);
+    bool canLift() const override;
+    bool lift(Player* player) override;
 
 private:
     static const int MAX_LIFTS = 3;
