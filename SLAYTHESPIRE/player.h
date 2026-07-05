@@ -84,8 +84,18 @@ public:
     bool canPlayCard();
     RelicSystem& getRelicSystem();
     const RelicSystem& getRelicSystem() const;
+
     bool canLift() const;
     bool lift();
+
+
+    // ----------------------------
+    // Combat Deck Access
+    // ----------------------------
+
+    CombatDeck* getCombatDeck();
+    const CombatDeck* getCombatDeck() const;
+
 };
 
 #endif

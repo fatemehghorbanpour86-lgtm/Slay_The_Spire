@@ -7,7 +7,7 @@ Player::Player(const QString& name, int maxHealth)
     currentEnergy(3),
     maxEnergy(3),
     gold(0),
-    combatDeck(nullptr)
+    combatDeck(new CombatDeck())
 {
 
 }
@@ -214,6 +214,7 @@ const RelicSystem& Player::getRelicSystem() const
     return relicSystem;
 }
 
+
 bool Player::canLift() const
 {
     return relicSystem.canLift();
@@ -222,4 +223,14 @@ bool Player::canLift() const
 bool Player::lift()
 {
     return relicSystem.lift(this);
+}
+
+CombatDeck* Player::getCombatDeck()
+{
+    return combatDeck;
+}
+
+const CombatDeck* Player::getCombatDeck() const
+{
+    return combatDeck;
 }
