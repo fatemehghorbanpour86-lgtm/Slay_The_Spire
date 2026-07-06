@@ -4,6 +4,11 @@
 #include "normalrelics.h"
 #include "player.h"
 
+RelicSystem::RelicSystem(QObject *parent) : QObject(parent)
+{
+
+}
+
 RelicSystem::~RelicSystem()
 {
     clear();
