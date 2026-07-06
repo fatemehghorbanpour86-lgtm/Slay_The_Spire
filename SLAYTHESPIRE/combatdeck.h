@@ -8,6 +8,12 @@ class MasterDeck;
 
 class CombatDeck
 {
+
+public:
+    // Slay the Spire standard max hand size
+    static const int MAX_HAND_SIZE = 10;
+
+
 private:
 
     QVector<Card*> drawPile;
@@ -52,6 +58,17 @@ public:
 
     bool moveFromHandToDiscard(Card* card);
     bool moveFromHandToExhaust(Card* card);
+    bool moveFromExhaustToHand(Card* card = nullptr);
+    Card* getRandomCardFromHand() const;
+    bool exhaustRandomCardFromHand();
+
+    //----------------------------------
+    // Combat Generation Helpers
+    //----------------------------------
+    void addCardToHand(Card* card);
+    void addCardToDiscardPile(Card* card);
+    void addCardToDrawPile(Card* card, bool random = false, bool onTop = false);
+    bool removeCardFromHand(Card* card);
 
     //----------------------------------
     // Shuffle
@@ -73,6 +90,8 @@ public:
     int drawPileSize() const;
     int discardPileSize() const;
     int exhaustPileSize() const;
+
+    bool isHandFull() const;
 };
 
 #endif

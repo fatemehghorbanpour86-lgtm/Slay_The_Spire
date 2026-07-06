@@ -1,4 +1,5 @@
 #include "skillcards.h"
+#include "combatdeck.h"
 #include "effect.h"
 #include "player.h"
 #include "combatcalculator.h"
@@ -50,9 +51,7 @@ void Exhume::play(Player* user,QVector <Enemy*>& enemies, Enemy* target)
     if (!user)
         return;
 
-    // TODO: Player::returnRandomCardFromExhaustToHand()
-    // Deck/CombatManager (Anahita)
-    //user->returnRandomCardFromExhaustToHand();
+    user->moveFromExhaustToHand();
 }
 void Exhume::upgrade()
 {
@@ -124,8 +123,8 @@ void Offering::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     user->loseHP(6);
     user->gainEnergy(2);
 
-    // TODO: Player::drawCards(int) - Deck/CombatManager (Anahita)
-    //user->drawCards(drawcards);
+    user->drawCards(drawcards);
+
 }
 void Offering::upgrade()
 {
@@ -190,8 +189,9 @@ void ShrugItOff::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     if (!user)
         return;
 
-    // TODO: Player::drawCards(int) — Deck/CombatManager (Anahita)
-    //user->drawCards(1);
+
+    user->drawCards(1);
+
     user->addBlock(CombatCalculator::calculateBlock(user, blockAmount));
 }
 void ShrugItOff::upgrade()
@@ -226,11 +226,15 @@ void TrueGrit::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
 
     user->addBlock(CombatCalculator::calculateBlock(user, blockAmount));
 
-    // TODO: Deck/CombatManager - (َAnahita)
-    // if (isUpgraded)
-    //     user->exhaustChosenCardInHand();
-    // else
-    //     user->exhaustRandomCardInHand();
+    if (isUpgraded)
+    {
+        // TODO (UI/CombatManager):
+        // Let the player choose a card in hand to exhaust.
+    }
+    else
+    {
+        user->exhaustRandomCardFromHand();
+    }
 }
 void TrueGrit::upgrade()
 {

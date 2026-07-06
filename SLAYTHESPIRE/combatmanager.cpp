@@ -119,6 +119,16 @@ bool CombatManager::playCard(Card* card, Enemy* target)
 
     card->play(player, enemies, target);
 
+    if (card->getType() == CardType::Attack)
+    {
+        Effect* rage = player->getEffect(Effect::Type::Rage);
+
+        if (rage)
+        {
+            CombatCalculator::grantBlock(player,rage->getAmount());
+        }
+    }
+
     emit cardPlayed(card, target);
 
     player->getRelicSystem().onCardPlayed(player, card);

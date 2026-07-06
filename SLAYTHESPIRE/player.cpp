@@ -1,12 +1,14 @@
 #include "player.h"
 #include "combatdeck.h"
 #include "potion.h"
+#include "masterdeck.h"
 
 Player::Player(const QString& name, int maxHealth)
     : Character(name, maxHealth),
     currentEnergy(3),
     maxEnergy(3),
     gold(0),
+    masterDeck(new MasterDeck()),
     combatDeck(new CombatDeck())
 {
 
@@ -15,6 +17,7 @@ Player::Player(const QString& name, int maxHealth)
 Player::~Player()
 {
     delete combatDeck;
+    delete masterDeck;
 
     qDeleteAll(potions);
     potions.clear();
@@ -233,4 +236,69 @@ CombatDeck* Player::getCombatDeck()
 const CombatDeck* Player::getCombatDeck() const
 {
     return combatDeck;
+}
+
+
+ MasterDeck* Player::getMasterDeck()
+{
+    return masterDeck;
+}
+
+const MasterDeck* Player::getMasterDeck() const
+{
+    return masterDeck;
+}
+
+void Player::prepareForCombat()
+{
+    if (masterDeck && combatDeck)
+    {
+        combatDeck->initializeFromMasterDeck(*masterDeck);
+    }
+}
+
+Card* Player::drawCard()
+{
+    return combatDeck->drawCard();
+}
+
+void Player::drawCards(int count)
+{
+    combatDeck->drawCards(count);
+}
+
+void Player::discardHand()
+{
+    combatDeck->discardHand();
+}
+
+bool Player::discardCard(Card* card)
+{
+    return combatDeck->moveFromHandToDiscard(card);
+}
+
+bool Player::exhaustCard(Card* card)
+{
+    return combatDeck->moveFromHandToExhaust(card);
+}
+
+bool Player::moveFromExhaustToHand(Card* card)
+{
+    return combatDeck->moveFromExhaustToHand(card);
+}
+
+Card* Player::getRandomHandCard()
+{
+    if (!combatDeck)
+        return nullptr;
+
+    return combatDeck->getRandomCardFromHand();
+}
+
+bool Player::exhaustRandomCardFromHand()
+{
+    if (!combatDeck)
+        return false;
+
+    return combatDeck->exhaustRandomCardFromHand();
 }
