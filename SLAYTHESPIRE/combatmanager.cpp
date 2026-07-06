@@ -172,11 +172,27 @@ void CombatManager::endTurn()
         changeState(CombatState::TurnEnd);
 }
 
+
 void CombatManager::handleTurnEnd()
 {
-    if (player->getCombatDeck())
+    CombatDeck* deck = player->getCombatDeck();
 
-        player->getCombatDeck()->discardHand();
+    if (deck)
+    {
+        for (Card* card : deck->getHand())
+        {
+            if (card && card->getName() == "Regret")
+            {
+                int handSize = deck->handSize();
+
+                int damage = handSize;
+
+                player->loseHP(damage);
+            }
+        }
+
+        deck->discardHand();
+    }
 
     player->getRelicSystem().onTurnEnd(player);
 

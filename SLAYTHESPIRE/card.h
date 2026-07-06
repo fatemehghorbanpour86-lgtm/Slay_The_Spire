@@ -70,6 +70,7 @@ public:
     bool doesInnate() const;
     bool canPlay() const;
     bool getIsUpgraded() const;
+    virtual bool isRemovable() const;
 };
 
 #endif

@@ -28,7 +28,10 @@ public:
 
     void upgrade() override;
 
+    bool isRemovable() const override;
+
     virtual Card* clone() const override;
+
 };
 
 
