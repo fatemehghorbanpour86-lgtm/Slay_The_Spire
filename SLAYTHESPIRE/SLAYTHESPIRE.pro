@@ -14,6 +14,7 @@ SOURCES += \
     card.cpp \
     combatcalculator.cpp \
     combatdeck.cpp \
+    combatmanager.cpp \
     cursecards.cpp \
     effect.cpp \
     eliteenemy.cpp \
@@ -47,6 +48,7 @@ HEADERS += \
     card.h \
     combatcalculator.h \
     combatdeck.h \
+    combatmanager.h \
     cursecards.h \
     effect.h \
     eliteenemy.h \

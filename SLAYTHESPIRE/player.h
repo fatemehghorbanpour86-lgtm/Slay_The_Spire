@@ -19,6 +19,7 @@ class Relic;
 class Potion;
 class Card;
 class CombatDeck;
+class MasterDeck;
 
 
 
@@ -31,6 +32,7 @@ class Player : public Character
 
     int gold;
 
+    MasterDeck* masterDeck;
     CombatDeck* combatDeck;
 
     // QVector<Card*> hand;
@@ -84,8 +86,38 @@ public:
     bool canPlayCard();
     RelicSystem& getRelicSystem();
     const RelicSystem& getRelicSystem() const;
+
     bool canLift() const;
     bool lift();
+
+
+    // ----------------------------
+    // Master Deck Access
+    // ----------------------------
+    MasterDeck* getMasterDeck();
+    const MasterDeck* getMasterDeck() const;
+
+
+    // ----------------------------
+    // Combat Deck Wrappers
+    // ----------------------------
+
+    void prepareForCombat();
+
+    Card* drawCard();
+    void drawCards(int count);
+    void discardHand();
+    bool discardCard(Card* card);
+    bool exhaustCard(Card* card);
+    bool moveFromExhaustToHand(Card* card = nullptr);
+    void addCardToDiscardPile(Card* card);
+
+    CombatDeck* getCombatDeck();
+    const CombatDeck* getCombatDeck() const;
+
+    Card* getRandomHandCard();
+    bool exhaustRandomCardFromHand();
+
 };
 
 #endif

@@ -51,16 +51,17 @@ void CurseOfTheBell::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
     Q_UNUSED(user)
     Q_UNUSED(enemies)
     Q_UNUSED(target)
-
-    // This card cannot be played.
-    // TODO (Deck System):
-    // This card cannot be permanently removed from the player's deck.
 }
 
 
 void CurseOfTheBell::upgrade()
 {
     // Curse cards cannot be upgraded.
+}
+
+bool CurseOfTheBell::isRemovable() const
+{
+    return false;
 }
 
 Card* CurseOfTheBell::clone() const
@@ -85,10 +86,6 @@ void Regret::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
     Q_UNUSED(user)
     Q_UNUSED(enemies)
     Q_UNUSED(target)
-
-    // TODO (CombatManager):
-    // At the end of the turn, if this card is still in the player's hand,
-    // the player loses HP equal to the number of cards in hand.
 }
 
 void Regret::upgrade()

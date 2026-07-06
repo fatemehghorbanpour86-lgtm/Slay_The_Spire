@@ -140,12 +140,7 @@ Barricade::Barricade()
     : Card("Barricade", "Block is not removed at the start of your turn.", 3,
            CardType::Power, false, false, false, false)
 {
-    // این کارت هیچ منطقی برای "پاک نکردن Block" ندارد - این باید توسط
-    // CombatManager رعایت شود: قبل از clearBlock() در شروع نوبت بازیکن، چک کند
-    // user->getEffect(Effect::Type::Barricade) و اگر موجود بود clearBlock صدا
-    // زده نشود.
 
-    //این کارت امتیازی است***************************************************
 }
 void Barricade::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
 {

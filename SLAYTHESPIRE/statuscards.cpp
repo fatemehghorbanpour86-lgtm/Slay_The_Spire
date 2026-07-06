@@ -100,7 +100,7 @@ Card* Wound::clone() const
 
 Burn::Burn()
     : Card("Burn", "Unplayable. At the end of your turn, take 2 damage.",0, CardType::Status,
-           false, false, false, true)
+           false, false, false, true),damageAmount(2)
 {
 }
 
@@ -110,9 +110,6 @@ void Burn::play(Player* user,QVector<Enemy*>& enemies,Enemy* target)
     Q_UNUSED(user)
     Q_UNUSED(enemies)
     Q_UNUSED(target)
-
-    // This card cannot be played.
-    // Damade will be dealt at CombatManager::endTurn()
 
 }
 
@@ -127,9 +124,16 @@ void Burn::upgrade()
 
     isUpgraded = true;
 
+    damageAmount = 4;
+
     name = "Burn+";
 
     description = "Unplayable. At the end of your turn, take 4 damage.";
+}
+
+int Burn::getDamageAmount() const
+{
+    return damageAmount;
 }
 
 Card* Burn::clone() const

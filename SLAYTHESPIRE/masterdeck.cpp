@@ -27,6 +27,9 @@ bool MasterDeck::removeCard(Card* card)
     if(index == -1)
         return false;
 
+    if (!card->isRemovable())
+        return false;
+
     delete cards[index];
     cards.removeAt(index);
 

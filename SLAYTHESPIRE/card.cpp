@@ -76,3 +76,8 @@ void Card::setEnergyCost(int cost)
 
     energyCost = cost;
 }
+
+bool Card::isRemovable() const
+{
+    return true;
+}

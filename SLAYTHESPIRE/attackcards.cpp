@@ -2,6 +2,7 @@
 #include "player.h"
 #include "enemy.h"
 #include "combatcalculator.h"
+#include "statuscards.h"
 
 //======================================================
 //  Strike
@@ -225,9 +226,7 @@ void Immolate::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
         CombatCalculator::dealDamage(user, enemy, damageAmount);
     }
 
-    // TODO
-    // Add Burn Status Card to the player's DiscardPile.
-    // This should be handled through CombatDeck.
+    user->addCardToDiscardPile(new Burn());
 }
 
 void Immolate::upgrade()

@@ -14,6 +14,21 @@ Enemy::Enemy(const QString& name, int maxHealth)
     turnCount = 0;
 }
 
+void Enemy::takeDamage(int amount)
+{
+    if (isDead())
+    {
+        return;
+    }
+
+    Character::takeDamage(amount);
+
+    if (isDead())
+    {
+        emit died(this);
+    }
+}
+
 Intent Enemy::getIntent() const
 {
     return currentIntent;
