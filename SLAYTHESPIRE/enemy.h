@@ -23,6 +23,7 @@ enum class Intent
 
 class Enemy : public Character
 {
+     Q_OBJECT
 
 signals:
     void died(Enemy* self);

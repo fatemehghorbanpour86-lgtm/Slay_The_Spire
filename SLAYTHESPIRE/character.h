@@ -9,6 +9,9 @@
 
 class Character : public QObject
 {
+
+ Q_OBJECT
+
 protected:
 
     QString name;
