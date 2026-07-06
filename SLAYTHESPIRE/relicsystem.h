@@ -1,6 +1,7 @@
 #ifndef RELICSYSTEM_H
 #define RELICSYSTEM_H
 
+#include <QObject>
 #include <QVector>
 #include <QString>
 #include "relic.h"
@@ -8,6 +9,7 @@
 
 class Card;
 class Enemy;
+class Player;
 
 struct RelicSaveData
 {
@@ -18,10 +20,12 @@ struct RelicSaveData
 };
 
 
-class RelicSystem
+class RelicSystem : public QObject
 {
+    Q_OBJECT
+
 public:
-    RelicSystem() = default;
+    RelicSystem(QObject* parent = nullptr);
     ~RelicSystem();
 
     // Non-copyable: RelicSystem owns raw Relic* pointers, so copying
@@ -46,14 +50,6 @@ public:
 
     void clear();
 
-    void onCombatStart(Player* player);
-    void onCombatEnd(Player* player);
-    void onTurnStart(Player* player);
-    void onTurnEnd(Player* player);
-    void onCardPlayed(Player* player, Card* card);
-    void onEnemyDeath(Player* player, Enemy* enemy);
-    void onChestOpened(Player* player);
-
     int modifyDamageTaken(int damage) const;
     int modifyDamageDealt(int damage) const;
 
@@ -66,6 +62,20 @@ public:
     QVector<RelicSaveData> extractState() const;
 
     static void grantRandomRelics(Player* player, Relic::Tier tier, int count);
+
+public slots:
+
+    void onCombatStart(Player* player);
+    void onCombatEnd(Player* player);
+    void onTurnStart(Player* player);
+    void onTurnEnd(Player* player);
+    void onCardPlayed(Player* player, Card* card);
+    void onEnemyDeath(Player* player, Enemy* enemy);
+    void onChestOpened(Player* player);
+
+    // void onCardDrawn(Player* player, Card* card);
+    // void onHpLost(Player* player, int amount);
+    // void onGoldGained(Player* player, int amount);
 
 private:
     QVector<Relic*> relics;
