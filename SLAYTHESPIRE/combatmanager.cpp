@@ -7,6 +7,7 @@
 #include "combatcalculator.h"
 #include "combatdeck.h"
 #include "relicsystem.h"
+#include "statuscards.h"
 
 #include <utility>
 
@@ -185,7 +186,11 @@ void CombatManager::handleTurnEnd()
     {
         for (Card* card : deck->getHand())
         {
-            if (card && card->getName() == "Regret")
+
+            if (!card)
+                continue;
+
+            if (card->getName() == "Regret")
             {
                 int handSize = deck->handSize();
 
@@ -193,6 +198,18 @@ void CombatManager::handleTurnEnd()
 
                 player->loseHP(damage);
             }
+
+
+            if (card->getName() == "Burn")
+            {
+                Burn* burn = dynamic_cast<Burn*>(card);
+
+                if (burn)
+                {
+                    CombatCalculator::dealDamage(nullptr, player, burn->getDamageAmount());
+                }
+            }
+
         }
 
         deck->discardHand();

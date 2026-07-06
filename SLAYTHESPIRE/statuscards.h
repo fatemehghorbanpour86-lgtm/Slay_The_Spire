@@ -48,12 +48,18 @@ public:
 
 class Burn : public Card
 {
+
+private:
+    int damageAmount;
+
 public:
     Burn();
 
     void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
     void upgrade() override;
+
+    int getDamageAmount() const;
 
     virtual Card* clone() const override;
 };
