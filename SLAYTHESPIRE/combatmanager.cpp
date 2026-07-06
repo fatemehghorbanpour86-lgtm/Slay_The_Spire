@@ -92,10 +92,14 @@ void CombatManager::handleTurnStart()
 {
     turnCount++;
 
+    if (player->getEffect(Effect::Type::Barricade) == nullptr)
+    {
+        player->clearBlock();
+    }
+
     player->resetEnergy();
 
-    if (player->getCombatDeck())
-        player->getCombatDeck()->drawCards(5);
+    player->drawCards(5);
 
     player->getRelicSystem().onTurnStart(player);
 
