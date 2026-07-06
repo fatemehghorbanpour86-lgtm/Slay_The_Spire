@@ -37,6 +37,16 @@ int CombatCalculator::calculateDamage(Character* attacker, Character* defender, 
         damage = static_cast<int>(damage * 1.5);
     }
 
+    if (Player* pAttacker = dynamic_cast<Player*>(attacker))
+    {
+        damage = pAttacker->getRelicSystem().modifyDamageDealt(damage);
+    }
+
+    if (Player* pDefender = dynamic_cast<Player*>(defender))
+    {
+        damage = pDefender->getRelicSystem().modifyDamageTaken(damage);
+    }
+
     damage = std::max(0, damage);
 
     return damage;
