@@ -10,7 +10,8 @@ class Card;
 class Potion;
 class CombatCalculator;
 
-enum class CombatState {
+enum class CombatState
+{
     BattleStart,
     TurnStart,
     PlayerAction,
@@ -41,8 +42,16 @@ public:
 signals:
     void combatStateChanged(CombatState state);
     void statsUpdated();
+
+    void combatStarted();
+    void playerTurnStarted();
+    void enemyTurnStarted();
+    void cardPlayed(Card* card, Enemy* target);
+    void enemyIntentUpdated(Enemy* enemy);
+
     void battleWon();
     void battleLost();
+    void combatEnded(bool playerWon);
 
 private:
     void changeState(CombatState newState);

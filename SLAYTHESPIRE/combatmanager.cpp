@@ -75,6 +75,16 @@ void CombatManager::handleBattleStart()
 {
     player->getRelicSystem().onCombatStart(player);
 
+    for(Enemy* enemy : std::as_const(enemies))
+    {
+        if(enemy && !enemy->isDead())
+        {
+            enemy->chooseIntent(player);
+        }
+    }
+
+    emit combatStarted();
+
     changeState(CombatState::TurnStart);
 }
 
@@ -88,6 +98,8 @@ void CombatManager::handleTurnStart()
         player->getCombatDeck()->drawCards(5);
 
     player->getRelicSystem().onTurnStart(player);
+
+    emit playerTurnStarted();
 
     emit statsUpdated();
 
@@ -106,6 +118,8 @@ bool CombatManager::playCard(Card* card, Enemy* target)
         return false;
 
     card->play(player, enemies, target);
+
+    emit cardPlayed(card, target);
 
     player->getRelicSystem().onCardPlayed(player, card);
 
@@ -161,6 +175,8 @@ void CombatManager::handleTurnEnd()
 
 void CombatManager::handleEnemyTurn()
 {
+    emit enemyTurnStarted();
+
     for (Enemy* enemy : std::as_const(enemies) )
     {
         if (!enemy || enemy->isDead())
@@ -168,11 +184,17 @@ void CombatManager::handleEnemyTurn()
 
         enemy->executeMove(player);
 
+        if (!enemy->isDead() && player->getCurrentHealth() > 0)
+        {
+            enemy->chooseIntent(player);
+            emit enemyIntentUpdated(enemy);
+        }
+
         emit statsUpdated();
 
         checkWinLossCondition();
 
-        if (currentState == CombatState::BattleLost)
+        if (currentState == CombatState::BattleLost || currentState == CombatState::BattleWon)
             return;
     }
 
@@ -183,12 +205,14 @@ void CombatManager::checkWinLossCondition()
 {
     if (enemies.isEmpty())
     {
+        emit combatEnded(true);
         changeState(CombatState::BattleWon);
         return;
     }
 
     if (player->getCurrentHealth() <= 0)
     {
+        emit combatEnded(false);
         changeState(CombatState::BattleLost);
     }
 }
