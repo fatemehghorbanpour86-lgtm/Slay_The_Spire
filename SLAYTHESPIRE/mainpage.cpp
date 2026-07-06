@@ -1,9 +1,11 @@
 #include "mainpage.h"
+#include "audiomanager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QApplication>
 #include <QLabel>
 #include <QMovie>
+#include <QTimer>
 
 mainpage::mainpage(QWidget *parent)
     : QWidget{parent}
@@ -92,9 +94,43 @@ mainpage::mainpage(QWidget *parent)
     mainLayout->addLayout(buttonsLayout);
     mainLayout->addStretch();
 
+    connect(singlePlayerBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
+
+    connect(multiPlayerBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
+
+    connect(leaderBoardBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
+
+    connect(settingBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
+
+    connect(exitBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
+
     connect(singlePlayerBtn, &QPushButton::clicked, this, &mainpage::singlePlayerClicked);
 
     connect(exitBtn, &QPushButton::clicked, this, [](){
-        QApplication::quit();}
+
+        QTimer::singleShot(250, []() {
+            QApplication::quit();
+        });
+    }
             );
 }

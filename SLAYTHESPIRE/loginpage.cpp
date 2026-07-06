@@ -3,6 +3,7 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include <QMovie>
+#include "audiomanager.h"
 
 loginpage::loginpage(QWidget *parent)
     : QWidget{parent}
@@ -84,6 +85,18 @@ loginpage::loginpage(QWidget *parent)
     mainLayout->addLayout(inputLayout);
     mainLayout->addLayout(buttonsLayout);
     mainLayout->addStretch();
+
+    connect(loginBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
+
+    connect(registerBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
 
     connect(loginBtn, &QPushButton::clicked, this, [this]()
             {emit loginSuccess();});

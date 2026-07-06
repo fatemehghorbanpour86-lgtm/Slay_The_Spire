@@ -1,10 +1,11 @@
 #include "mainwindow.h"
-
+#include "audiomanager.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    AudioManager::instance().initialize();
     MainWindow w;
     w.show();
     return QApplication::exec();

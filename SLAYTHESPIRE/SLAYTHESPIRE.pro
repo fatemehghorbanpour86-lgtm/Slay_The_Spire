@@ -8,6 +8,7 @@ CONFIG += c++17
 
 SOURCES += \
     attackcards.cpp \
+    audiomanager.cpp \
     bossenemies.cpp \
     bossrelics.cpp \
     campfire.cpp \
@@ -41,6 +42,7 @@ SOURCES += \
 
 HEADERS += \
     attackcards.h \
+    audiomanager.h \
     bossenemies.h \
     bossrelics.h \
     campfire.h \
