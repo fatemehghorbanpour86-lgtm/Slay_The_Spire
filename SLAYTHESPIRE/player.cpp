@@ -287,6 +287,14 @@ bool Player::moveFromExhaustToHand(Card* card)
     return combatDeck->moveFromExhaustToHand(card);
 }
 
+void Player::addCardToDiscardPile(Card* card)
+{
+    if (combatDeck)
+    {
+        combatDeck->addCardToDiscardPile(card);
+    }
+}
+
 Card* Player::getRandomHandCard()
 {
     if (!combatDeck)

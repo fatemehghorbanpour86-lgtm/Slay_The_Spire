@@ -110,6 +110,7 @@ public:
     bool discardCard(Card* card);
     bool exhaustCard(Card* card);
     bool moveFromExhaustToHand(Card* card = nullptr);
+    void addCardToDiscardPile(Card* card);
 
     CombatDeck* getCombatDeck();
     const CombatDeck* getCombatDeck() const;
