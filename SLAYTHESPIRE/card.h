@@ -16,6 +16,13 @@ enum class CardType
     Curse
 };
 
+struct CardSaveData
+{
+    QString cardId;   //real name (before Upgrade)
+    CardType type = CardType::Attack;
+    bool isUpgraded = false;
+};
+
 class Card
 {
 protected:

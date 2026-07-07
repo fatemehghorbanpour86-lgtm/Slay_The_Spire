@@ -3,8 +3,14 @@
 
 
 #include <QVector>
+#include "card.h"
 
 class Card;
+
+struct MasterDeckSaveData
+{
+    QVector<CardSaveData> cards;
+};
 
 class MasterDeck
 {
@@ -31,6 +37,11 @@ class MasterDeck
     int getCardCount() const;
 
     const QVector<Card*>& getCards() const;
+
+    MasterDeckSaveData extractState() const;
+    void restoreState(const MasterDeckSaveData& data);
+
+    static Card* createCardById(const QString& cardId);
 
 };
 
