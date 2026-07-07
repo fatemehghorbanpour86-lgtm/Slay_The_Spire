@@ -153,4 +153,20 @@ private:
 };
 
 
+class PleadingVagrant : public Event
+{
+public:
+    PleadingVagrant();
+    void chooseOption(Player* player, int optionIndex) override;
+
+private:
+
+    void handleGiveGold(Player* player);
+
+    void handleRob(Player* player);
+
+    void grantRandomNormalRelic(Player* player);
+};
+
+
 #endif  // EVENT_H

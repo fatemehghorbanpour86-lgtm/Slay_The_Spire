@@ -8,6 +8,8 @@
 
 #include "eventrelics.h"
 
+#include "normalrelics.h"
+
 #include "cursecards.h"
 
 #include <QRandomGenerator>
@@ -486,3 +488,93 @@ void TheJoust::handleOwner(Player* player)
     if (roll < 30)
         player->gainGold(250);
 }
+
+
+
+//======================================================
+// PleadingVagrant
+//======================================================
+
+
+PleadingVagrant::PleadingVagrant()
+    : Event("Pleading Vagrant",
+            "A vagrant pleads for your help. You could help... or take what they have.")
+{
+    options.append(EventOption("[Give 85 Gold] Spend 85 Gold. Gain a random relic."));
+    options.append(EventOption("[Rob] Gain a random relic. Receive Curse: Regret."));
+    options.append(EventOption("[Leave] Nothing happens."));
+}
+
+
+void PleadingVagrant::chooseOption(Player* player, int optionIndex)
+{
+    if (player == nullptr)
+        return;
+
+    switch (optionIndex)
+    {
+    case 0:
+        handleGiveGold(player);
+        break;
+    case 1:
+        handleRob(player);
+        break;
+    case 2:
+        // [Leave]: Nothing happens.
+        break;
+    default:
+        break;
+    }
+}
+
+
+void PleadingVagrant::handleGiveGold(Player* player)
+{
+    if (!player->spendGold(85))
+        return;
+
+    grantRandomNormalRelic(player);
+}
+
+void PleadingVagrant::handleRob(Player* player)
+{
+
+    grantRandomNormalRelic(player);
+
+    player->getMasterDeck()->addCard(new Regret());
+}
+
+void PleadingVagrant::grantRandomNormalRelic(Player* player)
+{
+
+    QVector<Relic*> pool;
+    pool.append(new Girya());
+    pool.append(new IceCream());
+    pool.append(new Shuriken());
+    pool.append(new Kunai());
+    pool.append(new Anchor());
+    pool.append(new HappyFlower());
+    pool.append(new Orichalcum());
+    pool.append(new Vajra());
+
+    for (int i = pool.size() - 1; i >= 0; --i)
+    {
+        if (player->hasRelic(pool[i]->getId()))
+        {
+            delete pool[i];
+            pool.removeAt(i);
+        }
+    }
+
+    if (pool.isEmpty())
+        return;
+
+    int index = QRandomGenerator::global()->bounded(pool.size());
+    Relic* chosen = pool[index];
+    pool.removeAt(index);
+
+    qDeleteAll(pool);
+
+    player->addRelic(chosen);
+}
+
