@@ -271,3 +271,39 @@ bool Character::isDead() const
 {
     return currentHealth == 0;
 }
+
+CharacterSaveData Character::extractState() const
+{
+    CharacterSaveData data;
+    data.currentHealth = currentHealth;
+    data.maxHealth = maxHealth;
+
+    for (Effect* e : activeEffects)
+    {
+        if (!e)
+            continue;
+
+        EffectSaveData ed;
+        ed.type = e->getType();
+        ed.category = e->getCategory();
+        ed.amount = e->getAmount();
+        ed.duration = e->getDuration();
+
+        data.effects.append(ed);
+    }
+
+    return data;
+}
+
+void Character::restoreState(const CharacterSaveData& data)
+{
+    maxHealth = data.maxHealth;
+    currentHealth = data.currentHealth;
+
+    for (Effect* e : std::as_const(activeEffects))
+        delete e;
+    activeEffects.clear();
+
+    for (const EffectSaveData& ed : data.effects)
+        activeEffects.append(new Effect(ed.type, ed.category, ed.amount, ed.duration));
+}

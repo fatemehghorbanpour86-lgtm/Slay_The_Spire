@@ -324,3 +324,31 @@ bool Player::exhaustRandomCardFromHand()
 
     return combatDeck->exhaustRandomCardFromHand();
 }
+
+PlayerSaveData Player::extractState() const
+{
+    PlayerSaveData data;
+
+    data.characterData = Character::extractState();
+    data.gold = gold;
+    data.maxEnergy = maxEnergy;
+    data.relics = relicSystem.extractState();
+
+    if (masterDeck)
+        data.masterDeckData = masterDeck->extractState();
+
+    return data;
+}
+
+void Player::restoreState(const PlayerSaveData& data)
+{
+    Character::restoreState(data.characterData);
+
+    gold = data.gold;
+    maxEnergy = data.maxEnergy;
+
+    relicSystem.restoreState(data.relics, this);
+
+    if (masterDeck)
+        masterDeck->restoreState(data.masterDeckData);
+}

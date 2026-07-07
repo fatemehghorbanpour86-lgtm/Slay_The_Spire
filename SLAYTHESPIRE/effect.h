@@ -60,4 +60,12 @@ private:
     int duration;
 };
 
+struct EffectSaveData
+{
+    Effect::Type type;
+    Effect::Category category;
+    int amount = 0;
+    int duration = -1;
+};
+
 #endif

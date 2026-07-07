@@ -6,6 +6,12 @@
 #include <QObject>
 #include "effect.h"
 
+struct CharacterSaveData
+{
+    int currentHealth = 0;
+    int maxHealth = 0;
+    QVector<EffectSaveData> effects;
+};
 
 class Character : public QObject
 {
@@ -58,6 +64,9 @@ public:
     void loseHP(int amount);
 
     bool isDead() const;
+
+    CharacterSaveData extractState() const;
+    void restoreState(const CharacterSaveData& data);
 };
 
 #endif
