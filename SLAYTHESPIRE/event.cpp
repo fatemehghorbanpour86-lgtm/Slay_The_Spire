@@ -10,6 +10,12 @@
 
 #include "normalrelics.h"
 
+#include "eliteenemy.h"
+
+#include "normalenemies.h"
+
+#include "relicsystem.h"
+
 #include "cursecards.h"
 
 #include <QRandomGenerator>
@@ -578,3 +584,90 @@ void PleadingVagrant::grantRandomNormalRelic(Player* player)
     player->addRelic(chosen);
 }
 
+
+//======================================================
+// Colosseum(امتیازی)
+//======================================================
+
+
+Colosseum::Colosseum(QObject* parent)
+    : QObject(parent),
+    Event("The Colosseum",
+          "The crowd roars. You must fight for their entertainment...")
+{
+    options.append(EventOption("[Fight] Face a random Elite enemy. Gain Elite rewards on victory."));
+}
+
+
+void Colosseum::chooseOption(Player* player, int optionIndex)
+{
+    if (player == nullptr)
+        return;
+
+    switch (optionIndex)
+    {
+    case 0:
+        handleFight(player);
+        break;
+
+    default:
+        break;
+    }
+}
+
+void Colosseum::handleFight(Player* player)
+{
+    QVector<Enemy*> encounter = buildRandomEliteEncounter();
+
+    // TODO (GameManager): Connect to requestEliteCombat signal.
+    // GameManager :
+    //   1. Create CombatManager with (player, encounter)
+    //   2. Call combatManager->startCombat()
+    //   3. Connect CombatManager::battleWon to call grantEliteReward(player)
+    emit requestEliteCombat(player, encounter);
+}
+
+void Colosseum::grantEliteReward(Player* player)
+{
+    if (player == nullptr)
+        return;
+
+    // Standard Elite reward: grant a random Event-tier relic.
+    // TODO (GameManager): Wire this call to CombatManager::battleWon signal.
+    RelicSystem::grantRandomRelics(player, Relic::Tier::Event, 1);
+}
+
+QVector<Enemy*> Colosseum::buildRandomEliteEncounter() const
+{
+    QVector<Enemy*> encounter;
+
+    int roll = QRandomGenerator::global()->bounded(4);
+
+    switch (roll)
+    {
+    case 0:
+        encounter.append(new GremlinNob());
+        break;
+
+    case 1:
+        encounter.append(new Sentry(false));
+        encounter.append(new Sentry(true));
+        encounter.append(new Sentry(false));
+        break;
+
+    case 2:
+        encounter.append(new BookOfStabbing());
+        break;
+
+    case 3:
+
+        encounter.append(new BlueSlaver());
+        encounter.append(new RedSlaver());
+        encounter.append(new Taskmaster());
+        break;
+    default:
+        break;
+    }
+
+    return encounter;
+}
