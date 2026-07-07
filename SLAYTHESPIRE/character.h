@@ -10,7 +10,6 @@ struct CharacterSaveData
 {
     int currentHealth = 0;
     int maxHealth = 0;
-    int block = 0;
     QVector<EffectSaveData> effects;
 };
 

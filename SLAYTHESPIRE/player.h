@@ -3,6 +3,7 @@
 
 #include "character.h"
 #include "relicsystem.h"
+#include "masterdeck.h"
 
 /*
  *  Player Responsibilities:
@@ -21,7 +22,17 @@ class Card;
 class CombatDeck;
 class MasterDeck;
 
+struct PlayerSaveData
+{
+    CharacterSaveData characterData;
 
+    int gold = 0;
+    int maxEnergy = 3;
+
+    QVector<RelicSaveData> relics;
+
+    MasterDeckSaveData masterDeckData;
+};
 
 class Player : public Character
 {
@@ -117,6 +128,9 @@ public:
 
     Card* getRandomHandCard();
     bool exhaustRandomCardFromHand();
+
+    PlayerSaveData extractState() const;
+    void restoreState(const PlayerSaveData& data);
 
 };
 

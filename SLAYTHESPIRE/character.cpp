@@ -277,7 +277,6 @@ CharacterSaveData Character::extractState() const
     CharacterSaveData data;
     data.currentHealth = currentHealth;
     data.maxHealth = maxHealth;
-    data.block = block;
 
     for (Effect* e : activeEffects)
     {
@@ -300,7 +299,6 @@ void Character::restoreState(const CharacterSaveData& data)
 {
     maxHealth = data.maxHealth;
     currentHealth = data.currentHealth;
-    block = data.block;
 
     for (Effect* e : std::as_const(activeEffects))
         delete e;
