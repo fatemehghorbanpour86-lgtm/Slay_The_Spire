@@ -139,5 +139,18 @@ private:
 };
 
 
+class TheJoust : public Event
+{
+public:
+    TheJoust();
+    void chooseOption(Player* player, int optionIndex) override;
+
+private:
+
+    void handleMurderer(Player* player);
+
+    void handleOwner(Player* player);
+};
+
 
 #endif  // EVENT_H

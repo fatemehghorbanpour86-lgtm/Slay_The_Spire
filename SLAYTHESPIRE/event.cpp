@@ -424,3 +424,65 @@ void GoldenShrine::handlePray(Player* player)
 {
     player->gainGold(100);
 }
+
+
+//======================================================
+// TheJoust
+//======================================================
+
+
+TheJoust::TheJoust()
+    : Event("The Joust",
+            "Two knights prepare to joust. You may bet on the outcome...")
+{
+    options.append(EventOption("[Murderer] Bet 50 Gold on the Murderer. 70% chance to win 100 Gold."));
+    options.append(EventOption("[Owner] Bet 50 Gold on the Owner. 30% chance to win 250 Gold."));
+}
+
+
+void TheJoust::chooseOption(Player* player, int optionIndex)
+{
+    if (player == nullptr)
+        return;
+
+    switch (optionIndex)
+    {
+    case 0:
+
+        handleMurderer(player);
+        break;
+
+    case 1:
+
+        handleOwner(player);
+        break;
+
+    default:
+        break;
+    }
+}
+
+
+void TheJoust::handleMurderer(Player* player)
+{
+
+    if (!player->spendGold(50))
+        return;
+
+
+    int roll = QRandomGenerator::global()->bounded(100);
+    if (roll < 70)
+        player->gainGold(100);
+}
+
+void TheJoust::handleOwner(Player* player)
+{
+
+    if (!player->spendGold(50))
+        return;
+
+
+    int roll = QRandomGenerator::global()->bounded(100);
+    if (roll < 30)
+        player->gainGold(250);
+}
