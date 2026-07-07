@@ -59,7 +59,7 @@ void Metallicize::upgrade()
 
     isUpgraded = true;
     blockAmount = 4;
-    name = "Metallicizie+";
+    name = "Metallicize+";
     description = "At the end of your turn, gain 4 Block.";
 }
 
