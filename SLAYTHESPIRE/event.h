@@ -83,4 +83,20 @@ private:
 };
 
 
+class Augmenter : public Event
+{
+public:
+    Augmenter();
+    void chooseOption(Player* player, int optionIndex) override;
+
+private:
+
+    void handleTestJAX(Player* player);
+
+    void handleBecomeTestSubject(Player* player);
+
+    void handleIngestMutagens(Player* player);
+};
+
+
 #endif  // EVENT_H

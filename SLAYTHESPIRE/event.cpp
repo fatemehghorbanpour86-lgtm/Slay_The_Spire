@@ -157,3 +157,84 @@ void GoldenIdol::handleSteal(Player* player)
 
     player->addRelic(new GoldenIdolRelic());
 }
+
+
+
+//======================================================
+// Augmenter
+//======================================================
+
+Augmenter::Augmenter()
+    : Event("Augmenter",
+            "A scientist offers to enhance you with experimental procedures...")
+{
+    options.append(EventOption("[Test J.A.X] Receive the J.A.X card."));
+    options.append(EventOption("[Become Test Subject] Transform 2 cards."));
+    options.append(EventOption("[Ingest Mutagens] Gain Mutagenic Strength relic."));
+}
+
+
+void Augmenter::chooseOption(Player* player, int optionIndex)
+{
+    if (player == nullptr)
+        return;
+
+    switch (optionIndex)
+    {
+    case 0:
+        handleTestJAX(player);
+        break;
+    case 1:
+        handleBecomeTestSubject(player);
+        break;
+    case 2:
+        handleIngestMutagens(player);
+        break;
+    default:
+        break;
+    }
+}
+
+
+void Augmenter::handleTestJAX(Player* player)
+{
+    player->getMasterDeck()->addCard(new JAX());
+}
+
+void Augmenter::handleBecomeTestSubject(Player* player)
+{
+    MasterDeck* deck = player->getMasterDeck();
+    if (deck == nullptr)
+        return;
+
+    // TODO (UI): Let the player pick 2 specific cards to transform.
+    // For now, pick 2 random transformable cards.
+
+    // Build pool of transformable cards (isRemovable == true)
+
+    QVector<Card*> pool;
+
+    for (Card* card : deck->getCards())
+    {
+        if (card != nullptr && card->isRemovable())
+            pool.append(card);
+    }
+
+    // Shuffle pool and transform up to 2 cards
+    for (int i = pool.size() - 1; i > 0; --i)
+    {
+        int j = QRandomGenerator::global()->bounded(i + 1);
+        pool.swapItemsAt(i, j);
+    }
+
+    int transformCount = qMin(2, pool.size());
+    for (int i = 0; i < transformCount; ++i)
+    {
+        deck->transformCard(pool[i]);
+    }
+}
+
+void Augmenter::handleIngestMutagens(Player* player)
+{
+    player->addRelic(new MutagenicStrength());
+}
