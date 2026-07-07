@@ -53,4 +53,20 @@ public:
     const QVector<EventOption>& getOptions() const;
 };
 
+
+class OminousForge : public Event
+{
+public:
+    OminousForge();
+    void chooseOption(Player* player, int optionIndex) override;
+
+private:
+    // [Forge]: Upgrade a card from MasterDeck
+    void handleForge(Player* player);
+
+    // [Rummage]: Gain WarpedTongs relic + receive a Curse card
+    void handleRummage(Player* player);
+};
+
+
 #endif  // EVENT_H
