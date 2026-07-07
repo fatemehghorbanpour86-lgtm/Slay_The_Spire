@@ -3,6 +3,7 @@
 
 
 #include <QVector>
+#include "card.h"
 
 class Card;
 
@@ -12,6 +13,7 @@ class MasterDeck
  private:
 
     QVector<Card*> cards;
+
 
  public:
 
@@ -31,6 +33,14 @@ class MasterDeck
     int getCardCount() const;
 
     const QVector<Card*>& getCards() const;
+
+    Card* transformCard(Card* card);
+
+ private:
+
+    static QVector<Card*> createFullCardPool(CardType type);
+     // Returns freshly allocated instances of all playable cards of the given type.
+     //Curse and Status cards are excluded
 
 };
 
