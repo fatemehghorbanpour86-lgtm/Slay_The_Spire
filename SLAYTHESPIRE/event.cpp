@@ -386,3 +386,41 @@ void TheCleric::handlePurify(Player* player)
     int index = QRandomGenerator::global()->bounded(removable.size());
     deck->removeCard(removable[index]);
 }
+
+
+//======================================================
+// GoldenShrine
+//======================================================
+
+
+GoldenShrine::GoldenShrine()
+    : Event("Golden Shrine","A golden shrine stands before you, emanating a warm glow...")
+{
+    options.append(EventOption("[Pray] Gain 100 Gold."));
+    options.append(EventOption("[Leave] Nothing happens."));
+}
+
+
+void GoldenShrine::chooseOption(Player* player, int optionIndex)
+{
+    if (player == nullptr)
+        return;
+
+    switch (optionIndex)
+    {
+    case 0:
+        handlePray(player);
+        break;
+    case 1:
+        // [Leave]: Nothing happens.
+        break;
+    default:
+        break;
+    }
+}
+
+
+void GoldenShrine::handlePray(Player* player)
+{
+    player->gainGold(100);
+}

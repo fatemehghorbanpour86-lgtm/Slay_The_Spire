@@ -127,4 +127,17 @@ private:
 
 
 
+class GoldenShrine : public Event
+{
+public:
+    GoldenShrine();
+    void chooseOption(Player* player, int optionIndex) override;
+
+private:
+
+    void handlePray(Player* player);
+};
+
+
+
 #endif  // EVENT_H
