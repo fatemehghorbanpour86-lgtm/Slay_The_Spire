@@ -88,3 +88,8 @@ void Enemy::increaseTurnCount()
 {
     turnCount++;
 }
+
+void Enemy::finishTurn()
+{
+    increaseTurnCount();
+}

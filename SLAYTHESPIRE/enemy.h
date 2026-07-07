@@ -89,6 +89,9 @@ public:
     // Other effects (Block, Heal, Buffs, Debuffs, Card generation) should be applied directly here.
     // Combat Deck is ToDo so just comment Card generation to apply later.
     // Example = //combatDeck->addToDiscard( new Burn()).
+
+    void finishTurn();
+
 };
 
 #endif // ENEMY_H

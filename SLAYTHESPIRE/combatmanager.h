@@ -63,7 +63,8 @@ private:
 
     void checkWinLossCondition();
 
-private:
+    void connectEnemy(Enemy* enemy);
+
     CombatState currentState;
     Player* player;
     QVector<Enemy*> enemies;

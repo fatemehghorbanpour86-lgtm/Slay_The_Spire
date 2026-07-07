@@ -1,7 +1,9 @@
 #include "eliteenemy.h"
 
+#include "combatdeck.h"
 #include "player.h"
 #include "combatcalculator.h"
+#include "statuscards.h"
 
 #include <QRandomGenerator>
 
@@ -19,7 +21,6 @@ bool GremlinNob::isEnraged() const
 
 void GremlinNob::chooseIntent(Player* player)
 {
-    Q_UNUSED(player)
 
     if(getTurnCount() == 0)
     {
@@ -111,7 +112,6 @@ Sentry::Sentry(bool startsWithBeam)
 
 void Sentry::chooseIntent(Player* player)
 {
-    Q_UNUSED(player)
 
     // First turn depends on which Sentry this is.
     if(getTurnCount() == 0)
@@ -180,10 +180,11 @@ void Sentry::executeMove(Player* player)
 
     case Bolt:
 
-        // TODO CombatDeck
-        // Shuffle 2 Dazed status cards into the player's Discard Pile.
-        // combatDeck->addToDiscardPile(new Dazed());
-        // combatDeck->addToDiscardPile(new Dazed());
+        if (player->getCombatDeck())
+        {
+            player->getCombatDeck()->addCardToDiscardPile(new Daze());
+            player->getCombatDeck()->addCardToDiscardPile(new Daze());
+        }
 
         break;
     }
@@ -297,7 +298,8 @@ void Taskmaster::performScouringWhip(Player* player)
 
      CombatCalculator::dealDamage(this, player, 7);
 
-    // TODO CombatDeck
-    // Add a WOUND status card to the player's Discard Pile.
-    // combatDeck->addToDiscardPile(new Wound());
+    if (player->getCombatDeck())
+    {
+        player->getCombatDeck()->addCardToDiscardPile(new Wound());
+    }
 }
