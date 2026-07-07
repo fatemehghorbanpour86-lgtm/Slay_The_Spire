@@ -112,5 +112,19 @@ private:
     void handleTrade(Player* player);
 };
 
+class TheCleric : public Event
+{
+public:
+    TheCleric();
+    void chooseOption(Player* player, int optionIndex) override;
+
+private:
+
+    void handleHeal(Player* player);
+
+    void handlePurify(Player* player);
+};
+
+
 
 #endif  // EVENT_H

@@ -309,3 +309,80 @@ void FaceTrader::handleTrade(Player* player)
         break;
     }
 }
+
+//======================================================
+// TheCleric
+//======================================================
+
+TheCleric::TheCleric()
+    : Event("The Cleric",
+            "A cleric offers you their services, for the right price...")
+{
+    options.append(EventOption("[Heal] Lose 35 Gold. Heal 25% Max HP."));
+    options.append(EventOption("[Purify] Lose 50 Gold. Remove a card."));
+    options.append(EventOption("[Leave] Nothing happens."));
+}
+
+
+void TheCleric::chooseOption(Player* player, int optionIndex)
+{
+    if (player == nullptr)
+        return;
+
+    switch (optionIndex)
+    {
+    case 0:
+
+        handleHeal(player);
+        break;
+    case 1:
+
+        handlePurify(player);
+        break;
+    case 2:
+
+        // [Leave]: Nothing happens.
+        break;
+
+    default:
+        break;
+    }
+}
+
+
+void TheCleric::handleHeal(Player* player)
+{
+    if (!player->spendGold(35))
+        return;
+
+    int healAmount = qRound(player->getMaxHealth() * 0.25);
+
+    player->heal(healAmount);
+}
+
+void TheCleric::handlePurify(Player* player)
+{
+    if (!player->spendGold(50))
+        return;
+
+    MasterDeck* deck = player->getMasterDeck();
+    if (deck == nullptr || deck->getCardCount() == 0)
+        return;
+
+    // TODO (UI): Let the player pick a specific card to remove.
+    // For now, pick a random removable card.
+
+    QVector<Card*> removable;
+
+    for (Card* card : deck->getCards())
+    {
+        if (card != nullptr && card->isRemovable())
+            removable.append(card);
+    }
+
+    if (removable.isEmpty())
+        return;
+
+    int index = QRandomGenerator::global()->bounded(removable.size());
+    deck->removeCard(removable[index]);
+}
