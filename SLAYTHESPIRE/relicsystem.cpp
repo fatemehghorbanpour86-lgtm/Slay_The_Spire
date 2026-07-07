@@ -2,6 +2,8 @@
 #include <utility>
 #include <QRandomGenerator>
 #include "normalrelics.h"
+#include "bossrelics.h"
+#include "eventrelics.h"
 #include "player.h"
 
 RelicSystem::RelicSystem(QObject *parent) : QObject(parent)
@@ -238,5 +240,56 @@ void RelicSystem::grantRandomRelics(Player* player, Relic::Tier tier, int count)
     for (int i = grantCount; i < pool.size(); ++i)
     {
         delete pool[i];
+    }
+}
+
+Relic* RelicSystem::createRelicById(RelicId id)
+{
+    switch (id)
+    {
+    //starter
+    case RelicId::BurningBlood:      return new BurningBlood();
+
+    //normal
+    case RelicId::Girya:             return new Girya();
+    case RelicId::IceCream:          return new IceCream();
+    case RelicId::Shuriken:          return new Shuriken();
+    case RelicId::Kunai:             return new Kunai();
+    case RelicId::Anchor:            return new Anchor();
+    case RelicId::HappyFlower:       return new HappyFlower();
+    case RelicId::Orichalcum:        return new Orichalcum();
+    case RelicId::Vajra:             return new Vajra();
+
+    //boss
+    case RelicId::CallingBell:       return new CallingBell();
+    case RelicId::MarkOfPain:        return new MarkOfPain();
+    case RelicId::VelvetChoker:      return new VelvetChoker();
+    case RelicId::BlackStar:         return new BlackStar();
+    case RelicId::CoffeeDripper:     return new CoffeeDripper();
+
+    //event
+    case RelicId::WarpedTongs:       return new WarpedTongs();
+    case RelicId::MutagenicStrength: return new MutagenicStrength();
+    case RelicId::CultistHeadpiece:  return new CultistHeadpiece();
+    case RelicId::GremlinVisage:     return new GremlinVisage();
+    case RelicId::FaceOfCleric:      return new FaceOfCleric();
+    }
+
+    return nullptr;
+}
+
+void RelicSystem::restoreState(const QVector<RelicSaveData>& data, Player* player)
+{
+    clear();
+
+    for (const RelicSaveData& relicData : data)
+    {
+        Relic* relic = createRelicById(relicData.id);
+
+        if (!relic)
+            continue;
+
+        relic->setCounter(relicData.counter);
+        addRelic(relic, player);
     }
 }

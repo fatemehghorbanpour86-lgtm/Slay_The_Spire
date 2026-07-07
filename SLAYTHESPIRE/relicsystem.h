@@ -60,6 +60,8 @@ public:
     bool canPlayCard(Player* player) const;
 
     QVector<RelicSaveData> extractState() const;
+    void restoreState(const QVector<RelicSaveData>& data, Player* player);
+    static Relic* createRelicById(RelicId id);
 
     static void grantRandomRelics(Player* player, Relic::Tier tier, int count);
 
