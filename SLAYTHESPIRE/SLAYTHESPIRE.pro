@@ -20,7 +20,9 @@ SOURCES += \
     effect.cpp \
     eliteenemy.cpp \
     enemy.cpp \
+    event.cpp \
     eventrelics.cpp \
+    eventsystem.cpp \
     loginpage.cpp \
     main.cpp \
     mainpage.cpp \
@@ -55,7 +57,9 @@ HEADERS += \
     effect.h \
     eliteenemy.h \
     enemy.h \
+    event.h \
     eventrelics.h \
+    eventsystem.h \
     loginpage.h \
     mainpage.h \
     mainwindow.h \
