@@ -99,4 +99,18 @@ private:
 };
 
 
+class FaceTrader : public Event
+{
+public:
+    FaceTrader();
+    void chooseOption(Player* player, int optionIndex) override;
+
+private:
+
+    void handleTouch(Player* player);
+
+    void handleTrade(Player* player);
+};
+
+
 #endif  // EVENT_H

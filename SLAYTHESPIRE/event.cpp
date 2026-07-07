@@ -238,3 +238,74 @@ void Augmenter::handleIngestMutagens(Player* player)
 {
     player->addRelic(new MutagenicStrength());
 }
+
+//======================================================
+// FaceTrader
+//======================================================
+
+FaceTrader::FaceTrader()
+    : Event("Face Trader",
+            "A strange face carved into the wall stares at you. It seems to want something...")
+{
+    options.append(EventOption("[Touch] Lose 5-10% Max HP. Gain 75 Gold."));
+    options.append(EventOption("[Trade] Gain a random face relic."));
+    options.append(EventOption("[Leave] Nothing happens."));
+}
+
+
+void FaceTrader::chooseOption(Player* player, int optionIndex)
+{
+    if (player == nullptr)
+        return;
+
+    switch (optionIndex)
+    {
+    case 0:
+        handleTouch(player);
+        break;
+
+    case 1:
+        handleTrade(player);
+        break;
+
+    case 2:
+        // [Leave]: Nothing happens.
+        break;
+
+    default:
+        break;
+    }
+}
+
+
+void FaceTrader::handleTouch(Player* player)
+{
+    int maxHp = player->getMaxHealth();
+    int percent = QRandomGenerator::global()->bounded(5, 11); // [5, 10]
+    int loss = qRound(maxHp * percent / 100.0);
+    player->decreaseMaxHealth(loss);
+
+    player->gainGold(75);
+}
+
+void FaceTrader::handleTrade(Player* player)
+{
+
+
+    int roll = QRandomGenerator::global()->bounded(3);
+
+    switch (roll)
+    {
+    case 0:
+        player->addRelic(new FaceOfCleric());
+        break;
+    case 1:
+        player->addRelic(new GremlinVisage());
+        break;
+    case 2:
+        player->addRelic(new CultistHeadpiece());
+        break;
+    default:
+        break;
+    }
+}
