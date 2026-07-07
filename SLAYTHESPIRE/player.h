@@ -66,6 +66,9 @@ public:
     // Permanently increases the player's maximum HP.
     // Current HP is also increased by the same amount.
 
+    void decreaseMaxHealth(int amount);
+    // Permanently decreases the player's maximum HP.
+
     void increaseMaxEnergy(int amount);
     //Permanently increases maxEnergy
     //Does NOT touch currentEnergy directly;

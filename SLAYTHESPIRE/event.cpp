@@ -117,3 +117,43 @@ void OminousForge::handleRummage(Player* player)
     player->getMasterDeck()->addCard(new CurseOfTheBell());
 }
 
+
+//======================================================
+// GoldenIdol
+//======================================================
+
+
+GoldenIdol::GoldenIdol()
+    : Event("Golden Idol",
+            "A golden idol sits on a pedestal. You feel a strange pull towards it...")
+{
+    options.append(EventOption("[Steal] Gain Golden Idol. Lose 5 Max HP."));
+    options.append(EventOption("[Leave] Nothing happens."));
+}
+
+
+void GoldenIdol::chooseOption(Player* player, int optionIndex)
+{
+    if (player == nullptr)
+        return;
+
+    switch (optionIndex)
+    {
+    case 0:
+        handleSteal(player);
+        break;
+    case 1:
+        // [Leave]: Nothing happens.
+        break;
+    default:
+        break;
+    }
+}
+
+
+void GoldenIdol::handleSteal(Player* player)
+{
+    player->decreaseMaxHealth(5);
+
+    player->addRelic(new GoldenIdolRelic());
+}

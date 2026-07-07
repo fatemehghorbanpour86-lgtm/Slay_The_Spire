@@ -69,4 +69,18 @@ private:
 };
 
 
+class GoldenIdol : public Event
+{
+public:
+
+    GoldenIdol();
+
+    void chooseOption(Player* player, int optionIndex) override;
+
+private:
+
+    void handleSteal(Player* player);
+};
+
+
 #endif  // EVENT_H
