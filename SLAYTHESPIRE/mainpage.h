@@ -12,13 +12,14 @@ class mainpage : public QWidget
     Q_OBJECT
 public:
     explicit mainpage(QWidget *parent = nullptr);
-
 signals:
+    void startGame();
+private slots:
     void singlePlayerClicked();
-    void multiPlayerClicked();
-    void leaderBoardClicked();
-    void settingClicked();
-    void exitClicked();
+    // void multiPlayerClicked();
+    // void leaderBoardClicked();
+    // void settingClicked();
+    // void exitClicked();
 private:
     QPushButton *singlePlayerBtn;
     QPushButton *multiPlayerBtn;

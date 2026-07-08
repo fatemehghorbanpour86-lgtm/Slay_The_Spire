@@ -3,6 +3,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QApplication>
+#include <QStackedWidget>
 #include <QLabel>
 #include <QMovie>
 #include <QTimer>
@@ -133,4 +134,9 @@ mainpage::mainpage(QWidget *parent)
         });
     }
             );
+}
+
+void mainpage::singlePlayerClicked()
+{
+    emit startGame();
 }
