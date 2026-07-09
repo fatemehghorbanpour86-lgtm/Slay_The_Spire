@@ -1,5 +1,6 @@
 #include "mapwidget.h"
 #include "mapnode.h"
+#include "audiomanager.h"
 #include <QPen>
 
 MapWidget::MapWidget(Map* gameMap, QWidget *parent)
@@ -75,6 +76,12 @@ void MapWidget::createNodeButtons() {
             btn->move(xPos, yPos);
             btn->setToolTip(getTooltipText(node->getType()));
 
+            connect(btn, &QPushButton::pressed,
+                    this, []()
+                    {
+                        AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+                    });
+
             connect(btn, &QPushButton::clicked, this, [this, node]() {
                 if (node->isAvailable()) {
                     emit nodeClicked(node->getId());
@@ -144,6 +151,9 @@ QString MapWidget::getNodeStyleSheet(MapNode* node) {
                "border-image: url(%1);"
                "border: none;"
                "background: transparent;"
+               "}"
+               "QPushButton:pressed { "
+               "   margin: 5px 5px 5px 5px; "
                "}"
                ).arg(imagePath);
 }

@@ -4,6 +4,7 @@
 #include <QScrollBar>
 #include "player.h"
 #include "potion.h"
+#include "audiomanager.h"
 
 static const QString BONE_COLOR = "#E8DCC0";
 
@@ -21,6 +22,9 @@ void MapPage::setupUI() {
         "background-image: url(:/map/map.png);"
         "background-repeat: no-repeat;"
         "background-position: center;"
+        "}"
+        "QToolTip { color: #facc15; background-color: #1f2937; border: 1px solid #b91c1c;"
+        "border-radius: 4px; padding: 6px; font-weight: bold; font-family: Tahoma;"
         "}"
         );
 
@@ -85,7 +89,11 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
     relicBtn->setCursor(Qt::PointingHandCursor);
     relicBtn->setStyleSheet(
         "QPushButton { background-color: transparent; font-size: 16px; "
-        "font-weight: bold; color: " + BONE_COLOR + "; border: none; }");
+        "font-weight: bold; color: " + BONE_COLOR + "; border: none; }"
+        "QPushButton:pressed { "
+        "   margin: 3px 3px 3px 3px; "
+        "}"
+        );
     connect(relicBtn, &QPushButton::clicked, this, &MapPage::onRelicButtonClicked);
 
     // پنل تیره با گوشه‌های گرد پشت پوشن‌ها (QFrame خودش QSS رو رندر می‌کنه)
@@ -127,7 +135,8 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
 
     floorIconLabel = new QLabel();
     floorIconLabel->setFixedSize(24, 24);
-    floorIconLabel->setStyleSheet("border-image: url(:/map/floorIcon.png); background: transparent;");
+    floorIconLabel->setStyleSheet(
+        "border-image: url(:/map/floorIcon.png); background: transparent;");
 
     floorNumberLabel = new QLabel("0");
     floorNumberLabel->setStyleSheet("font-size: 18px; font-weight: bold; color: " + BONE_COLOR + ";");
@@ -148,13 +157,33 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
         "QPushButton {"
         "border: none;"
         "border-image: url(:/map/cardsBtn.png);"
-        "}");
+        "}"
+        "QPushButton:pressed { "
+        "   margin: 5px 5px 5px 5px; "
+        "}"
+        );
+
+    connect(deckBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(deckBtn, &QPushButton::clicked, this, &MapPage::onDeckButtonClicked);
 
     settingsBtn = new QPushButton();
     settingsBtn->setFixedSize(40, 40);
     settingsBtn->setCursor(Qt::PointingHandCursor);
-    settingsBtn->setStyleSheet("QPushButton { border-image: url(:/map/settingBtnMap.png); }");
+    settingsBtn->setStyleSheet(
+        "QPushButton { border-image: url(:/map/settingBtnMap.png); }"
+        "QPushButton:pressed { "
+        "   margin: 5px 5px 5px 5px; "
+        "}"
+        );
+    connect(settingsBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(settingsBtn, &QPushButton::clicked, this, &MapPage::onSettingsButtonClicked);
 
     topBarLayout->addWidget(deckBtn);

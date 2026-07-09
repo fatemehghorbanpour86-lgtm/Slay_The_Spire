@@ -26,7 +26,7 @@ private:
 
     static const int MAP_CONTENT_WIDTH = 1400;
     static const int NODE_SIZE = 64;
-    static const int VERTICAL_SPACING = 170;    // فاصله بیشتر بین فلورها
+    static const int VERTICAL_SPACING = 170;
     static const int VERTICAL_SPACING_BOSS = 300;
     static const int HORIZONTAL_SPACING = 200;
 
