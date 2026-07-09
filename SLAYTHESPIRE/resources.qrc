@@ -10,6 +10,7 @@
         <file>MainMenu.gif</file>
         <file>LoginPage.gif</file>
         <file>SplashPage.gif</file>
+        <file>battlebackground.png</file>
     </qresource>
     <qresource prefix="/Audio">
         <file>Attack.wav</file>

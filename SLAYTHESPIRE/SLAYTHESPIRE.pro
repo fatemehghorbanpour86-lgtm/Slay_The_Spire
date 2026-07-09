@@ -9,6 +9,7 @@ CONFIG += c++17
 SOURCES += \
     attackcards.cpp \
     audiomanager.cpp \
+    battlepage.cpp \
     bossenemies.cpp \
     bossrelics.cpp \
     campfire.cpp \
@@ -47,6 +48,7 @@ SOURCES += \
 HEADERS += \
     attackcards.h \
     audiomanager.h \
+    battlepage.h \
     bossenemies.h \
     bossrelics.h \
     campfire.h \
@@ -82,6 +84,7 @@ HEADERS += \
     statuscards.h
 
 FORMS += \
+    battlepage.ui \
     mainwindow.ui
 
 # Default rules for deployment.

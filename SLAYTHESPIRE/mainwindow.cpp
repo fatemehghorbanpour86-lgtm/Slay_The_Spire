@@ -4,6 +4,7 @@
 #include "splashpage.h"
 #include "loginpage.h"
 #include "mainpage.h"
+#include "battlepage.h"
 
 void MainWindow::showLoginPAge()
 {
@@ -13,6 +14,11 @@ void MainWindow::showLoginPAge()
 void MainWindow::showMainMenuPage()
 {
     stackedWidget->setCurrentWidget(mainMenuPage);
+}
+
+void MainWindow::showBattlePage()
+{
+    stackedWidget->setCurrentWidget(battlePage);
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -29,13 +35,17 @@ MainWindow::MainWindow(QWidget *parent)
     splashPage = new SplashPage(this);
     loginPage = new loginpage(this);
     mainMenuPage = new mainpage(this);
+    battlePage = new BattlePage(this);
+
 
     stackedWidget->addWidget(splashPage);
     stackedWidget->addWidget(loginPage);
     stackedWidget->addWidget(mainMenuPage);
+    stackedWidget->addWidget(battlePage);
 
     connect(splashPage, &SplashPage::loadingFinished, this, &MainWindow::showLoginPAge);
     connect(loginPage, &loginpage::loginSuccess,this, &MainWindow::showMainMenuPage );
+    connect(mainMenuPage, &mainpage::singlePlayerClicked, this, &MainWindow::showBattlePage);
 
     stackedWidget->setCurrentWidget(splashPage);
 }
