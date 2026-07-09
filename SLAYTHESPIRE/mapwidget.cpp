@@ -1,37 +1,77 @@
 #include "mapwidget.h"
+#include "mapnode.h"
 #include <QPen>
 
 MapWidget::MapWidget(Map* gameMap, QWidget *parent)
     : QWidget(parent), map(gameMap)
 {
+    // بک‌گراند این ویجت رو کاملاً شفاف نگه می‌داریم تا عکس مپ که روی
+    // MapPage ست شده از پشتش دیده بشه
+    setAttribute(Qt::WA_TranslucentBackground);
+    setStyleSheet("background: transparent;");
+
     createNodeButtons();
 }
 
 void MapWidget::createNodeButtons() {
-    const int nodeSize = 64;
-    const int verticalSpacing = 120;
-    const int horizontalSpacing = 100;
-
     const QVector<MapFloor>& floors = map->getFloors();
     int totalFloors = floors.size();
 
-    int mapHeight = totalFloors * verticalSpacing + 100;
-    setMinimumSize(800, mapHeight);
+    int mapHeight = ((totalFloors - 1) * VERTICAL_SPACING) + 150 + VERTICAL_SPACING_BOSS;
+
+    // setFixedSize به‌جای setMinimumSize: عرض همین الان قطعی می‌شه
+    // و دیگه لازم نیست منتظر layout بمونیم تا width() درست برگرده
+    setFixedSize(MAP_CONTENT_WIDTH, mapHeight);
 
     for (int i = 0; i < totalFloors; ++i) {
         const QVector<MapNode*>& nodes = floors[i].getNodes();
         int nodeCount = nodes.size();
 
-        int startX = (this->width() - (nodeCount * horizontalSpacing)) / 2;
+        // همیشه بر اساس عرض ثابت مپ سنتر می‌کنیم، نه this->width() لحظه‌ای
+        // int rowWidth = nodeCount * HORIZONTAL_SPACING;
+        // int startX = (MAP_CONTENT_WIDTH - rowWidth) / 2 + (HORIZONTAL_SPACING - NODE_SIZE) / 2;
+        int startX = 0;
+        if(nodeCount == 1)
+        {
+            startX = (MAP_CONTENT_WIDTH / 2) - (NODE_SIZE * 3.5);
+        }
+        else if(nodeCount == 2)
+        {
+            startX = (MAP_CONTENT_WIDTH / 2) - (HORIZONTAL_SPACING / 2 + NODE_SIZE * 1.5);
+        }
+        else if(nodeCount == 3)
+        {
+            startX = (MAP_CONTENT_WIDTH / 2) - (HORIZONTAL_SPACING + NODE_SIZE * 1.5);
+        }
+        else
+        {
+            startX = (MAP_CONTENT_WIDTH / 2) - ((HORIZONTAL_SPACING * 1.5) + (NODE_SIZE * 1.5));
+        }
 
-        int yPos = mapHeight - ((i + 1) * verticalSpacing);
+        int yPos = 0;
+        if(nodeCount == 1)
+        {
+            yPos = mapHeight - ((i + 1) * VERTICAL_SPACING + VERTICAL_SPACING_BOSS);
+        }
+        else
+        {
+            yPos = mapHeight - ((i + 1) * VERTICAL_SPACING);
+        }
 
         for (int j = 0; j < nodeCount; ++j) {
             MapNode* node = nodes[j];
             QPushButton* btn = new QPushButton(this);
-            btn->setFixedSize(nodeSize, nodeSize);
+            if(node->getType() == NodeType::Boss)
+            {
+                btn->setFixedSize(NODE_SIZE * 5, NODE_SIZE * 5);
+            }
+            else
+            {
+                btn->setFixedSize(NODE_SIZE, NODE_SIZE);
+            }
+            btn->setStyleSheet("background: transparent; border: none;");
 
-            int xPos = startX + (j * horizontalSpacing);
+            int xPos = startX + (j * HORIZONTAL_SPACING);
             btn->move(xPos, yPos);
             btn->setToolTip(getTooltipText(node->getType()));
 
@@ -58,7 +98,6 @@ void MapWidget::refreshUI() {
             btn->setEnabled(true);
             btn->setCursor(Qt::PointingHandCursor);
         } else {
-
             btn->setEnabled(false);
             btn->setCursor(Qt::ArrowCursor);
         }
@@ -69,14 +108,12 @@ void MapWidget::refreshUI() {
 QString MapWidget::getNodeStyleSheet(MapNode* node) {
     QString stateStr;
 
-    // وضعیت منطقی گره
     if (node->getType() == NodeType::Boss)
     {
         if(map->getCurrentAct() == 1)
-        {
             stateStr = "hexaghost";
-        }
-        else stateStr = "champ";
+        else
+            stateStr = "champ";
     }
     else
     {
@@ -85,7 +122,6 @@ QString MapWidget::getNodeStyleSheet(MapNode* node) {
         else stateStr = "locked";
     }
 
-    // نوع گره
     QString typeStr;
     switch (node->getType()) {
     case NodeType::Monster: typeStr = "enemy"; break;
@@ -97,11 +133,19 @@ QString MapWidget::getNodeStyleSheet(MapNode* node) {
     case NodeType::Boss: typeStr = "boss"; break;
     }
 
-    QString imagePath = QString("map/%1_%2.png").arg(typeStr, stateStr);
+    QString imagePath = QString(":/map/%1_%2.png").arg(typeStr, stateStr);
 
-    QString border = (map->getCurrentNode() == node) ? "border: 3px solid gold; border-radius: 32px;" : "border: none;";
+    // QString border = (map->getCurrentNode() == node)
+    //                      ? "border: 3px solid gold; border-radius: 32px;"
+    //                      : "border: none;";
 
-    return QString("QPushButton { background-image: url(%1); background-repeat: no-repeat; background-position: center; background-color: transparent; %2 }").arg(imagePath, border);
+    return QString(
+               "QPushButton {"
+               "border-image: url(%1);"
+               "border: none;"
+               "background: transparent;"
+               "}"
+               ).arg(imagePath);
 }
 
 QString MapWidget::getTooltipText(NodeType type) {
@@ -118,14 +162,12 @@ QString MapWidget::getTooltipText(NodeType type) {
 }
 
 void MapWidget::paintEvent(QPaintEvent *event) {
-
-    QStyleOption opt;
-    opt.initFrom(this);
-    QPainter p(this);
-    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
-
-
     Q_UNUSED(event)
+
+    // توجه: دیگه drawPrimitive(PE_Widget) صدا نمی‌زنیم چون اون یه
+    // بک‌گراند مات می‌کشید و جلوی دیده‌شدن عکس مپِ MapPage رو می‌گرفت.
+    // این ویجت باید کاملاً شفاف بمونه، فقط خطوط مسیر رو می‌کشیم.
+
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
@@ -145,18 +187,34 @@ void MapWidget::paintEvent(QPaintEvent *event) {
 
                 QPoint p2 = childBtn->geometry().center();
 
-                // تعیین رنگ مسیر
-                QColor lineColor = QColor(100, 100, 100); // خاکستری (Locked)
+                QColor lineColor = QColor(100, 100, 100);
 
                 if (parentNode->isVisited() && childNode->isVisited()) {
-                    lineColor = QColor(255, 215, 0); // طلایی (Visited Path)
+                    lineColor = QColor(255, 215, 0);
                 } else if ((parentNode == map->getCurrentNode() || parentNode->isVisited()) && childNode->isAvailable()) {
-                    lineColor = QColor(100, 150, 255); // آبی (Available)
+                    lineColor = QColor(100, 150, 255);
                 }
 
                 painter.setPen(QPen(lineColor, 4, Qt::DashLine, Qt::RoundCap));
                 painter.drawLine(p1, p2);
             }
         }
+    }
+
+    const MapNode* current = map->getCurrentNode();
+
+    if (current && nodeButtons.contains(const_cast<MapNode*>(current)))
+    {
+        QPushButton* btn = nodeButtons.value(const_cast<MapNode*>(current));
+
+        QRect rect = btn->geometry().adjusted(-4, -4, 4, 4);
+
+        QPen pen(QColor(255, 215, 0));
+        pen.setWidth(4);
+
+        painter.setPen(pen);
+        painter.setBrush(Qt::NoBrush);
+
+        painter.drawEllipse(rect);
     }
 }

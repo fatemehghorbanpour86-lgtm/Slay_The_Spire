@@ -1,11 +1,11 @@
 #ifndef MAPPAGE_H
 #define MAPPAGE_H
-
 #include <QWidget>
 #include <QScrollArea>
 #include <QProgressBar>
 #include <QLabel>
 #include <QPushButton>
+#include <QFrame>
 #include <QVBoxLayout>
 #include <QStyleOption>
 #include <QPainter>
@@ -30,18 +30,21 @@ private:
     Player* player;
     MapWidget* mapWidget;
 
-    // ویجت‌های TopBar
+    QWidget* topBarWidget;
     QProgressBar* hpBar;
     QLabel* goldLabel;
-    QLabel* floorInfoLabel;
+    QLabel* actLabel;
     QLabel* floorIconLabel;
+    QLabel* floorNumberLabel;
     QPushButton* relicBtn;
     QPushButton* deckBtn;
     QPushButton* settingsBtn;
+    QFrame* potionsPanel;
     QLabel* potionSlots[3];
 
     void setupUI();
     void createTopBar(QVBoxLayout* mainLayout);
+
 protected:
     void paintEvent(QPaintEvent *) override{
         QStyleOption opt;
@@ -50,5 +53,4 @@ protected:
         style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
     }
 };
-
 #endif // MAPPAGE_H
