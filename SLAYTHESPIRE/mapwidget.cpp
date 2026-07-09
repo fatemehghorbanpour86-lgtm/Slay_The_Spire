@@ -142,10 +142,6 @@ QString MapWidget::getNodeStyleSheet(MapNode* node) {
 
     QString imagePath = QString(":/map/%1_%2.png").arg(typeStr, stateStr);
 
-    // QString border = (map->getCurrentNode() == node)
-    //                      ? "border: 3px solid gold; border-radius: 32px;"
-    //                      : "border: none;";
-
     return QString(
                "QPushButton {"
                "border-image: url(%1);"
@@ -197,12 +193,12 @@ void MapWidget::paintEvent(QPaintEvent *event) {
 
                 QPoint p2 = childBtn->geometry().center();
 
-                QColor lineColor = QColor(100, 100, 100);
+                QColor lineColor = QColor(24, 28, 34);
 
                 if (parentNode->isVisited() && childNode->isVisited()) {
-                    lineColor = QColor(255, 215, 0);
+                    lineColor = QColor(186, 177, 0);
                 } else if ((parentNode == map->getCurrentNode() || parentNode->isVisited()) && childNode->isAvailable()) {
-                    lineColor = QColor(100, 150, 255);
+                    lineColor = QColor(121, 180, 255);
                 }
 
                 painter.setPen(QPen(lineColor, 4, Qt::DashLine, Qt::RoundCap));

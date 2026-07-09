@@ -30,6 +30,7 @@ private:
     Player* player;
     MapWidget* mapWidget;
 
+    QLabel* cardLabel;
     QWidget* topBarWidget;
     QProgressBar* hpBar;
     QLabel* goldLabel;

@@ -62,7 +62,7 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
     topBarWidget->setObjectName("TopBar");
     topBarWidget->setStyleSheet(
         "#TopBar {"
-        "background-color: rgba(20,20,20,200);"
+        "background-color: rgba(20, 20, 20, 0.97);"
         "}"
         );
     // QWidget خام بدون این attribute، background-color رو رندر نمی‌کنه
@@ -169,6 +169,11 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
                 AudioManager::instance().play(AudioManager::Sound::ButtonClick);
             });
     connect(deckBtn, &QPushButton::clicked, this, &MapPage::onDeckButtonClicked);
+    
+    cardLabel = new QLabel("0", this);
+    cardLabel->setStyleSheet("font-size: 18px; font-weight: bold; color: " + BONE_COLOR + ";");
+    cardLabel->move(1190, 26);
+    
 
     settingsBtn = new QPushButton();
     settingsBtn->setFixedSize(40, 40);
@@ -201,6 +206,8 @@ void MapPage::updateTopBarData() {
     goldLabel->setText(QString("💰 %1").arg(player->getGold()));
 
     relicBtn->setText(QString("💎 x%1").arg(player->getAllRelics().size()));
+
+    cardLabel->setText(QString("%1").arg(player->getMasterDeck()->getCardCount()));
 
     actLabel->setText(QString("Act %1").arg(map->getCurrentAct()));
     floorNumberLabel->setText(QString::number(map->getCurrentFloorIndex()));

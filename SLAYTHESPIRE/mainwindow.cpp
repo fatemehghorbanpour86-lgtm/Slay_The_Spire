@@ -8,6 +8,8 @@
 #include "map.h"
 #include "player.h"
 #include "mappage.h"
+#include "card.h"
+#include "attackcards.h"
 
 void MainWindow::showLoginPAge()
 {
