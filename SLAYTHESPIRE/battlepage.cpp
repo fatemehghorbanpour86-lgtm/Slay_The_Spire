@@ -50,28 +50,111 @@ BattlePage::BattlePage(QWidget *parent)
 void BattlePage::setupTopBar()
 {
     QHBoxLayout *layout = new QHBoxLayout(topBar);
-    layout->setContentsMargins(30, 5, 30, 5);
+    layout->setContentsMargins(20, 6, 20, 6);
+    layout->setSpacing(0);
 
-    // Left: player HP
-    QLabel *hpLabel = new QLabel("HP: 80 / 80", topBar);
-    hpLabel->setStyleSheet("color: white; font-size: 14px;");
+    // ===== LEFT GROUP: name + HP + gold + potions =====
+    QHBoxLayout *leftGroup = new QHBoxLayout();
+    leftGroup->setSpacing(10);
 
-    // Center: turn counter
-    QLabel *turnLabel = new QLabel("Turn 1", topBar);
-    turnLabel->setStyleSheet("color: #facc15; font-size: 14px;");
-    turnLabel->setAlignment(Qt::AlignCenter);
+    // Character name
+    QLabel *nameLabel = new QLabel("anaconda", topBar);
+    nameLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold;");
 
-    // Right: deck and discard pile counts
-    QLabel *deckLabel = new QLabel("Deck: 10   Discard: 0", topBar);
-    deckLabel->setStyleSheet("color: white; font-size: 14px;");
-    deckLabel->setAlignment(Qt::AlignRight);
+    QLabel *classLabel = new QLabel("the Ironclad", topBar);
+    classLabel->setStyleSheet("color: #cfcfcf; font-size: 13px;");
 
-    layout->addWidget(hpLabel);
+    // HP icon + value
+
+    QLabel *heartIcon = new QLabel(topBar);
+    heartIcon->setFixedSize(45, 45);
+    heartIcon->setStyleSheet("background: transparent;");
+    heartIcon->setPixmap(QPixmap(":/heartIcon.png").scaled(
+        45, 45,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        ));
+    heartIcon->setAlignment(Qt::AlignCenter);
+
+
+    QLabel *hpValueLabel = new QLabel("59/80", topBar);
+    hpValueLabel->setStyleSheet("color: #f5c518; font-size: 14px; font-weight: bold;");
+
+    // Gold icon + value
+    QLabel *goldIcon = new QLabel(topBar);
+    goldIcon->setFixedSize(20, 20);
+    goldIcon->setStyleSheet("background: #d4af37; border-radius: 10px;");
+    // later: goldIcon->setPixmap(QPixmap(":/icons/gold.png").scaled(20,20, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+    QLabel *goldValueLabel = new QLabel("149", topBar);
+    goldValueLabel->setStyleSheet("color: #f5c518; font-size: 14px; font-weight: bold;");
+
+    leftGroup->addWidget(nameLabel);
+    leftGroup->addWidget(classLabel);
+    leftGroup->addSpacing(15);
+    leftGroup->addWidget(heartIcon);
+    leftGroup->addWidget(hpValueLabel);
+    leftGroup->addSpacing(10);
+    leftGroup->addWidget(goldIcon);
+    leftGroup->addWidget(goldValueLabel);
+    leftGroup->addSpacing(15);
+
+    // Potion slots (placeholders, 3 empty by default)
+    for (int i = 0; i < 3; i++) {
+        QLabel *potionSlot = new QLabel(topBar);
+        potionSlot->setFixedSize(24, 24);
+        potionSlot->setStyleSheet("background: rgba(255,255,255,20); border: 1px solid #666; border-radius: 4px;");
+        // later: potionSlot->setPixmap(QPixmap(":/icons/potion_X.png")...);
+        leftGroup->addWidget(potionSlot);
+        leftGroup->addSpacing(4);
+    }
+
+    // ===== CENTER: floor icon + count =====
+    QHBoxLayout *centerGroup = new QHBoxLayout();
+    centerGroup->setSpacing(6);
+
+    QLabel *floorIcon = new QLabel(topBar);
+    floorIcon->setFixedSize(20, 20);
+    floorIcon->setStyleSheet("background: #d9c9a3; border-radius: 4px;");
+    // later: floorIcon->setPixmap(QPixmap(":/icons/deck.png")...);
+
+    QLabel *floorCountLabel = new QLabel("10", topBar);
+    floorCountLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold;");
+
+    centerGroup->addWidget(floorIcon);
+    centerGroup->addWidget(floorCountLabel);
+
+    // ===== RIGHT GROUP: notes/scroll, map, settings =====
+    QHBoxLayout *rightGroup = new QHBoxLayout();
+    rightGroup->setSpacing(14);
+
+    QLabel *scrollIcon = new QLabel(topBar);
+    scrollIcon->setFixedSize(24, 24);
+    scrollIcon->setStyleSheet("background: #d9c9a3; border-radius: 4px;");
+    // later: scrollIcon->setPixmap(QPixmap(":/icons/scroll.png")...);
+
+    QLabel *mapIcon = new QLabel(topBar);
+    mapIcon->setFixedSize(24, 24);
+    mapIcon->setStyleSheet("background: #b91c1c; border-radius: 4px;");
+    // later: mapIcon->setPixmap(QPixmap(":/icons/map.png")...);
+
+    QLabel *settingsIcon = new QLabel(topBar);
+    settingsIcon->setFixedSize(24, 24);
+    settingsIcon->setStyleSheet("background: #6b7280; border-radius: 12px;");
+    // later: settingsIcon->setPixmap(QPixmap(":/icons/settings.png")...);
+
+    rightGroup->addWidget(scrollIcon);
+    rightGroup->addWidget(mapIcon);
+    rightGroup->addWidget(settingsIcon);
+
+    // ===== Assemble =====
+    layout->addLayout(leftGroup);
     layout->addStretch();
-    layout->addWidget(turnLabel);
+    layout->addLayout(centerGroup);
     layout->addStretch();
-    layout->addWidget(deckLabel);
+    layout->addLayout(rightGroup);
 }
+
 
 // ─────────────────────────────────────────
 void BattlePage::setupBattleField()

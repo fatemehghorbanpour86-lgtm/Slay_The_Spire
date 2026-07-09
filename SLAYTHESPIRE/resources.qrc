@@ -12,6 +12,7 @@
         <file>SplashPage.gif</file>
         <file>battlebackground.png</file>
         <file>ironclad.png</file>
+        <file>heartIcon.png</file>
     </qresource>
     <qresource prefix="/Audio">
         <file>Attack.wav</file>
