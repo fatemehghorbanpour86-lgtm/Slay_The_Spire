@@ -11,6 +11,7 @@
         <file>LoginPage.gif</file>
         <file>SplashPage.gif</file>
         <file>battlebackground.png</file>
+        <file>ironclad.png</file>
     </qresource>
     <qresource prefix="/Audio">
         <file>Attack.wav</file>
