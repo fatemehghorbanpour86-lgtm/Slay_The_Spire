@@ -13,6 +13,12 @@
         <file>battlebackground.png</file>
         <file>ironclad.png</file>
         <file>heartIcon.png</file>
+        <file>moneyPouch.png</file>
+        <file>floor.png</file>
+        <file>settingicon.png</file>
+        <file>mapIcon.png</file>
+        <file>deckIcon.png</file>
+        <file>energybutton.png</file>
     </qresource>
     <qresource prefix="/Audio">
         <file>Attack.wav</file>

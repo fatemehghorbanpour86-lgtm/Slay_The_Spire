@@ -72,6 +72,7 @@ HEADERS += \
     masterdeck.h \
     normalenemies.h \
     normalrelics.h \
+    outlinedlabel.h \
     player.h \
     potion.h \
     powercard.h \

@@ -1,6 +1,9 @@
 #include "battlepage.h"
 #include "ui_battlepage.h"
 
+#include "outlinedlabel.h"
+
+
 BattlePage::BattlePage(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::BattlePage)
@@ -59,10 +62,10 @@ void BattlePage::setupTopBar()
 
     // Character name
     QLabel *nameLabel = new QLabel("anaconda", topBar);
-    nameLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold;");
+    nameLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold; background: transparent;");
 
     QLabel *classLabel = new QLabel("the Ironclad", topBar);
-    classLabel->setStyleSheet("color: #cfcfcf; font-size: 13px;");
+    classLabel->setStyleSheet("color: #cfcfcf; font-size: 13px; background: transparent;");
 
     // HP icon + value
 
@@ -77,17 +80,22 @@ void BattlePage::setupTopBar()
     heartIcon->setAlignment(Qt::AlignCenter);
 
 
-    QLabel *hpValueLabel = new QLabel("59/80", topBar);
-    hpValueLabel->setStyleSheet("color: #f5c518; font-size: 14px; font-weight: bold;");
+    QLabel *hpValueLabel = new QLabel("80/80", topBar);
+    hpValueLabel->setStyleSheet("color: #e63946; font-size: 14px; font-weight: bold; background: transparent;");
 
     // Gold icon + value
     QLabel *goldIcon = new QLabel(topBar);
-    goldIcon->setFixedSize(20, 20);
-    goldIcon->setStyleSheet("background: #d4af37; border-radius: 10px;");
-    // later: goldIcon->setPixmap(QPixmap(":/icons/gold.png").scaled(20,20, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    goldIcon->setFixedSize(45, 45);
+    goldIcon->setStyleSheet("background: transparent;");
+    goldIcon->setPixmap(QPixmap(":/moneyPouch.png").scaled(
+             45,45,
+             Qt::KeepAspectRatio,
+             Qt::SmoothTransformation
+             ));
+    goldIcon->setAlignment(Qt::AlignCenter);
 
     QLabel *goldValueLabel = new QLabel("149", topBar);
-    goldValueLabel->setStyleSheet("color: #f5c518; font-size: 14px; font-weight: bold;");
+    goldValueLabel->setStyleSheet("color: #f5c518; font-size: 14px; font-weight: bold; background: transparent;");
 
     leftGroup->addWidget(nameLabel);
     leftGroup->addWidget(classLabel);
@@ -114,12 +122,17 @@ void BattlePage::setupTopBar()
     centerGroup->setSpacing(6);
 
     QLabel *floorIcon = new QLabel(topBar);
-    floorIcon->setFixedSize(20, 20);
-    floorIcon->setStyleSheet("background: #d9c9a3; border-radius: 4px;");
-    // later: floorIcon->setPixmap(QPixmap(":/icons/deck.png")...);
+    floorIcon->setFixedSize(45, 45);
+    floorIcon->setStyleSheet("background: transparent;");
+    floorIcon->setPixmap(QPixmap(":/floor.png").scaled(
+        45,45,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        ));
+    floorIcon->setAlignment(Qt::AlignCenter);
 
     QLabel *floorCountLabel = new QLabel("10", topBar);
-    floorCountLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold;");
+    floorCountLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold;  background: transparent;");
 
     centerGroup->addWidget(floorIcon);
     centerGroup->addWidget(floorCountLabel);
@@ -128,23 +141,40 @@ void BattlePage::setupTopBar()
     QHBoxLayout *rightGroup = new QHBoxLayout();
     rightGroup->setSpacing(14);
 
-    QLabel *scrollIcon = new QLabel(topBar);
-    scrollIcon->setFixedSize(24, 24);
-    scrollIcon->setStyleSheet("background: #d9c9a3; border-radius: 4px;");
-    // later: scrollIcon->setPixmap(QPixmap(":/icons/scroll.png")...);
-
     QLabel *mapIcon = new QLabel(topBar);
-    mapIcon->setFixedSize(24, 24);
-    mapIcon->setStyleSheet("background: #b91c1c; border-radius: 4px;");
-    // later: mapIcon->setPixmap(QPixmap(":/icons/map.png")...);
+    mapIcon->setFixedSize(60, 60);
+    mapIcon->setStyleSheet("background: transparent; margin-top: -20px;");
+
+    mapIcon->setPixmap(QPixmap(":/mapIcon.png").scaled(
+        55,55,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        ));
+    mapIcon->setAlignment(Qt::AlignCenter);
+
+
+    QLabel *deckIcon = new QLabel(topBar);
+    deckIcon->setFixedSize(45, 45);
+    deckIcon->setStyleSheet("background: transparent;");
+    deckIcon->setPixmap(QPixmap(":/deckIcon.png").scaled(
+        45,45,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        ));
+    deckIcon->setAlignment(Qt::AlignCenter);
 
     QLabel *settingsIcon = new QLabel(topBar);
-    settingsIcon->setFixedSize(24, 24);
-    settingsIcon->setStyleSheet("background: #6b7280; border-radius: 12px;");
-    // later: settingsIcon->setPixmap(QPixmap(":/icons/settings.png")...);
+    settingsIcon->setFixedSize(45, 45);
+    settingsIcon->setStyleSheet("background: transparent;");
+    settingsIcon->setPixmap(QPixmap(":/settingicon.png").scaled(
+        45,45,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        ));
+    settingsIcon->setAlignment(Qt::AlignCenter);
 
-    rightGroup->addWidget(scrollIcon);
     rightGroup->addWidget(mapIcon);
+    rightGroup->addWidget(deckIcon);
     rightGroup->addWidget(settingsIcon);
 
     // ===== Assemble =====
@@ -264,15 +294,21 @@ void BattlePage::setupBottomBar()
     // -- Top row: energy orb (left) + End Turn button (right) --
     QHBoxLayout *controlRow = new QHBoxLayout();
 
-    QLabel *energyLabel = new QLabel("3 / 3", bottomBar);
-    energyLabel->setFixedSize(70, 70);
+    QLabel *energyLabel = new QLabel(bottomBar);
+    energyLabel->setFixedSize(130, 130);
+    energyLabel->setStyleSheet("background: transparent;");
+    energyLabel->setPixmap(QPixmap(":/energybutton.png").scaled(
+        130, 130,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        ));
     energyLabel->setAlignment(Qt::AlignCenter);
-    energyLabel->setStyleSheet(
-        "background: qradialgradient(cx:0.5, cy:0.5, radius:0.8,"
-        "stop:0 #fbbf24, stop:0.7 #f59e0b, stop:1 #b45309);"
-        "border: 4px solid #78350f; border-radius: 35px;"
-        "color: white; font-size: 20px; font-weight: bold;"
-        );
+
+    OutlinedLabel *energyValueLabel = new OutlinedLabel("3/3", energyLabel);
+    energyValueLabel->setFixedSize(130, 130);
+    energyValueLabel->move(0, 0);
+    energyValueLabel->raise();
+
 
     QPushButton *endTurnBtn = new QPushButton("End Turn", bottomBar);
     endTurnBtn->setFixedSize(140, 50);
