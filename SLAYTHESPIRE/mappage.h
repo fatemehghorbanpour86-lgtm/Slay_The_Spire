@@ -37,6 +37,7 @@ private:
     QLabel* actLabel;
     QLabel* floorIconLabel;
     QLabel* floorNumberLabel;
+    QLabel* relicLabel;
     QPushButton* relicBtn;
     QPushButton* deckBtn;
     QPushButton* settingsBtn;

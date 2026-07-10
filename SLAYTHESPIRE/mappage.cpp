@@ -62,7 +62,7 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
     topBarWidget->setObjectName("TopBar");
     topBarWidget->setStyleSheet(
         "#TopBar {"
-        "background-color: rgba(20, 20, 20, 0.97);"
+        "background-color: #2C444F ;"
         "}"
         );
     // QWidget خام بدون این attribute، background-color رو رندر نمی‌کنه
@@ -85,15 +85,27 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
     goldLabel = new QLabel("💰 99");
     goldLabel->setStyleSheet("font-size: 16px; font-weight: bold; color: " + BONE_COLOR + ";");
 
-    relicBtn = new QPushButton("💎 x0");
+    relicBtn = new QPushButton();
+    relicBtn->setFixedSize(30, 25);
     relicBtn->setCursor(Qt::PointingHandCursor);
     relicBtn->setStyleSheet(
-        "QPushButton { background-color: transparent; font-size: 16px; "
-        "font-weight: bold; color: " + BONE_COLOR + "; border: none; }"
+        "QPushButton {"
+        "border: none;"
+        "border-image: url(:/map/relicIcon.png);"
+        "}"
         "QPushButton:pressed { "
         "   margin: 3px 3px 3px 3px; "
         "}"
         );
+
+    relicLabel = new QLabel("x0");
+    relicLabel->setStyleSheet("font-size: 16px; font-weight: bold; color: " + BONE_COLOR + ";");
+
+    connect(relicBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(relicBtn, &QPushButton::clicked, this, &MapPage::onRelicButtonClicked);
 
     // پنل تیره با گوشه‌های گرد پشت پوشن‌ها (QFrame خودش QSS رو رندر می‌کنه)
@@ -122,6 +134,8 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
     topBarLayout->addWidget(goldLabel);
     topBarLayout->addSpacing(15);
     topBarLayout->addWidget(relicBtn);
+    topBarLayout->addSpacing(0);
+    topBarLayout->addWidget(relicLabel);
     topBarLayout->addSpacing(15);
     topBarLayout->addWidget(potionsPanel);
     topBarLayout->addStretch();
@@ -172,11 +186,11 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
     
     cardLabel = new QLabel("0", this);
     cardLabel->setStyleSheet("font-size: 18px; font-weight: bold; color: " + BONE_COLOR + ";");
-    cardLabel->move(1190, 26);
+    cardLabel->move(1185, 26);
     
 
     settingsBtn = new QPushButton();
-    settingsBtn->setFixedSize(40, 40);
+    settingsBtn->setFixedSize(45, 45);
     settingsBtn->setCursor(Qt::PointingHandCursor);
     settingsBtn->setStyleSheet(
         "QPushButton { border-image: url(:/map/settingBtnMap.png); }"
@@ -203,9 +217,40 @@ void MapPage::updateTopBarData() {
     hpBar->setValue(player->getCurrentHealth());
     hpBar->setFormat(QString("%1 / %2").arg(player->getCurrentHealth()).arg(player->getMaxHealth()));
 
+    double hpPercent = static_cast<double>(player->getCurrentHealth()) /
+                       player->getMaxHealth();
+
+    QString chunkColor;
+    QString textColor;
+
+    if (hpPercent > 0.5) {
+        chunkColor = "#2ecc71";
+        textColor = BONE_COLOR;
+    }
+    else if (hpPercent > 0.25) {
+        chunkColor = "#f1c40f";
+        textColor = "#000000";
+    }
+    else {
+        chunkColor = "#e74c3c";
+        textColor = BONE_COLOR;
+    }
+
+    hpBar->setStyleSheet(QString(
+                             "QProgressBar { border: 1px solid #555; border-radius: 10px;"
+                             "background-color: #222; color: %1;"
+                             "font-weight: bold; text-align: center;"
+                             "}"
+                             "QProgressBar::chunk {"
+                             "background-color: %2;"
+                             "border-radius: 8px;"
+                             "margin: 1px;"
+                             "}"
+                             ).arg(textColor, chunkColor));
+
     goldLabel->setText(QString("💰 %1").arg(player->getGold()));
 
-    relicBtn->setText(QString("💎 x%1").arg(player->getAllRelics().size()));
+    relicLabel->setText(QString("x%1").arg(player->getAllRelics().size()));
 
     cardLabel->setText(QString("%1").arg(player->getMasterDeck()->getCardCount()));
 
