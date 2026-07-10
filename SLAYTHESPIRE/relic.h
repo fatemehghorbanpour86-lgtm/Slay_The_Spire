@@ -31,7 +31,8 @@ enum class RelicId
     MutagenicStrength,
     CultistHeadpiece,
     GremlinVisage,
-    FaceOfCleric
+    FaceOfCleric,
+    GoldenIdolRelic
 };
 
 

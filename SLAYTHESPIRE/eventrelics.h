@@ -49,4 +49,11 @@ public:
     void onCombatEnd(Player* player) override;
 };
 
+class GoldenIdolRelic : public Relic
+{
+public:
+    GoldenIdolRelic();
+    void onEnemyDeath(Player* player, Enemy* enemy) override;
+};
+
 #endif // EVENTRELICS_H

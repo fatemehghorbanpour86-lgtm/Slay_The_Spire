@@ -19,6 +19,7 @@ class MasterDeck
 
     QVector<Card*> cards;
 
+
  public:
 
     MasterDeck();
@@ -38,6 +39,14 @@ class MasterDeck
 
     const QVector<Card*>& getCards() const;
 
+
+    Card* transformCard(Card* card);
+
+ private:
+
+    static QVector<Card*> createFullCardPool(CardType type);
+     // Returns freshly allocated instances of all playable cards of the given type.
+     //Curse and Status cards are excluded
     MasterDeckSaveData extractState() const;
     void restoreState(const MasterDeckSaveData& data);
 

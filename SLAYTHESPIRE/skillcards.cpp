@@ -39,7 +39,7 @@ Card* Defend::clone() const
 
 
 Exhume::Exhume()
-    : Card("Exhume", "Put a card from your exhaust pile into your hand.", 1,
+    : Card("Exhume", "Put a card from your exhaust pile into your hand. Exhaust.", 1,
            CardType::Skill, true, false, false, false)
 {
 }
@@ -70,7 +70,7 @@ Card* Exhume::clone() const
 
 
 LimitBreak::LimitBreak()
-    : Card("Limit Break", "Double your Strength.", 1, CardType::Skill,
+    : Card("Limit Break", "Double your Strength. Exhaust.", 1, CardType::Skill,
            true, false, false, false)
 {
 }
@@ -108,7 +108,7 @@ Card* LimitBreak::clone() const
 
 
 Offering::Offering()
-    : Card("Offering", "Lose 6 HP. Gain 2 Energy. Draw 3 cards.", 0,
+    : Card("Offering", "Lose 6 HP. Gain 2 Energy. Draw 3 cards. Exhaust.", 0,
            CardType::Skill, true, false, false, false), drawcards(3)
 {
 }
@@ -134,7 +134,7 @@ void Offering::upgrade()
     isUpgraded = true;
     drawcards = 5;
     name = "Offering+";
-    description = "Lose 5 HP. Gain 2 Energy. Draw 3 cards.";
+    description = "Lose 6 HP. Gain 2 Energy. Draw 5 cards. Exhaust.";
 }
 
 Card* Offering::clone() const
@@ -144,7 +144,7 @@ Card* Offering::clone() const
 
 
 Impervious::Impervious()
-    : Card("Impervious", "Gain 30 Block.", 2, CardType::Skill,
+    : Card("Impervious", "Gain 30 Block. Exhaust.", 2, CardType::Skill,
            true, false, false, false), blockAmount(30)
 {
 }

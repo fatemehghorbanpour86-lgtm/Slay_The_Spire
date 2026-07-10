@@ -134,3 +134,25 @@ void FaceOfCleric::onCombatEnd(Player* player)
 
     player->increaseMaxHealth(1);
 }
+
+//======================================================
+//  GoldenIdolRelic
+//======================================================
+
+GoldenIdolRelic::GoldenIdolRelic()
+    : Relic(RelicId::GoldenIdolRelic,
+            "Golden Idol",
+            "Enemies drop 25% more gold.",
+            Relic::Tier::Event)
+{
+}
+
+void GoldenIdolRelic::onEnemyDeath(Player* player, Enemy* enemy)
+{
+    if (player == nullptr || enemy == nullptr)
+        return;
+
+    // TODO: enemy->getGoldDrop()
+    // int bonus = qRound(enemy->getGoldDrop() * 0.25f);
+    // player->gainGold(bonus);
+}

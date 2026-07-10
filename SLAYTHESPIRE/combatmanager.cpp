@@ -8,6 +8,7 @@
 #include "combatdeck.h"
 #include "relicsystem.h"
 #include "statuscards.h"
+#include "eliteenemy.h"
 
 #include <utility>
 
@@ -19,10 +20,9 @@ CombatManager::CombatManager(Player* p, QVector<Enemy*> e, QObject* parent)
     calculator(new CombatCalculator()),
     turnCount(0)
 {
-    for (Enemy* enemy : enemies)
+    for (Enemy* enemy : std::as_const(enemies))
     {
-        connect(enemy, &Enemy::died,
-                this, &CombatManager::onEnemyDied);
+       connectEnemy(enemy);
     }
 }
 
@@ -134,6 +134,18 @@ bool CombatManager::playCard(Card* card, Enemy* target)
         }
     }
 
+    if (card->getType() == CardType::Skill)
+    {
+        for (Enemy* enemy : std::as_const(enemies))
+        {
+            GremlinNob* nob = dynamic_cast<GremlinNob*>(enemy);
+            if (nob && nob->isEnraged())
+            {
+                nob->addEffect(Effect::Type::Strength, Effect::Category::Buff, 2);
+            }
+        }
+    }
+
     emit cardPlayed(card, target);
 
     player->getRelicSystem().onCardPlayed(player, card);
@@ -231,6 +243,8 @@ void CombatManager::handleEnemyTurn()
 
         enemy->executeMove(player);
 
+        enemy->finishTurn();
+
         if (!enemy->isDead() && player->getCurrentHealth() > 0)
         {
             enemy->chooseIntent(player);
@@ -262,6 +276,13 @@ void CombatManager::checkWinLossCondition()
         emit combatEnded(false);
         changeState(CombatState::BattleLost);
     }
+}
+
+
+void CombatManager::connectEnemy(Enemy* enemy)
+{
+    if (!enemy) return;
+    connect(enemy, &Enemy::died, this, &CombatManager::onEnemyDied);
 }
 
 void CombatManager::onEnemyDied(Enemy* enemy)

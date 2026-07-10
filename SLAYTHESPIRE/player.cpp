@@ -135,6 +135,20 @@ void Player::increaseMaxHealth(int amount)
     }
 }
 
+void Player::decreaseMaxHealth(int amount)
+{
+    if (amount <= 0)
+        return;
+
+    maxHealth -= amount;
+
+    if (maxHealth < 1)
+        maxHealth = 1;
+
+    if (currentHealth > maxHealth)
+        currentHealth = maxHealth;
+}
+
 void Player::increaseMaxEnergy(int amount)
 {
     if(amount <= 0)
