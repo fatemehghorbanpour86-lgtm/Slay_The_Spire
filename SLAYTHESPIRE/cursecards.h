@@ -9,6 +9,8 @@ class Enemy;
 
 class JAX : public Card
 {
+private:
+    int strengthAmount;
 public:
     JAX();
 
