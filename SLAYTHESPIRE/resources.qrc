@@ -102,5 +102,12 @@
         <file>TwinStrikePlus.png</file>
         <file>Wound.png</file>
     </qresource>
-    <qresource prefix="/Potion"/>
+    <qresource prefix="/Potion">
+        <file>block_potion.png</file>
+        <file>energy_potion.png</file>
+        <file>fairy_in_a_bottle.png</file>
+        <file>fire_potion.png</file>
+        <file>potionEmpty.png</file>
+        <file>swift_potion.png</file>
+    </qresource>
 </RCC>
