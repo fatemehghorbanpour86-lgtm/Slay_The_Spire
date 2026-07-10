@@ -23,4 +23,26 @@
         <file>Reward.wav</file>
         <file>TakeDamage.wav</file>
     </qresource>
+    <qresource prefix="/Relic">
+        <file>Anchor.png</file>
+        <file>BlackStar.png</file>
+        <file>BurningBlood.png</file>
+        <file>CallingBell.png</file>
+        <file>CoffeeDripper.png</file>
+        <file>CultistHeadpience.png</file>
+        <file>FaceOfCleric.png</file>
+        <file>Girya.png</file>
+        <file>GoldenIdol.png</file>
+        <file>GremlinVisage.png</file>
+        <file>HappyFlower.png</file>
+        <file>IceCream.png</file>
+        <file>Kunai.png</file>
+        <file>MarkofPain.png</file>
+        <file>MutagenicStrength.png</file>
+        <file>Orichalcum.png</file>
+        <file>Shuriken.png</file>
+        <file>Vajra.png</file>
+        <file>VelvetChoker.png</file>
+        <file>WarpedTongs.png</file>
+    </qresource>
 </RCC>
