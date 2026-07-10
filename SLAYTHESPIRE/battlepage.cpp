@@ -346,12 +346,15 @@ void BattlePage::setupBottomBar()
     const float maxRotation = 12.0f; // max rotation angle (degrees)
 
     const int handViewWidth = 900;
-    const int handViewHeight = 280;
+    const int handViewHeight = 400;
 
     // Create the scene/view BEFORE computing layout, since we now size
     // everything against handView's fixed dimensions instead of the
     // undefined "handContainer" that used to be referenced here.
     handScene = new QGraphicsScene(bottomBar);
+
+    //ch
+    handScene->setSceneRect(0, 0, handViewWidth, handViewHeight);
 
     handView = new QGraphicsView(handScene, bottomBar);
     handView->setFixedSize(handViewWidth, handViewHeight);
@@ -360,10 +363,18 @@ void BattlePage::setupBottomBar()
     handView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     handView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     handView->setRenderHint(QPainter::Antialiasing);
+    //ch
+    handView->setResizeAnchor(QGraphicsView::NoAnchor);
+    handView->setTransformationAnchor(QGraphicsView::NoAnchor);
+    //2
+    handView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    handView->viewport()->setAutoFillBackground(false);
+
 
     int totalWidth = (numCards - 1) * cardSpacing + cardWidth;
     int startX = (handViewWidth - totalWidth) / 2;
-    int baseY = handViewHeight - cardHeight - 60; // baseline for the card row
+    int baseY = handViewHeight - cardHeight + 80; // baseline for the card row
+
 
     for (int i = 0; i < numCards; i++)
     {
@@ -402,7 +413,14 @@ void BattlePage::setupBottomBar()
     }
 
     layout->addLayout(controlRow);
-    layout->addWidget(handView, 0, Qt::AlignHCenter);
+    handView->setParent(this);  // always place on BattlePage itself
+    handView->setGeometry(
+        (1280 - handViewWidth) / 2,  // centered horizontally
+        720 - handViewHeight,         // anchored to bottom of screen
+        handViewWidth,
+        handViewHeight
+        );
+    handView->raise();
 
 }
 
@@ -420,7 +438,7 @@ bool BattlePage::eventFilter(QObject *obj, QEvent *event)
         QPropertyAnimation *moveUp = new QPropertyAnimation(proxy, "pos");
         moveUp->setDuration(200);
         moveUp->setStartValue(proxy->pos());
-        moveUp->setEndValue(QPointF(proxy->pos().x(), card->property("defaultY").toInt() - 130));
+        moveUp->setEndValue(QPointF(proxy->pos().x(), card->property("defaultY").toInt() - 100));
         moveUp->setEasingCurve(QEasingCurve::OutCubic);
         moveUp->start(QAbstractAnimation::DeleteWhenStopped);
 
@@ -446,7 +464,7 @@ bool BattlePage::eventFilter(QObject *obj, QEvent *event)
         // Blue glow
         QGraphicsDropShadowEffect *glow = new QGraphicsDropShadowEffect();
         glow->setColor(QColor(0, 150, 255, 200));
-        glow->setBlurRadius(20);
+        glow->setBlurRadius(60);
         glow->setOffset(0, 0);
         proxy->setGraphicsEffect(glow);
     }
