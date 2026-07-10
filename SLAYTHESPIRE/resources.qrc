@@ -43,12 +43,6 @@
         <file>shop_visited.png</file>
         <file>treasure_available.png</file>
         <file>treasure_visited.png</file>
-        <file>block_potion.png</file>
-        <file>energy_potion.png</file>
-        <file>fairy_in_a_bottle.png</file>
-        <file>fire_potion.png</file>
-        <file>potionEmpty.png</file>
-        <file>swift_potion.png</file>
         <file>elite_locked.png</file>
         <file>enemy_locked.png</file>
         <file>event_locked.png</file>
