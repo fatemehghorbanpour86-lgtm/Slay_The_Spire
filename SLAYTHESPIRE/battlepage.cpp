@@ -3,6 +3,15 @@
 
 #include "outlinedlabel.h"
 
+#include <QPropertyAnimation>
+#include <QGraphicsProxyWidget>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsDropShadowEffect>
+#include <QEasingCurve>
+
+
+
 
 BattlePage::BattlePage(QWidget *parent)
     : QWidget(parent)
@@ -284,11 +293,13 @@ void BattlePage::setupBattleField()
     layout->addWidget(enemyContainer, 0, Qt::AlignBottom);
 }
 
+
+
 // ─────────────────────────────────────────
 void BattlePage::setupBottomBar()
 {
     QVBoxLayout *layout = new QVBoxLayout(bottomBar);
-    layout->setContentsMargins(50, 10, 50, 15);
+    layout->setContentsMargins(50, 0, 50,0);
     layout->setSpacing(10);
 
     // -- Top row: energy orb (left) + End Turn button (right) --
@@ -324,37 +335,156 @@ void BattlePage::setupBottomBar()
     controlRow->addWidget(endTurnBtn);
 
     // -- Bottom row: placeholder hand cards --
-    QHBoxLayout *handRow = new QHBoxLayout();
-    handRow->setAlignment(Qt::AlignCenter);
-    handRow->setSpacing(12);
 
-    // 5 placeholder cards
-    for (int i = 0; i < 5; i++) {
-        QPushButton *card = new QPushButton(QString("Card %1").arg(i + 1), bottomBar);
-        card->setFixedSize(110, 160);
-        card->setStyleSheet(
-            "QPushButton {"
-            "  background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
-            "  stop:0 #1e3a5f, stop:1 #0f1c2e);"
-            "  color: white; font-size: 13px; font-weight: bold;"
-            "  border: 3px solid #3b82f6; border-radius: 10px;"
-            "}"
-            "QPushButton:hover {"
-            "  background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
-            "  stop:0 #2d5a8e, stop:1 #1e3a5f);"
-            "  margin-bottom: 15px;"
-            "  border-color: #60a5fa;"
-            "}"
-            "QPushButton:pressed {"
-            "  background: #1e40af;"
-            "  margin-bottom: 0px;"
-            "}"
-            );
-        handRow->addWidget(card);
+
+    // ===== Card hand with arc layout =====
+    const int numCards = 5;
+    const int cardWidth = 110;
+    const int cardHeight = 160;
+    const int cardSpacing = 75;   // horizontal overlap between cards
+    const int arcHeight = 20;     // fan curve height
+    const float maxRotation = 12.0f; // max rotation angle (degrees)
+
+    const int handViewWidth = 900;
+    const int handViewHeight = 280;
+
+    // Create the scene/view BEFORE computing layout, since we now size
+    // everything against handView's fixed dimensions instead of the
+    // undefined "handContainer" that used to be referenced here.
+    handScene = new QGraphicsScene(bottomBar);
+
+    handView = new QGraphicsView(handScene, bottomBar);
+    handView->setFixedSize(handViewWidth, handViewHeight);
+    handView->setStyleSheet("background: transparent; border: none;");
+    handView->setFrameShape(QFrame::NoFrame);
+    handView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    handView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    handView->setRenderHint(QPainter::Antialiasing);
+
+    int totalWidth = (numCards - 1) * cardSpacing + cardWidth;
+    int startX = (handViewWidth - totalWidth) / 2;
+    int baseY = handViewHeight - cardHeight - 60; // baseline for the card row
+
+    for (int i = 0; i < numCards; i++)
+    {
+        // No parent widget passed here: QGraphicsScene::addWidget() wraps
+        // the widget in a proxy and takes ownership of it, so parenting it
+        // to a (previously undefined) handContainer was both wrong and unnecessary.
+        QPushButton *card = new QPushButton(QString("Card %1").arg(i + 1));
+        card->setFixedSize(cardWidth, cardHeight);
+
+        QGraphicsProxyWidget *proxy = handScene->addWidget(card);
+
+        proxy->setFlag(QGraphicsItem::ItemClipsChildrenToShape, false);
+        proxy->setFlag(QGraphicsItem::ItemClipsToShape, false);
+        proxy->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
+        // normalizedPos goes from -1 (leftmost card) to +1 (rightmost card)
+        float normalizedPos = (i - (numCards - 1) / 2.0f) / ((numCards - 1) / 2.0f);
+        int arcOffset = static_cast<int>(arcHeight * (1.0f - normalizedPos * normalizedPos));
+        float rotation = maxRotation * normalizedPos;
+
+        int x = startX + i * cardSpacing;
+        int y = baseY - arcOffset;
+
+        proxy->setPos(x, y);
+        proxy->setRotation(rotation);
+        proxy->setTransformOriginPoint(cardWidth / 2.0, cardHeight / 2.0);
+        proxy->setZValue(i); // base stacking order (rightmost card drawn on top)
+
+        // Store everything eventFilter() needs for the hover animation
+        card->setProperty("proxy", QVariant::fromValue(proxy));
+        card->setProperty("defaultY", y);
+        card->setProperty("defaultRotation", rotation);
+        card->setProperty("index", i); // needed to restore zValue on hover leave
+
+        card->installEventFilter(this);
     }
 
     layout->addLayout(controlRow);
-    layout->addLayout(handRow);
+    layout->addWidget(handView, 0, Qt::AlignHCenter);
+
+}
+
+bool BattlePage::eventFilter(QObject *obj, QEvent *event)
+{
+    QPushButton *card = qobject_cast<QPushButton*>(obj);
+    if (!card) return QWidget::eventFilter(obj, event);
+
+    QGraphicsProxyWidget *proxy = card->property("proxy").value<QGraphicsProxyWidget*>();
+    if (!proxy) return QWidget::eventFilter(obj, event);
+
+    if (event->type() == QEvent::Enter)
+    {
+        // Move the card up
+        QPropertyAnimation *moveUp = new QPropertyAnimation(proxy, "pos");
+        moveUp->setDuration(200);
+        moveUp->setStartValue(proxy->pos());
+        moveUp->setEndValue(QPointF(proxy->pos().x(), card->property("defaultY").toInt() - 130));
+        moveUp->setEasingCurve(QEasingCurve::OutCubic);
+        moveUp->start(QAbstractAnimation::DeleteWhenStopped);
+
+        // Flatten the rotation
+        QPropertyAnimation *rotateFlat = new QPropertyAnimation(proxy, "rotation");
+        rotateFlat->setDuration(200);
+        rotateFlat->setStartValue(proxy->rotation());
+        rotateFlat->setEndValue(0.0);
+        rotateFlat->setEasingCurve(QEasingCurve::OutCubic);
+        rotateFlat->start(QAbstractAnimation::DeleteWhenStopped);
+
+        // make bigger
+        QPropertyAnimation *scaleUp = new QPropertyAnimation(proxy, "scale");
+        scaleUp->setDuration(200);
+        scaleUp->setStartValue(1.0);
+        scaleUp->setEndValue(1.2);
+        scaleUp->setEasingCurve(QEasingCurve::OutCubic);
+        scaleUp->start(QAbstractAnimation::DeleteWhenStopped);
+
+        // Bring to front
+        proxy->setZValue(100);
+
+        // Blue glow
+        QGraphicsDropShadowEffect *glow = new QGraphicsDropShadowEffect();
+        glow->setColor(QColor(0, 150, 255, 200));
+        glow->setBlurRadius(20);
+        glow->setOffset(0, 0);
+        proxy->setGraphicsEffect(glow);
+    }
+    else if (event->type() == QEvent::Leave)
+    {
+        // Move back down
+        QPropertyAnimation *moveDown = new QPropertyAnimation(proxy, "pos");
+        moveDown->setDuration(200);
+        moveDown->setStartValue(proxy->pos());
+        moveDown->setEndValue(QPointF(proxy->pos().x(), card->property("defaultY").toInt()));
+        moveDown->setEasingCurve(QEasingCurve::OutCubic);
+        moveDown->start(QAbstractAnimation::DeleteWhenStopped);
+
+        // Restore original rotation
+        QPropertyAnimation *rotateBack = new QPropertyAnimation(proxy, "rotation");
+        rotateBack->setDuration(200);
+        rotateBack->setStartValue(proxy->rotation());
+        rotateBack->setEndValue(card->property("defaultRotation").toDouble());
+        rotateBack->setEasingCurve(QEasingCurve::OutCubic);
+        rotateBack->start(QAbstractAnimation::DeleteWhenStopped);
+
+         // Restore original size
+        QPropertyAnimation *scaleDown = new QPropertyAnimation(proxy, "scale");
+        scaleDown->setDuration(200);
+        scaleDown->setStartValue(proxy->scale());
+        scaleDown->setEndValue(1.0);
+        scaleDown->setEasingCurve(QEasingCurve::OutCubic);
+        scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
+
+        // Restore original stacking order using the stored index property
+        // ("i" is not in scope here, unlike inside setupBottomBar's loop)
+        proxy->setZValue(card->property("index").toInt());
+
+        // Remove the glow
+        proxy->setGraphicsEffect(nullptr);
+    }
+
+    return QWidget::eventFilter(obj, event);
 }
 
 BattlePage::~BattlePage()
