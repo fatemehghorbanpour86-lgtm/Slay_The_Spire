@@ -273,6 +273,7 @@ Relic* RelicSystem::createRelicById(RelicId id)
     case RelicId::CultistHeadpiece:  return new CultistHeadpiece();
     case RelicId::GremlinVisage:     return new GremlinVisage();
     case RelicId::FaceOfCleric:      return new FaceOfCleric();
+    case RelicId::GoldenIdolRelic:    return new GoldenIdolRelic();
     }
 
     return nullptr;

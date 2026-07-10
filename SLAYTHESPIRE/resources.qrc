@@ -7,22 +7,8 @@
         <file>multiPalyerBtn.png</file>
         <file>settingBtn.png</file>
         <file>singlePlayerBtn.png</file>
-        <file>MainMenu.gif</file>
-        <file>LoginPage.gif</file>
-        <file>SplashPage.gif</file>
     </qresource>
-    <qresource prefix="/Audio">
-        <file>Attack.wav</file>
-        <file>ButtonClicked.wav</file>
-        <file>Campfire.wav</file>
-        <file>DeathEnemyOrPlayer.wav</file>
-        <file>Defeat.wav</file>
-        <file>DrinkPotion.wav</file>
-        <file>IntentEnemy.wav</file>
-        <file>RavenRelic.wav</file>
-        <file>Reward.wav</file>
-        <file>TakeDamage.wav</file>
-    </qresource>
+    <qresource prefix="/Audio"/>
     <qresource prefix="/map">
         <file>boss_champ.png</file>
         <file>boss_hexaghost.png</file>

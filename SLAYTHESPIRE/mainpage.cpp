@@ -7,6 +7,8 @@
 #include <QLabel>
 #include <QMovie>
 #include <QTimer>
+#include <QCoreApplication>
+#include <QDir>
 
 mainpage::mainpage(QWidget *parent)
     : QWidget{parent}
@@ -17,7 +19,9 @@ mainpage::mainpage(QWidget *parent)
     bg->setGeometry(0, 0, 1280, 720);
     bg->setScaledContents(true);
     bg->lower();
-    QMovie *movie = new QMovie(":/MainMenu.gif");
+    QString exeDir = QCoreApplication::applicationDirPath();
+    QString gifPath = QDir(exeDir).filePath("assets/page/MainMenu.gif");
+    QMovie *movie = new QMovie(gifPath);
     bg->setMovie(movie);
     movie->start();
 

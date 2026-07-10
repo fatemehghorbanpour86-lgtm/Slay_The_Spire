@@ -4,6 +4,8 @@
 #include <QLabel>
 #include <QMovie>
 #include "audiomanager.h"
+#include <QCoreApplication>
+#include <QDir>
 
 loginpage::loginpage(QWidget *parent)
     : QWidget{parent}
@@ -14,9 +16,12 @@ loginpage::loginpage(QWidget *parent)
     bg->setGeometry(0, 0, 1280, 720);
     bg->setScaledContents(true);
     bg->lower();
-    QMovie *movie = new QMovie(":/LoginPage.gif");
+    QString exeDir = QCoreApplication::applicationDirPath();
+    QString gifPath = QDir(exeDir).filePath("assets/page/LoginPage.gif");
+    QMovie *movie = new QMovie(gifPath);
     bg->setMovie(movie);
     movie->start();
+
 
     setStyleSheet(
                   "QToolTip { color: #facc15; background-color: #1f2937; border: 1px solid #b91c1c;"

@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/pages">
+        <file>assets/page/LoginPage.gif</file>
+        <file>assets/page/MainMenu.gif</file>
+        <file>assets/page/SplashPage.gif</file>
+    </qresource>
+</RCC>

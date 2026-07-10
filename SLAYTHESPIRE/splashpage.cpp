@@ -2,6 +2,8 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QMovie>
+#include <QCoreApplication>
+#include <QDir>
 
 SplashPage::SplashPage(QWidget *parent): QWidget(parent)
 {
@@ -11,7 +13,9 @@ SplashPage::SplashPage(QWidget *parent): QWidget(parent)
     bg->setGeometry(0, 0, 1280, 720);
     bg->setScaledContents(true);
     bg->lower();
-    QMovie *movie = new QMovie(":/SplashPage.gif");
+    QString exeDir = QCoreApplication::applicationDirPath();
+    QString gifPath = QDir(exeDir).filePath("assets/page/SplashPage.gif");
+    QMovie *movie = new QMovie(gifPath);
     bg->setMovie(movie);
     movie->start();
 

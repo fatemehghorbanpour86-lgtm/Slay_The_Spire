@@ -125,7 +125,7 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
     for (int i = 0; i < 3; ++i) {
         potionSlots[i] = new QLabel();
         potionSlots[i]->setFixedSize(32, 32);
-        potionSlots[i]->setStyleSheet("border-image: url(:/map/potionEmpty.png); background: transparent;");
+        potionSlots[i]->setStyleSheet("border-image: url(:/Potion/potionEmpty.png); background: transparent;");
         potionsLayout->addWidget(potionSlots[i]);
     }
 
@@ -260,10 +260,10 @@ void MapPage::updateTopBarData() {
     for(int i = 0; i < 3; ++i) {
         if(i < player->getPotionCount() && player->getPotion(i) != nullptr) {
             QString potionName = player->getPotion(i)->getName().toLower().replace(" ", "_");
-            QString iconPath = QString(":/map/%1.png").arg(potionName);
+            QString iconPath = QString(":/Potion/%1.png").arg(potionName);
             potionSlots[i]->setStyleSheet(QString("border-image: url(%1); background: transparent;").arg(iconPath));
         } else {
-            potionSlots[i]->setStyleSheet("border-image: url(:/map/potionEmpty.png); background: transparent;");
+            potionSlots[i]->setStyleSheet("border-image: url(:/Potion/potionEmpty.png); background: transparent;");
         }
     }
 }

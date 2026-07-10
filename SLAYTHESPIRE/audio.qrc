@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/audio">
+        <file>assets/audio/Attack.wav</file>
+        <file>assets/audio/ButtonClicked.wav</file>
+        <file>assets/audio/Campfire.wav</file>
+        <file>assets/audio/DeathEnemyOrPlayer.wav</file>
+        <file>assets/audio/Defeat.wav</file>
+        <file>assets/audio/DrinkPotion.wav</file>
+        <file>assets/audio/IntentEnemy.wav</file>
+        <file>assets/audio/RavenRelic.wav</file>
+        <file>assets/audio/TakeDamage.wav</file>
+        <file>assets/audio/Reward.wav</file>
+    </qresource>
+</RCC>
