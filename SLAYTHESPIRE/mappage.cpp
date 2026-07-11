@@ -6,6 +6,7 @@
 #include "potion.h"
 #include "audiomanager.h"
 #include "relicviewer.h"
+#include "deckviewer.h"
 
 static const QString BONE_COLOR = "#E8DCC0";
 
@@ -285,7 +286,8 @@ void MapPage::onRelicButtonClicked() {
 }
 
 void MapPage::onDeckButtonClicked() {
-    // TODO:
+    DeckViewerDialog dialog(player, this);
+    dialog.exec();
 }
 
 void MapPage::onSettingsButtonClicked() {

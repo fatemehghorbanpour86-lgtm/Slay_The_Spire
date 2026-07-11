@@ -115,6 +115,9 @@
         <file>TwinStrike.png</file>
         <file>TwinStrikePlus.png</file>
         <file>Wound.png</file>
+        <file>CardViewer.png</file>
+        <file>Barricade.png</file>
+        <file>BarricadePlus.png</file>
     </qresource>
     <qresource prefix="/Potion">
         <file>block_potion.png</file>
