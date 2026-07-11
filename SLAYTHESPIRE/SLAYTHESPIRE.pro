@@ -40,6 +40,7 @@ SOURCES += \
     powercard.cpp \
     relic.cpp \
     relicsystem.cpp \
+    relicviewer.cpp \
     savemanager.cpp \
     skillcards.cpp \
     splashpage.cpp \
@@ -79,6 +80,7 @@ HEADERS += \
     powercard.h \
     relic.h \
     relicsystem.h \
+    relicviewer.h \
     savemanager.h \
     skillcards.h \
     splashpage.h \

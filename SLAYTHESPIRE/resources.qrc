@@ -42,7 +42,7 @@
         <file>BurningBlood.png</file>
         <file>CallingBell.png</file>
         <file>CoffeeDripper.png</file>
-        <file>CultistHeadpience.png</file>
+        <file>CultistHeadpiece.png</file>
         <file>FaceOfCleric.png</file>
         <file>Girya.png</file>
         <file>GoldenIdol.png</file>
@@ -57,6 +57,7 @@
         <file>Vajra.png</file>
         <file>VelvetChoker.png</file>
         <file>WarpedTongs.png</file>
+        <file>RelicViewer.png</file>
     </qresource>
     <qresource prefix="/card">
         <file>Berserk.png</file>
