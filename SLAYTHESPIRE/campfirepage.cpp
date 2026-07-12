@@ -1,5 +1,5 @@
 #include "campfirepage.h"
-#include "upgradecardsdialog.h"
+#include "upgradecards.h"
 #include "player.h"
 #include "map.h"
 #include "masterdeck.h"
