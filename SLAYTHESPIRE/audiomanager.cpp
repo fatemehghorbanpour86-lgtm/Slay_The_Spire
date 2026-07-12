@@ -1,4 +1,6 @@
 #include "audiomanager.h"
+#include <QCoreApplication>
+#include <QDir>
 
 AudioManager& AudioManager::instance()
 {
@@ -13,25 +15,29 @@ AudioManager::AudioManager(QObject *parent)
 
 void AudioManager::initialize()
 {
-    auto addSound = [&](Sound sound, const QString &path)
+    QString baseDir = QCoreApplication::applicationDirPath();
+    auto addSound = [&](Sound sound, const QString &relativePath)
     {
         QSoundEffect *effect = new QSoundEffect(this);
-        effect->setSource(QUrl(path));
+
+        QString fullPath = QDir(baseDir).filePath(relativePath);
+
+        effect->setSource(QUrl::fromLocalFile(fullPath));
         effect->setVolume(volume);
 
         effects.insert(sound, effect);
     };
 
-    addSound(Sound::ButtonClick, "qrc:/Audio/ButtonClicked.wav");
-    addSound(Sound::Attack, "qrc:/Audio/Attack.wav");
-    addSound(Sound::Campfire, "qrc:/Audio/Campfire.wav");
-    addSound(Sound::Death, "qrc:/Audio/DeathEnemyOrPlayer.wav");
-    addSound(Sound::Drink, "qrc:/Audio/DrinkPotion.wav");
-    addSound(Sound::Raven, "qrc:/Audio/RavenRelic.wav");
-    addSound(Sound::Enemy, "qrc:/Audio/IntentEnemy.wav");
-    addSound(Sound::Reward, "qrc:/Audio/Reward.wav");
-    addSound(Sound::TakeDamage, "qrc:/Audio/TakeDamage.wav");
-    addSound(Sound::Defeat, "qrc:/Audio/Defeat.wav");
+    addSound(Sound::ButtonClick, "assets/audio/ButtonClicked.wav");
+    addSound(Sound::Attack, "assets/audio/Attack.wav");
+    addSound(Sound::Campfire, "assets/audio/Campfire.wav");
+    addSound(Sound::Death, "assets/audio/DeathEnemyOrPlayer.wav");
+    addSound(Sound::Drink, "assets/audio/DrinkPotion.wav");
+    addSound(Sound::Raven, "assets/audio/RavenRelic.wav");
+    addSound(Sound::Enemy, "assets/audio/IntentEnemy.wav");
+    addSound(Sound::Reward, "assets/audio/Reward.wav");
+    addSound(Sound::TakeDamage, "assets/audio/TakeDamage.wav");
+    addSound(Sound::Defeat, "assets/audio/Defeat.wav");
 }
 
 void AudioManager::play(Sound sound)

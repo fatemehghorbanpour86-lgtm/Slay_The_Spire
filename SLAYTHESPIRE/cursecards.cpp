@@ -6,7 +6,7 @@
 //======================================================
 
 JAX::JAX()
-    : Card("J.A.X.","Lose 3 HP. Gain 2 Strength.",0,CardType::Curse)
+    : Card("J.A.X.","Lose 3 HP. Gain 2 Strength.",0,CardType::Curse), strengthAmount(2)
 {
 }
 
@@ -22,12 +22,23 @@ void JAX::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
 
     user->loseHP(3);
 
-    user->addEffect( Effect::Type::Strength,Effect::Category::Buff, 2);
+    user->addEffect( Effect::Type::Strength,Effect::Category::Buff, strengthAmount);
 }
 
 void JAX::upgrade()
 {
-    // Curse cards cannot be upgraded.
+    if(isUpgraded)
+    {
+        return;
+    }
+
+    isUpgraded = true;
+
+    name = "J.A.X.+";
+
+    strengthAmount += 1;
+
+    description = "Lose 3 HP. Gain 3 Strength.";
 }
 
 Card* JAX::clone() const

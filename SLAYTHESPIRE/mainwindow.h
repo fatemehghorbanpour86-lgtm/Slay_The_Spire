@@ -31,6 +31,7 @@ private slots:
     void showLoginPAge();
     void showMainMenuPage();
     void showBattlePage();
+    void showMapPage();
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;

@@ -7,9 +7,6 @@
         <file>multiPalyerBtn.png</file>
         <file>settingBtn.png</file>
         <file>singlePlayerBtn.png</file>
-        <file>MainMenu.gif</file>
-        <file>LoginPage.gif</file>
-        <file>SplashPage.gif</file>
         <file>battlebackground.png</file>
         <file>ironclad.png</file>
         <file>heartIcon.png</file>
@@ -20,16 +17,119 @@
         <file>deckIcon.png</file>
         <file>energybutton.png</file>
     </qresource>
-    <qresource prefix="/Audio">
-        <file>Attack.wav</file>
-        <file>ButtonClicked.wav</file>
-        <file>Campfire.wav</file>
-        <file>DeathEnemyOrPlayer.wav</file>
-        <file>Defeat.wav</file>
-        <file>DrinkPotion.wav</file>
-        <file>IntentEnemy.wav</file>
-        <file>RavenRelic.wav</file>
-        <file>Reward.wav</file>
-        <file>TakeDamage.wav</file>
+    <qresource prefix="/Audio"/>
+    <qresource prefix="/map">
+        <file>boss_champ.png</file>
+        <file>boss_hexaghost.png</file>
+        <file>campfire_available.png</file>
+        <file>campfire_locked.png</file>
+        <file>campfire_visited.png</file>
+        <file>cardsBtn.png</file>
+        <file>elite_available.png</file>
+        <file>elite_visited.png</file>
+        <file>enemy_available.png</file>
+        <file>enemy_visited.png</file>
+        <file>event_available.png</file>
+        <file>event_visited.png</file>
+        <file>floorIcon.png</file>
+        <file>map.png</file>
+        <file>settingBtnMap.png</file>
+        <file>shop_available.png</file>
+        <file>shop_visited.png</file>
+        <file>treasure_available.png</file>
+        <file>treasure_visited.png</file>
+        <file>elite_locked.png</file>
+        <file>enemy_locked.png</file>
+        <file>event_locked.png</file>
+        <file>relicIcon.png</file>
+        <file>treasure_locked.png</file>
+        <file>shop_locked.png</file>
+    </qresource>
+    <qresource prefix="/Relic">
+        <file>Anchor.png</file>
+        <file>BlackStar.png</file>
+        <file>BurningBlood.png</file>
+        <file>CallingBell.png</file>
+        <file>CoffeeDripper.png</file>
+        <file>CultistHeadpience.png</file>
+        <file>FaceOfCleric.png</file>
+        <file>Girya.png</file>
+        <file>GoldenIdol.png</file>
+        <file>GremlinVisage.png</file>
+        <file>HappyFlower.png</file>
+        <file>IceCream.png</file>
+        <file>Kunai.png</file>
+        <file>MarkofPain.png</file>
+        <file>MutagenicStrength.png</file>
+        <file>Orichalcum.png</file>
+        <file>Shuriken.png</file>
+        <file>Vajra.png</file>
+        <file>VelvetChoker.png</file>
+        <file>WarpedTongs.png</file>
+    </qresource>
+    <qresource prefix="/card">
+        <file>Berserk.png</file>
+        <file>BerserkPlus.png</file>
+        <file>Bludgeon.png</file>
+        <file>BludgeonPlus.png</file>
+        <file>Brutality.png</file>
+        <file>BrutalityPlus.png</file>
+        <file>Burn.png</file>
+        <file>BurnPlus.png</file>
+        <file>Carnage.png</file>
+        <file>CarnagePlus.png</file>
+        <file>CurseoftheBell.png</file>
+        <file>DarkEmbrace.png</file>
+        <file>DarkEmbracePlus.png</file>
+        <file>Dazed.png</file>
+        <file>Defend.png</file>
+        <file>DefendPlus.png</file>
+        <file>DemonForm.png</file>
+        <file>DemonFormPlus.png</file>
+        <file>Exhume.png</file>
+        <file>ExhumePlus.png</file>
+        <file>Feed.png</file>
+        <file>FeedPlus.png</file>
+        <file>FeelNoPain.png</file>
+        <file>FeelNoPainPlus.png</file>
+        <file>Hemokinesis.png</file>
+        <file>HemokinesisPlus.png</file>
+        <file>Immolate.png</file>
+        <file>ImmolatePlus.png</file>
+        <file>Impervious.png</file>
+        <file>ImperviousPlus.png</file>
+        <file>Inflame.png</file>
+        <file>InflamePlus.png</file>
+        <file>JAX.png</file>
+        <file>JAXPlus.png</file>
+        <file>LimitBreak.png</file>
+        <file>LimitBreakPlus.png</file>
+        <file>Metallicize.png</file>
+        <file>MetallicizePlus.png</file>
+        <file>Offering.png</file>
+        <file>OfferingPlus.png</file>
+        <file>Rage.png</file>
+        <file>RagePlus.png</file>
+        <file>Reaper.png</file>
+        <file>ReaperPlus.png</file>
+        <file>Regret.png</file>
+        <file>ShrugItOff.png</file>
+        <file>ShrugItOffPlus.png</file>
+        <file>Slimed.png</file>
+        <file>Strike.png</file>
+        <file>StrikePlus.png</file>
+        <file>TrueGrit.png</file>
+        <file>TrueGritPlus.png</file>
+        <file>TwinStrike.png</file>
+        <file>TwinStrikePlus.png</file>
+        <file>Wound.png</file>
+    </qresource>
+    <qresource prefix="/Potion">
+        <file>block_potion.png</file>
+        <file>energy_potion.png</file>
+        <file>fairy_in_a_bottle.png</file>
+        <file>fire_potion.png</file>
+        <file>potionEmpty.png</file>
+        <file>swift_potion.png</file>
     </qresource>
 </RCC>

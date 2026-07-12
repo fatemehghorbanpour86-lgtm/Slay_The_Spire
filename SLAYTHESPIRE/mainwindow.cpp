@@ -6,6 +6,12 @@
 #include "mainpage.h"
 #include "battlepage.h"
 
+#include "map.h"
+#include "player.h"
+#include "mappage.h"
+#include "card.h"
+#include "attackcards.h"
+
 void MainWindow::showLoginPAge()
 {
     stackedWidget->setCurrentWidget(loginPage);
@@ -19,6 +25,18 @@ void MainWindow::showMainMenuPage()
 void MainWindow::showBattlePage()
 {
     stackedWidget->setCurrentWidget(battlePage);
+}
+void MainWindow::showMapPage()
+{
+    Map* currentMap = new Map();
+    Player* currentPlayer = new Player("Ironclad", 80);
+
+    MapPage* mapPage = new MapPage(currentMap, currentPlayer);
+
+    connect(mapPage, &MapPage::battleRequested, this, &MainWindow::showBattlePage);
+
+    stackedWidget->addWidget(mapPage);
+    stackedWidget->setCurrentWidget(mapPage);
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -45,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(splashPage, &SplashPage::loadingFinished, this, &MainWindow::showLoginPAge);
     connect(loginPage, &loginpage::loginSuccess,this, &MainWindow::showMainMenuPage );
-    connect(mainMenuPage, &mainpage::singlePlayerClicked, this, &MainWindow::showBattlePage);
+    connect(mainMenuPage, &mainpage::startGame, this, &MainWindow::showMapPage);
 
     stackedWidget->setCurrentWidget(splashPage);
 }

@@ -2,16 +2,28 @@
 #include "combatdeck.h"
 #include "potion.h"
 #include "masterdeck.h"
+#include "attackcards.h"
+#include "skillcards.h"
 
 Player::Player(const QString& name, int maxHealth)
     : Character(name, maxHealth),
     currentEnergy(3),
     maxEnergy(3),
-    gold(0),
+    gold(99),
     masterDeck(new MasterDeck()),
-    combatDeck(new CombatDeck())
+    combatDeck(new CombatDeck()),
+    relicSystem(new RelicSystem())
 {
-
+    for(int i = 0; i < 5; ++i)
+    {
+        masterDeck->addCard(new Strike());
+    }
+    for(int i = 0; i < 4; ++i)
+    {
+        masterDeck->addCard(new Defend());
+    }
+    masterDeck->addCard(new Carnage());
+    relicSystem.addRelic(new BurningBlood(), this);
 }
 
 Player::~Player()
