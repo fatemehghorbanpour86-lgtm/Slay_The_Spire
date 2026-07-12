@@ -5,7 +5,7 @@
 #include <QVector>
 
 class Player;
-class Enemy; // future class
+class Enemy;
 
 enum class CardType
 {
@@ -48,7 +48,6 @@ protected:
 
     void setEnergyCost(int cost);
     // Used for upgrading.
-
 public:
 
     Card(const QString& name, const QString& description, int energyCost, CardType type,

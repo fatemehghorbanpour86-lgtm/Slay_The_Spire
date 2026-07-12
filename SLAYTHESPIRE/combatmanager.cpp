@@ -74,6 +74,7 @@ void CombatManager::changeState(CombatState newState)
 
 void CombatManager::handleBattleStart()
 {
+    player->prepareForCombat();
     player->getRelicSystem().onCombatStart(player);
 
     for(Enemy* enemy : std::as_const(enemies))

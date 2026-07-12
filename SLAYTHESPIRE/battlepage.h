@@ -10,23 +10,40 @@
 #include <QGraphicsScene>   // added: needed for handScene member
 #include <QGraphicsView>    // added: needed for handView member
 
-namespace Ui {
-class BattlePage;
-}
+#include <QMap>
+#include <QList>
+
+#include "combatmanager.h"
+#include "outlinedlabel.h"
+
+class Player;
+class Enemy;
+class Card;
+
 
 class BattlePage : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit BattlePage(QWidget *parent = nullptr);
-    ~BattlePage() override;
+    explicit BattlePage(Player* player = nullptr,
+                        QVector<Enemy*> enemies = {},
+                        QWidget* parent = nullptr);
+
+private slots:
+    void updateStats();
+    void onCardClicked(Card* card);
+    void onBattleWon();
+    void onBattleLost();
 
 signals:
     void battleEnded();
 
 private:
-    Ui::BattlePage *ui;
+
+    CombatManager* combatManager;
+    Player* player;
+    QVector<Enemy*> enemies;
 
     // -- Three main sections of the battle screen --
     QWidget *topBar;        // Top bar: HP, relics, potions
@@ -40,6 +57,17 @@ private:
     void setupTopBar();
     void setupBattleField();
     void setupBottomBar();
+    void refreshHand();
+
+    QPushButton *endTurnBtn = nullptr;
+    QLabel *playerHpLabel = nullptr;
+    QLabel *playerBlockLabel = nullptr;
+    OutlinedLabel *energyValueLabel = nullptr;
+    QLabel *intentLabel = nullptr;
+    QProgressBar *playerHPBar = nullptr;
+    QProgressBar *enemyHPBar = nullptr;
+    QString cardImagePath(const Card* card);
+
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

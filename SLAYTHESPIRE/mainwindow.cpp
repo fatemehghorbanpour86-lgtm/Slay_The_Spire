@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "normalenemies.h"
 #include "ui_mainwindow.h"
 
 #include "splashpage.h"
@@ -24,8 +25,16 @@ void MainWindow::showMainMenuPage()
 
 void MainWindow::showBattlePage()
 {
-    stackedWidget->setCurrentWidget(battlePage);
+       if (battlePage) {
+            stackedWidget->removeWidget(battlePage);
+            delete battlePage;
+            battlePage = nullptr;
+        }
+        battlePage = new BattlePage(new Player("Ironclad", 80), {new Cultist}, this);
+        stackedWidget->addWidget(battlePage);
+        stackedWidget->setCurrentWidget(battlePage);
 }
+
 void MainWindow::showMapPage()
 {
     Map* currentMap = new Map();
@@ -53,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent)
     splashPage = new SplashPage(this);
     loginPage = new loginpage(this);
     mainMenuPage = new mainpage(this);
-    battlePage = new BattlePage(this);
+    battlePage = new BattlePage(new Player("Ironclad", 80), {new Cultist}, this);
 
 
     stackedWidget->addWidget(splashPage);

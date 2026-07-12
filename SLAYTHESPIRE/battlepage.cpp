@@ -1,5 +1,8 @@
 #include "battlepage.h"
-#include "ui_battlepage.h"
+#include "combatdeck.h"
+#include "enemy.h"
+#include "normalenemies.h"
+#include "player.h"
 
 #include "outlinedlabel.h"
 
@@ -13,11 +16,15 @@
 
 
 
-BattlePage::BattlePage(QWidget *parent)
-    : QWidget(parent)
-    , ui(new Ui::BattlePage)
+BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
+    : QWidget(parent), player(player), enemies(enemies)
 {
-    ui->setupUi(this);
+    if (this->player == nullptr)
+        this->player = new Player("Ironclad", 80);
+
+    if (this->enemies.isEmpty())
+        this->enemies.append (new Cultist);
+
 
     // -- Main vertical layout --
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -56,6 +63,15 @@ BattlePage::BattlePage(QWidget *parent)
     setupTopBar();
     setupBattleField();
     setupBottomBar();
+
+    combatManager = new CombatManager(player, enemies, this);
+
+    connect(combatManager, &CombatManager::statsUpdated, this, &BattlePage::updateStats);
+    connect(combatManager, &CombatManager::battleWon,    this, &BattlePage::onBattleWon);
+    connect(combatManager, &CombatManager::battleLost,   this, &BattlePage::onBattleLost);
+    connect(endTurnBtn,    &QPushButton::clicked,        combatManager, &CombatManager::endTurn);
+
+    combatManager->startCombat();
 }
 
 // ─────────────────────────────────────────
@@ -89,8 +105,12 @@ void BattlePage::setupTopBar()
     heartIcon->setAlignment(Qt::AlignCenter);
 
 
-    QLabel *hpValueLabel = new QLabel("80/80", topBar);
-    hpValueLabel->setStyleSheet("color: #e63946; font-size: 14px; font-weight: bold; background: transparent;");
+    playerHpLabel = new QLabel("80/80", topBar);
+    playerHpLabel->setStyleSheet("color: #e63946; font-size: 14px; font-weight: bold; background: transparent;");
+
+    playerBlockLabel = new QLabel("Block: 0", topBar);
+    playerBlockLabel->setStyleSheet("color: #60a5fa; font-size: 13px; font-weight: bold; background: transparent;");
+    leftGroup->addWidget(playerBlockLabel);
 
     // Gold icon + value
     QLabel *goldIcon = new QLabel(topBar);
@@ -110,7 +130,7 @@ void BattlePage::setupTopBar()
     leftGroup->addWidget(classLabel);
     leftGroup->addSpacing(15);
     leftGroup->addWidget(heartIcon);
-    leftGroup->addWidget(hpValueLabel);
+    leftGroup->addWidget(playerHpLabel);
     leftGroup->addSpacing(10);
     leftGroup->addWidget(goldIcon);
     leftGroup->addWidget(goldValueLabel);
@@ -216,13 +236,13 @@ void BattlePage::setupBattleField()
     playerImg->setAlignment(Qt::AlignCenter);
 
     // Player HP bar
-    QProgressBar *playerHP = new QProgressBar(playerWidget);
-    playerHP->setRange(0, 80);
-    playerHP->setValue(80);
-    playerHP->setFixedSize(170, 16);
-    playerHP->setTextVisible(true);
-    playerHP->setFormat("%v / %m");
-    playerHP->setStyleSheet(
+    playerHPBar = new QProgressBar(playerWidget);
+    playerHPBar->setRange(0, player->getMaxHealth());
+    playerHPBar->setValue(player->getCurrentHealth());
+    playerHPBar->setFixedSize(170, 16);
+    playerHPBar->setTextVisible(true);
+    playerHPBar->setFormat("%v / %m");
+    playerHPBar->setStyleSheet(
         "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
         "border-radius: 6px; color: white; font-size: 12px; text-align: center; }"
         "QProgressBar::chunk { background: #e63946; border-radius: 4px; }"
@@ -230,7 +250,7 @@ void BattlePage::setupBattleField()
 
     playerLayout->addStretch();
     playerLayout->addWidget(playerImg);
-    playerLayout->addWidget(playerHP, 0, Qt::AlignHCenter);
+    playerLayout->addWidget(playerHPBar, 0, Qt::AlignHCenter);
 
     // -- Enemy container (right side) --
     QWidget *enemyContainer = new QWidget(battleField);
@@ -247,7 +267,7 @@ void BattlePage::setupBattleField()
     enemyInnerLayout->setSpacing(5);
 
     // Enemy intent (attack/defend indicator)
-    QLabel *intentLabel = new QLabel("⚔ 12", enemyWidget);
+    intentLabel = new QLabel("⚔ 12", enemyWidget);
     intentLabel->setAlignment(Qt::AlignCenter);
     intentLabel->setFixedHeight(30);
     intentLabel->setStyleSheet(
@@ -269,13 +289,13 @@ void BattlePage::setupBattleField()
 
 
     // Enemy HP bar
-    QProgressBar *enemyHP = new QProgressBar(enemyWidget);
-    enemyHP->setRange(0, 50);
-    enemyHP->setValue(50);
-    enemyHP->setFixedSize(170, 16);
-    enemyHP->setTextVisible(true);
-    enemyHP->setFormat("%v / %m");
-    enemyHP->setStyleSheet(
+    enemyHPBar  = new QProgressBar(enemyWidget);
+    enemyHPBar->setRange(0, 50);
+    enemyHPBar->setValue(50);
+    enemyHPBar->setFixedSize(170, 16);
+    enemyHPBar->setTextVisible(true);
+    enemyHPBar->setFormat("%v / %m");
+    enemyHPBar->setStyleSheet(
         "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
         "border-radius: 6px; color: white; font-size: 12px; text-align: center; }"
         "QProgressBar::chunk { background: #e63946; border-radius: 4px; }"
@@ -284,7 +304,7 @@ void BattlePage::setupBattleField()
     enemyInnerLayout->addWidget(intentLabel);
     enemyInnerLayout->addStretch();
     enemyInnerLayout->addWidget(enemyImg);
-    enemyInnerLayout->addWidget(enemyHP, 0, Qt::AlignHCenter);
+    enemyInnerLayout->addWidget(enemyHPBar, 0, Qt::AlignHCenter);
 
     enemyLayout->addWidget(enemyWidget);
 
@@ -315,13 +335,13 @@ void BattlePage::setupBottomBar()
         ));
     energyLabel->setAlignment(Qt::AlignCenter);
 
-    OutlinedLabel *energyValueLabel = new OutlinedLabel("3/3", energyLabel);
+    energyValueLabel = new OutlinedLabel("3/3", energyLabel);
     energyValueLabel->setFixedSize(130, 130);
     energyValueLabel->move(0, 0);
     energyValueLabel->raise();
 
 
-    QPushButton *endTurnBtn = new QPushButton("End Turn", bottomBar);
+    endTurnBtn = new QPushButton("End Turn", bottomBar);
     endTurnBtn->setFixedSize(140, 50);
     endTurnBtn->setStyleSheet(
         "QPushButton { background-color: #b91c1c; color: white; font-size: 16px;"
@@ -338,12 +358,6 @@ void BattlePage::setupBottomBar()
 
 
     // ===== Card hand with arc layout =====
-    const int numCards = 5;
-    const int cardWidth = 110;
-    const int cardHeight = 160;
-    const int cardSpacing = 75;   // horizontal overlap between cards
-    const int arcHeight = 20;     // fan curve height
-    const float maxRotation = 12.0f; // max rotation angle (degrees)
 
     const int handViewWidth = 900;
     const int handViewHeight = 400;
@@ -370,99 +384,51 @@ void BattlePage::setupBottomBar()
     handView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     handView->viewport()->setAutoFillBackground(false);
 
-
-    int totalWidth = (numCards - 1) * cardSpacing + cardWidth;
-    int startX = (handViewWidth - totalWidth) / 2;
-    int baseY = handViewHeight - cardHeight + 80; // baseline for the card row
-
-
-    for (int i = 0; i < numCards; i++)
-    {
-        // No parent widget passed here: QGraphicsScene::addWidget() wraps
-        // the widget in a proxy and takes ownership of it, so parenting it
-        // to a (previously undefined) handContainer was both wrong and unnecessary.
-        QPushButton *card = new QPushButton(QString("Card %1").arg(i + 1));
-        card->setFixedSize(cardWidth, cardHeight);
-
-        QGraphicsProxyWidget *proxy = handScene->addWidget(card);
-
-        proxy->setFlag(QGraphicsItem::ItemClipsChildrenToShape, false);
-        proxy->setFlag(QGraphicsItem::ItemClipsToShape, false);
-        proxy->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
-
-        // normalizedPos goes from -1 (leftmost card) to +1 (rightmost card)
-        float normalizedPos = (i - (numCards - 1) / 2.0f) / ((numCards - 1) / 2.0f);
-        int arcOffset = static_cast<int>(arcHeight * (1.0f - normalizedPos * normalizedPos));
-        float rotation = maxRotation * normalizedPos;
-
-        int x = startX + i * cardSpacing;
-        int y = baseY - arcOffset;
-
-        proxy->setPos(x, y);
-        proxy->setRotation(rotation);
-        proxy->setTransformOriginPoint(cardWidth / 2.0, cardHeight / 2.0);
-        proxy->setZValue(i); // base stacking order (rightmost card drawn on top)
-
-        // Store everything eventFilter() needs for the hover animation
-        card->setProperty("proxy", QVariant::fromValue(proxy));
-        card->setProperty("defaultY", y);
-        card->setProperty("defaultRotation", rotation);
-        card->setProperty("index", i); // needed to restore zValue on hover leave
-
-        card->installEventFilter(this);
-    }
-
     layout->addLayout(controlRow);
-    handView->setParent(this);  // always place on BattlePage itself
+
+    handView->setParent(this);
     handView->setGeometry(
-        (1280 - handViewWidth) / 2,  // centered horizontally
-        720 - handViewHeight,         // anchored to bottom of screen
-        handViewWidth,
-        handViewHeight
+        (1280 - 900) / 2,   // x: centered = 190
+        720  - 400,          // y: anchored to bottom = 320
+        900,
+        400
         );
-    handView->raise();
 
 }
-
 bool BattlePage::eventFilter(QObject *obj, QEvent *event)
 {
-    QPushButton *card = qobject_cast<QPushButton*>(obj);
+    QPushButton* card = qobject_cast<QPushButton*>(obj);
     if (!card) return QWidget::eventFilter(obj, event);
 
-    QGraphicsProxyWidget *proxy = card->property("proxy").value<QGraphicsProxyWidget*>();
+    QGraphicsProxyWidget* proxy = card->property("proxy").value<QGraphicsProxyWidget*>();
     if (!proxy) return QWidget::eventFilter(obj, event);
 
     if (event->type() == QEvent::Enter)
     {
-        // Move the card up
-        QPropertyAnimation *moveUp = new QPropertyAnimation(proxy, "pos");
+        QPropertyAnimation* moveUp = new QPropertyAnimation(proxy, "pos");
         moveUp->setDuration(200);
         moveUp->setStartValue(proxy->pos());
         moveUp->setEndValue(QPointF(proxy->pos().x(), card->property("defaultY").toInt() - 100));
         moveUp->setEasingCurve(QEasingCurve::OutCubic);
         moveUp->start(QAbstractAnimation::DeleteWhenStopped);
 
-        // Flatten the rotation
-        QPropertyAnimation *rotateFlat = new QPropertyAnimation(proxy, "rotation");
+        QPropertyAnimation* rotateFlat = new QPropertyAnimation(proxy, "rotation");
         rotateFlat->setDuration(200);
         rotateFlat->setStartValue(proxy->rotation());
         rotateFlat->setEndValue(0.0);
         rotateFlat->setEasingCurve(QEasingCurve::OutCubic);
         rotateFlat->start(QAbstractAnimation::DeleteWhenStopped);
 
-        // make bigger
-        QPropertyAnimation *scaleUp = new QPropertyAnimation(proxy, "scale");
+        QPropertyAnimation* scaleUp = new QPropertyAnimation(proxy, "scale");
         scaleUp->setDuration(200);
-        scaleUp->setStartValue(1.0);
+        scaleUp->setStartValue(proxy->scale());
         scaleUp->setEndValue(1.2);
         scaleUp->setEasingCurve(QEasingCurve::OutCubic);
         scaleUp->start(QAbstractAnimation::DeleteWhenStopped);
 
-        // Bring to front
         proxy->setZValue(100);
 
-        // Blue glow
-        QGraphicsDropShadowEffect *glow = new QGraphicsDropShadowEffect();
+        QGraphicsDropShadowEffect* glow = new QGraphicsDropShadowEffect();
         glow->setColor(QColor(0, 150, 255, 200));
         glow->setBlurRadius(60);
         glow->setOffset(0, 0);
@@ -470,42 +436,173 @@ bool BattlePage::eventFilter(QObject *obj, QEvent *event)
     }
     else if (event->type() == QEvent::Leave)
     {
-        // Move back down
-        QPropertyAnimation *moveDown = new QPropertyAnimation(proxy, "pos");
+        QPropertyAnimation* moveDown = new QPropertyAnimation(proxy, "pos");
         moveDown->setDuration(200);
         moveDown->setStartValue(proxy->pos());
         moveDown->setEndValue(QPointF(proxy->pos().x(), card->property("defaultY").toInt()));
         moveDown->setEasingCurve(QEasingCurve::OutCubic);
         moveDown->start(QAbstractAnimation::DeleteWhenStopped);
 
-        // Restore original rotation
-        QPropertyAnimation *rotateBack = new QPropertyAnimation(proxy, "rotation");
+        QPropertyAnimation* rotateBack = new QPropertyAnimation(proxy, "rotation");
         rotateBack->setDuration(200);
         rotateBack->setStartValue(proxy->rotation());
         rotateBack->setEndValue(card->property("defaultRotation").toDouble());
         rotateBack->setEasingCurve(QEasingCurve::OutCubic);
         rotateBack->start(QAbstractAnimation::DeleteWhenStopped);
 
-         // Restore original size
-        QPropertyAnimation *scaleDown = new QPropertyAnimation(proxy, "scale");
+        QPropertyAnimation* scaleDown = new QPropertyAnimation(proxy, "scale");
         scaleDown->setDuration(200);
         scaleDown->setStartValue(proxy->scale());
         scaleDown->setEndValue(1.0);
         scaleDown->setEasingCurve(QEasingCurve::OutCubic);
         scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
 
-        // Restore original stacking order using the stored index property
-        // ("i" is not in scope here, unlike inside setupBottomBar's loop)
         proxy->setZValue(card->property("index").toInt());
-
-        // Remove the glow
         proxy->setGraphicsEffect(nullptr);
     }
 
     return QWidget::eventFilter(obj, event);
 }
-
-BattlePage::~BattlePage()
+void BattlePage::updateStats()
 {
-    delete ui;
+    playerHPBar->setMaximum(player->getMaxHealth());
+    playerHPBar->setValue(player->getCurrentHealth());
+
+    playerHpLabel->setText(QString("%1 / %2")
+                               .arg(player->getCurrentHealth())
+                               .arg(player->getMaxHealth()));
+
+    playerBlockLabel->setText(QString::number(player->getBlock()));
+
+    energyValueLabel->setText(QString("%1/%2")
+                                  .arg(player->getCurrentEnergy())
+                                  .arg(player->getMaxEnergy()));
+
+    if (!enemies.isEmpty() && !enemies[0]->isDead()) {
+        enemyHPBar->setMaximum(enemies[0]->getMaxHealth());
+        enemyHPBar->setValue(enemies[0]->getCurrentHealth());
+    }
+
+    refreshHand();
+}
+void BattlePage::refreshHand()
+{
+    handScene->clear();
+
+    CombatDeck* deck = player->getCombatDeck();
+    if (!deck) return;
+    const auto& hand = deck->getHand();
+    if (hand.isEmpty()) return;
+
+    const int cardW      = 110;
+    const int cardH      = 160;
+    const int spacing    = 75;
+    const int viewW      = 900;
+    const float maxRot   = 12.0f;
+    const int arcH       = 20;
+    const int baseY      = 400 - cardH + 80;
+
+    const int totalW = (hand.size() - 1) * spacing + cardW;
+    const int startX = (viewW - totalW) / 2;
+
+    for (int i = 0; i < hand.size(); ++i) {
+        Card* card = hand[i];
+        if (!card) continue;
+
+        float norm = hand.size() > 1
+                         ? (i - (hand.size()-1) / 2.0f) / ((hand.size()-1) / 2.0f)
+                         : 0.0f;
+
+        int arcOffset  = static_cast<int>(arcH * (1.0f - norm * norm));
+        float rotation = maxRot * norm;
+        int x = startX + i * spacing;
+        int y = baseY - arcOffset;
+
+        // Build the card as a single QPushButton styled with the card image
+        // This is exactly the old approach — one widget, no children, clean hover events
+        QPushButton* btn = new QPushButton();
+        btn->setFixedSize(cardW, cardH);
+        btn->setCursor(Qt::PointingHandCursor);
+
+        QPixmap px(cardImagePath(card));
+        if (!px.isNull()) {
+            // Use the card image as the button background
+            QPixmap scaled = px.scaled(cardW, cardH,
+                                       Qt::IgnoreAspectRatio,
+                                       Qt::SmoothTransformation);
+            btn->setIcon(QIcon(scaled));
+            btn->setIconSize(QSize(cardW, cardH));
+            btn->setStyleSheet(
+                "QPushButton { border: none; background: transparent; padding: 0; }"
+                );
+        } else {
+            // Fallback styled card (no image)
+            QString typeColor = (card->getType() == CardType::Attack) ? "#7f1d1d" : "#1e3a5f";
+            btn->setStyleSheet(QString(
+                                   "QPushButton {"
+                                   "  background: qlineargradient(x1:0,y1:0,x2:0,y2:1,"
+                                   "    stop:0 %1, stop:1 #0f172a);"
+                                   "  border: 2px solid #475569;"
+                                   "  border-radius: 8px;"
+                                   "  color: white;"
+                                   "  font-size: 10px;"
+                                   "  font-weight: bold;"
+                                   "  padding: 4px;"
+                                   "}"
+                                   ).arg(typeColor));
+            btn->setText(QString("%1\nCost: %2")
+                             .arg(card->getName())
+                             .arg(card->getEnergyCost()));
+        }
+
+        QGraphicsProxyWidget* proxy = handScene->addWidget(btn);
+        proxy->setFlag(QGraphicsItem::ItemClipsChildrenToShape, false);
+        proxy->setFlag(QGraphicsItem::ItemClipsToShape, false);
+        proxy->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
+        proxy->setPos(x, y);
+        proxy->setRotation(rotation);
+        proxy->setTransformOriginPoint(cardW / 2.0, cardH / 2.0);
+        proxy->setZValue(i);
+
+        // Store properties — exactly the same as the old working code
+        btn->setProperty("proxy",           QVariant::fromValue(proxy));
+        btn->setProperty("defaultY",        y);
+        btn->setProperty("defaultRotation", rotation);
+        btn->setProperty("index",           i);
+        btn->installEventFilter(this);
+
+        connect(btn, &QPushButton::clicked, [this, card]() {
+            onCardClicked(card);
+        });
+    }
+}
+void BattlePage::onCardClicked(Card* card)
+{
+    Enemy* target = enemies.isEmpty() ? nullptr : enemies[0];
+    combatManager->playCard(card, target);
+}
+
+void BattlePage::onBattleWon()
+{
+    emit battleEnded();
+}
+void BattlePage::onBattleLost()
+{
+    emit battleEnded();
+}
+QString BattlePage::cardImagePath(const Card* card)
+{
+    if (!card) return QString();
+
+    QString cleanName = card->getName();
+    cleanName.remove(' ');
+    cleanName.remove('\'');
+    cleanName.remove('.');
+    if (cleanName.endsWith('+'))
+        cleanName.chop(1);
+    if (card->getIsUpgraded())
+        cleanName += "Plus";
+
+    return QString(":/card/%1.png").arg(cleanName);
 }
