@@ -8,7 +8,6 @@
         <file>settingBtn.png</file>
         <file>singlePlayerBtn.png</file>
     </qresource>
-    <qresource prefix="/Audio"/>
     <qresource prefix="/map">
         <file>boss_champ.png</file>
         <file>boss_hexaghost.png</file>
@@ -126,5 +125,19 @@
         <file>fire_potion.png</file>
         <file>potionEmpty.png</file>
         <file>swift_potion.png</file>
+    </qresource>
+    <qresource prefix="/RestSite">
+        <file>BackBtn.png</file>
+        <file>YesBtn.png</file>
+        <file>TickBtn.png</file>
+        <file>SmithBtn.png</file>
+        <file>RestBtn.png</file>
+        <file>RestSite.png</file>
+        <file>NoBtn.png</file>
+        <file>GiryaBtn.png</file>
+        <file>BackBtnDis.png</file>
+        <file>GiryaBtnDis.png</file>
+        <file>RestBtnDis.png</file>
+        <file>SmithBtnDis.png</file>
     </qresource>
 </RCC>

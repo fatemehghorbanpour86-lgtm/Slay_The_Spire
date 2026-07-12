@@ -49,7 +49,6 @@ void RelicViewerDialog::setupUI()
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
     scrollArea->setStyleSheet("QScrollArea { background: transparent; border: none; }");
-    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->viewport()->setAutoFillBackground(false);
     scrollArea->viewport()->setStyleSheet("background: transparent;");

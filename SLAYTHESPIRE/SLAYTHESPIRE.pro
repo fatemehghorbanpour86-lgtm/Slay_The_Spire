@@ -12,6 +12,7 @@ SOURCES += \
     bossenemies.cpp \
     bossrelics.cpp \
     campfire.cpp \
+    campfirepage.cpp \
     card.cpp \
     combatcalculator.cpp \
     combatdeck.cpp \
@@ -46,7 +47,8 @@ SOURCES += \
     skillcards.cpp \
     splashpage.cpp \
     character.cpp \
-    statuscards.cpp
+    statuscards.cpp \
+    upgradecards.cpp
 
 HEADERS += \
     attackcards.h \
@@ -54,6 +56,7 @@ HEADERS += \
     bossenemies.h \
     bossrelics.h \
     campfire.h \
+    campfirepage.h \
     card.h \
     combatcalculator.h \
     combatdeck.h \
@@ -87,7 +90,8 @@ HEADERS += \
     skillcards.h \
     splashpage.h \
     character.h \
-    statuscards.h
+    statuscards.h \
+    upgradecards.h
 
 FORMS += \
     mainwindow.ui

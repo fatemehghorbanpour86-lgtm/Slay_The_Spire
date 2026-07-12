@@ -46,7 +46,6 @@ void DeckViewerDialog::setupUI()
     scrollArea->setFrameShape(QFrame::NoFrame);
     scrollArea->setStyleSheet("QScrollArea { background: transparent; border: none; }");
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->viewport()->setAutoFillBackground(false);
     scrollArea->viewport()->setStyleSheet("background: transparent;");
 
