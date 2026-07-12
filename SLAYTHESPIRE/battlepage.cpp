@@ -408,7 +408,7 @@ bool BattlePage::eventFilter(QObject *obj, QEvent *event)
         QPropertyAnimation* moveUp = new QPropertyAnimation(proxy, "pos");
         moveUp->setDuration(200);
         moveUp->setStartValue(proxy->pos());
-        moveUp->setEndValue(QPointF(proxy->pos().x(), card->property("defaultY").toInt() - 100));
+        moveUp->setEndValue(QPointF(proxy->pos().x(), card->property("defaultY").toInt() - 120));
         moveUp->setEasingCurve(QEasingCurve::OutCubic);
         moveUp->start(QAbstractAnimation::DeleteWhenStopped);
 
@@ -429,8 +429,8 @@ bool BattlePage::eventFilter(QObject *obj, QEvent *event)
         proxy->setZValue(100);
 
         QGraphicsDropShadowEffect* glow = new QGraphicsDropShadowEffect();
-        glow->setColor(QColor(0, 150, 255, 200));
-        glow->setBlurRadius(60);
+        glow->setColor(QColor(0, 150, 255, 255));
+        glow->setBlurRadius(80);
         glow->setOffset(0, 0);
         proxy->setGraphicsEffect(glow);
     }
@@ -494,13 +494,13 @@ void BattlePage::refreshHand()
     const auto& hand = deck->getHand();
     if (hand.isEmpty()) return;
 
-    const int cardW      = 110;
-    const int cardH      = 160;
-    const int spacing    = 75;
+    const int cardW      = 150;
+    const int cardH      = 220;
+    const int spacing    = 105;
     const int viewW      = 900;
     const float maxRot   = 12.0f;
     const int arcH       = 20;
-    const int baseY      = 400 - cardH + 80;
+    const int baseY = 400 - cardH + 120;
 
     const int totalW = (hand.size() - 1) * spacing + cardW;
     const int startX = (viewW - totalW) / 2;
