@@ -14,11 +14,13 @@ SOURCES += \
     bossenemies.cpp \
     bossrelics.cpp \
     campfire.cpp \
+    campfirepage.cpp \
     card.cpp \
     combatcalculator.cpp \
     combatdeck.cpp \
     combatmanager.cpp \
     cursecards.cpp \
+    deckviewer.cpp \
     effect.cpp \
     eliteenemy.cpp \
     enemy.cpp \
@@ -42,11 +44,13 @@ SOURCES += \
     powercard.cpp \
     relic.cpp \
     relicsystem.cpp \
+    relicviewer.cpp \
     savemanager.cpp \
     skillcards.cpp \
     splashpage.cpp \
     character.cpp \
-    statuscards.cpp
+    statuscards.cpp \
+    upgradecards.cpp
 
 HEADERS += \
     attackcards.h \
@@ -55,11 +59,13 @@ HEADERS += \
     bossenemies.h \
     bossrelics.h \
     campfire.h \
+    campfirepage.h \
     card.h \
     combatcalculator.h \
     combatdeck.h \
     combatmanager.h \
     cursecards.h \
+    deckviewer.h \
     effect.h \
     eliteenemy.h \
     enemy.h \
@@ -83,11 +89,13 @@ HEADERS += \
     powercard.h \
     relic.h \
     relicsystem.h \
+    relicviewer.h \
     savemanager.h \
     skillcards.h \
     splashpage.h \
     character.h \
-    statuscards.h
+    statuscards.h \
+    upgradecards.h
 
 FORMS += \
     battlepage.ui \
