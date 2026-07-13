@@ -187,7 +187,13 @@ NodeType Map::pickWeightedType(int floorIndex) const
     {
         if (option.type == NodeType::Shop && nearBoss)
             continue; // Doc rule: Shops should not appear right before the Boss.
-
+        for(int i = 0; i < guaranteedCampfireFloors.size(); ++i)
+        {
+            if(option.type == NodeType::Campfire && (floorIndex == i + 1 || floorIndex == i - 1))
+            {
+                continue;
+            }
+        }
         filtered.append(option);
         totalWeight += option.weight;
     }
@@ -220,6 +226,22 @@ bool Map::violatesAdjacencyRule(MapNode* node, NodeType candidate) const
             return true;
     }
 
+    const QVector<NodeType> repeatedGroup = {
+        NodeType::Shop, NodeType::Campfire
+    };
+
+    if (!repeatedGroup.contains(candidate))
+        return false;
+
+    for(int i = 0; i < repeatedGroup.size(); ++i)
+    {
+        for (MapNode* parent : node->getParents())
+        {
+            if (repeatedGroup[i] == parent->getType())
+                return true;
+        }
+    }
+
     return false;
 }
 
@@ -249,7 +271,7 @@ void Map::assignNodeTypes()
     // ("at least 2 Campfires per path from floor 1 to 11") deterministically
     // instead of relying on random luck.
     QVector<int> restFloorCandidates;
-    for (int i = 1; i < bossFloorIndex; ++i)
+    for (int i = 2; i < bossFloorIndex - 2; ++i)
     {
         if (i != TREASURE_FLOOR_INDEX)
             restFloorCandidates.append(i);
@@ -261,11 +283,10 @@ void Map::assignNodeTypes()
         restFloorCandidates.swapItemsAt(i, j);
     }
 
-    QVector<int> guaranteedCampfireFloors;
-    if (restFloorCandidates.size() >= 2)
+    guaranteedCampfireFloors.append(bossFloorIndex - 1);
+    if (restFloorCandidates.size() >= 1)
     {
         guaranteedCampfireFloors.append(restFloorCandidates[0]);
-        guaranteedCampfireFloors.append(restFloorCandidates[1]);
     }
 
     for (int i = 0; i < floors.size(); ++i)
