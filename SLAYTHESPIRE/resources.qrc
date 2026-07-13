@@ -144,9 +144,10 @@
         <file>RestSite.png</file>
         <file>NoBtn.png</file>
         <file>GiryaBtn.png</file>
-        <file>BackBtnDis.png</file>
         <file>GiryaBtnDis.png</file>
         <file>RestBtnDis.png</file>
         <file>SmithBtnDis.png</file>
+        <file>FlashLabel.png</file>
+        <file>UpgradeViewer.png</file>
     </qresource>
 </RCC>

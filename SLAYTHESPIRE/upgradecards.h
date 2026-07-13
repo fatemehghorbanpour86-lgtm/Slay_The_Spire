@@ -16,6 +16,7 @@ class UpgradePreviewDialog : public QDialog
 
 public:
     explicit UpgradePreviewDialog(Card* card, Player* player, Campfire* campfire, QWidget* parent = nullptr);
+    static QString UpgradeCardImagePath(const Card* card);
 
 private slots:
     void onUpgradeClicked();
@@ -43,8 +44,8 @@ private:
     QWidget* gridContainer;
     QGridLayout* gridLayout;
 
-    static const int CARD_WIDTH = 130;
-    static const int CARD_HEIGHT = 190;
+    static const int CARD_WIDTH = 162;
+    static const int CARD_HEIGHT = 214;
     static const int COLUMNS = 4;
 
     void setupUI();

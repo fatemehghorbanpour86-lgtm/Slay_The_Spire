@@ -18,61 +18,87 @@ UpgradePreviewDialog::UpgradePreviewDialog(Card* cardPtr, Player* playerPtr, Cam
     setupUI();
 }
 
+QString UpgradePreviewDialog::UpgradeCardImagePath(const Card* card)
+{
+    if (!card)
+        return QString();
+
+    QString cleanName = card->getName();
+    cleanName.remove(' ');
+    cleanName.remove('\'');
+    cleanName.remove('.');
+
+    if (cleanName.endsWith('+'))
+        cleanName.chop(1);
+
+    return QString(":/card/%1Plus.png").arg(cleanName);
+}
+
 void UpgradePreviewDialog::setupUI()
 {
     setWindowTitle("Upgrade Card");
-    setStyleSheet("QDialog { background-color: #1f2937; }");
+    // setStyleSheet("QDialog { background-color: #1f2937; }");
+
+    setFixedSize(700, 500);
+    setStyleSheet("QDialog { border-image: url(:/RestSite/UpgradeViewer.png); border: none; background: transparent; }"
+                  );
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+
 
     QHBoxLayout* previewLayout = new QHBoxLayout();
+    previewLayout->setContentsMargins(50, 60, 50, 0);
     previewLayout->setSpacing(20);
 
     QLabel* currentImage = new QLabel();
-    currentImage->setFixedSize(150, 220);
-    currentImage->setPixmap(QPixmap(DeckViewerDialog::cardImagePath(card))
-                                .scaled(150, 220, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    currentImage->setFixedSize(170, 220);
+    currentImage->setStyleSheet(QString("border-image: url(%1); background: transparent;")
+                                    .arg(DeckViewerDialog::cardImagePath(card)));
 
-    QLabel* arrowLabel = new QLabel(QString::fromUtf8("\xE2\x96\xB6  \xE2\x96\xB6  \xE2\x96\xB6"));
-    arrowLabel->setStyleSheet("color: #facc15; font-size: 22px; font-weight: bold;");
+    QLabel* arrowLabel = new QLabel();
+    arrowLabel->setFixedSize(180, 100);
+    arrowLabel->setStyleSheet("border-image: url(:/RestSite/FlashLabel.png); background: transparent;");
     arrowLabel->setAlignment(Qt::AlignCenter);
 
     QLabel* upgradedImage = new QLabel();
-    upgradedImage->setFixedSize(150, 220);
-    upgradedImage->setPixmap(QPixmap(DeckViewerDialog::cardImagePath(card))
-                                 .scaled(150, 220, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    upgradedImage->setFixedSize(170, 220);
+    upgradedImage->setStyleSheet(QString("border-image: url(%1); background: transparent;")
+                                     .arg(UpgradeCardImagePath(card)));
 
     previewLayout->addWidget(currentImage);
     previewLayout->addWidget(arrowLabel);
     previewLayout->addWidget(upgradedImage);
 
     mainLayout->addLayout(previewLayout);
-    mainLayout->addSpacing(20);
+    //mainLayout->addSpacing(20);
 
     QHBoxLayout* buttonsLayout = new QHBoxLayout();
+    buttonsLayout->setContentsMargins(0, 0, 0, 0);
+    buttonsLayout->setSpacing(400);
     buttonsLayout->setAlignment(Qt::AlignCenter);
-    buttonsLayout->setSpacing(200);
 
-    QPushButton* upgradeBtn = new QPushButton("Upgrade");
+    QPushButton* upgradeBtn = new QPushButton();
     upgradeBtn->setObjectName("upgradeConfirmBtn");
-    upgradeBtn->setFixedSize(120, 40);
+    upgradeBtn->setFixedSize(150, 100);
     upgradeBtn->setStyleSheet("QPushButton { border-image: url(:/RestSite/YesBtn.png); }"
                               "QPushButton:pressed { "
                               "   margin: 5px 5px 5px 5px; "
                               "}");
     upgradeBtn->setCursor(Qt::PointingHandCursor);
 
-    QPushButton* cancelBtn = new QPushButton("Cancel");
+    QPushButton* cancelBtn = new QPushButton();
     cancelBtn->setObjectName("upgradeCancelBtn");
-    cancelBtn->setFixedSize(120, 40);
+    cancelBtn->setFixedSize(150, 100);
     cancelBtn->setStyleSheet("QPushButton { border-image: url(:/RestSite/NoBtn.png); }"
                              "QPushButton:pressed { "
                              "   margin: 5px 5px 5px 5px; "
                              "}");
     cancelBtn->setCursor(Qt::PointingHandCursor);
 
-    buttonsLayout->addWidget(upgradeBtn);
     buttonsLayout->addWidget(cancelBtn);
+    buttonsLayout->addWidget(upgradeBtn);
 
     mainLayout->addLayout(buttonsLayout);
 
@@ -103,24 +129,26 @@ UpgradeCardsDialog::UpgradeCardsDialog(Player* playerPtr, Campfire* campfirePtr,
 void UpgradeCardsDialog::setupUI()
 {
     setWindowTitle("Upgrade Cards");
-    resize(650, 500);
-    setStyleSheet(
-        "QDialog { background-color: #1f2937; }"
-        "QScrollArea { border: none; background: transparent; }"
-        );
+    setFixedSize(850, 620);
+    setStyleSheet("QDialog { border-image: url(:/card/CardViewer.png); }"
+                  "QScrollArea { border: none; background: transparent; }"
+                  );
+    // resize(650, 500);
+    // setStyleSheet(
+    //     "QDialog { background-color: #1f2937; }"
+    //     "QScrollArea { border: none; background: transparent; }"
+    //     );
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-
+    mainLayout->setContentsMargins(40, 45, 50, 50);
     scrollArea = new QScrollArea(this);
     scrollArea->setWidgetResizable(true);
-    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     gridContainer = new QWidget();
     gridContainer->setStyleSheet("background: transparent;");
 
     gridLayout = new QGridLayout(gridContainer);
-    gridLayout->setSpacing(12);
+    gridLayout->setSpacing(20);
 
     scrollArea->setWidget(gridContainer);
     mainLayout->addWidget(scrollArea);
@@ -142,6 +170,9 @@ void UpgradeCardsDialog::populateCards()
         QPushButton* cardBtn = new QPushButton();
         cardBtn->setFixedSize(CARD_WIDTH, CARD_HEIGHT);
         cardBtn->setIcon(QIcon(DeckViewerDialog::cardImagePath(card)));
+        cardBtn->setStyleSheet("QIcon:pressed { "
+                               "   margin: 5px 5px 5px 5px; "
+                               "}");
         cardBtn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
         cardBtn->setFlat(true);
         cardBtn->setCursor(Qt::PointingHandCursor);

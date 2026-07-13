@@ -189,7 +189,6 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
     cardLabel = new QLabel("0", this);
     cardLabel->setStyleSheet("font-size: 18px; font-weight: bold; color: " + BONE_COLOR + ";");
     cardLabel->move(1185, 26);
-    
 
     settingsBtn = new QPushButton();
     settingsBtn->setFixedSize(45, 45);
@@ -270,6 +269,17 @@ void MapPage::updateTopBarData() {
     }
 }
 
+Player* MapPage::getPlayer() const
+{
+    return player;
+}
+
+Map* MapPage::getMap() const
+{
+    return map;
+}
+
+
 void MapPage::onNodeClicked(int nodeId) {
     bool moved = map->moveToNode(nodeId);
     if (moved) {
@@ -278,10 +288,15 @@ void MapPage::onNodeClicked(int nodeId) {
         //TODO (GameManager)
         //emit roomEntered(map->getCurrentNode()->getType());
 
-        const MapNode* node = map->getCurrentNode();
-        if (node && node->getType() == NodeType::Monster)
+        // const MapNode* node = map->getCurrentNode();
+        // if (node && node->getType() == NodeType::Monster)
+        // {
+        //     emit battleRequested();
+        // }
+
+        if (map->getCurrentNodeType() == NodeType::Campfire)
         {
-            emit battleRequested();
+            emit campfireEntered();
         }
     }
 }

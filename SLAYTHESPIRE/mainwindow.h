@@ -21,6 +21,8 @@ class SplashPage;
 class loginpage;
 class mainpage;
 class BattlePage;
+class MapPage;
+class CampfirePage;
 
 
 class MainWindow : public QMainWindow
@@ -32,6 +34,8 @@ private slots:
     void showMainMenuPage();
     void showBattlePage();
     void showMapPage();
+    void showCampfirePage();
+    void returnFromCampfireToMap();
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
@@ -44,5 +48,7 @@ private:
     loginpage *loginPage;
     mainpage *mainMenuPage;
     BattlePage *battlePage;
+    MapPage *mapPage = nullptr;
+    CampfirePage *campfirePage = nullptr;
 };
 #endif // MAINWINDOW_H

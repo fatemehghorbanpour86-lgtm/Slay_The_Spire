@@ -13,10 +13,6 @@
 
 static const QString BONE_COLOR = "#E8DCC0";
 
-// ======================================================
-//  TopBarWidget
-// ======================================================
-
 TopBarWidget::TopBarWidget(QWidget *parent)
     : QWidget(parent)
 {
@@ -148,8 +144,10 @@ void TopBarWidget::setupUI()
             });
     connect(deckBtn, &QPushButton::clicked, this, &TopBarWidget::deckClicked);
 
-    cardLabel = new QLabel("0");
+    cardLabel = new QLabel("0", this);
     cardLabel->setStyleSheet("font-size: 18px; font-weight: bold; color: " + BONE_COLOR + ";");
+    cardLabel->move(1187, 26);
+    cardLabel->raise();
 
     settingsBtn = new QPushButton();
     settingsBtn->setFixedSize(45, 45);
@@ -168,7 +166,6 @@ void TopBarWidget::setupUI()
     connect(settingsBtn, &QPushButton::clicked, this, &TopBarWidget::settingsClicked);
 
     topBarLayout->addWidget(deckBtn);
-    topBarLayout->addWidget(cardLabel);
     topBarLayout->addSpacing(10);
     topBarLayout->addWidget(settingsBtn);
 }
@@ -253,8 +250,10 @@ void TopBarWidget::updateData(Player* player, Map* map)
 CampfirePage::CampfirePage(Player* playerPtr, Map* mapPtr, QWidget* parent)
     : QWidget(parent), player(playerPtr), map(mapPtr)
 {
+    AudioManager::instance().play(AudioManager::Sound::Campfire);
     setupUI();
     topBar->updateData(player, map);
+    setFixedSize(1280,720);
     refreshButtonStates();
 }
 
@@ -285,26 +284,16 @@ void CampfirePage::setupUI()
 
     mainLayout->addStretch();
 
-    // fireLabel = new QLabel(this);
-    // fireLabel->setAlignment(Qt::AlignCenter);
-    // fireLabel->setFixedSize(220, 220);
-    // fireLabel->setStyleSheet("border-image: url(:/campfire/fire.png); background: transparent;");
-    // mainLayout->addWidget(fireLabel, 0, Qt::AlignHCenter);
-
-    // mainLayout->addSpacing(30);
 
     QHBoxLayout* buttonsLayout = new QHBoxLayout();
-    buttonsLayout->setSpacing(20);
+    buttonsLayout->setSpacing(70);
     buttonsLayout->setAlignment(Qt::AlignCenter);
 
-    auto makeButton = [this](const QString& text, const QString& objectName) {
-        QPushButton* btn = new QPushButton(text, this);
-        btn->setObjectName(objectName);
-        btn->setFixedSize(160, 55);
+    auto makeButton = [this](const QString& objectName) {
+        QPushButton* btn = new QPushButton(this);
+        //btn->setObjectName(objectName);
+        btn->setFixedSize(180, 130);
         btn->setCursor(Qt::PointingHandCursor);
-        // Art pending: swap this for
-        // "QPushButton#<objectName> { border-image: url(:/RestSite/<name>.png); }"
-        // once the button images are added to the resource file.
         btn->setStyleSheet(
             QString("QPushButton { border-image: url(:/RestSite/%1.png); border: none; background: transparent; }"
             "QPushButton:disabled { border-image: url(:/RestSite/%1Dis.png); border: none; background: transparent; }"
@@ -316,23 +305,50 @@ void CampfirePage::setupUI()
         return btn;
     };
 
-    restBtn  = makeButton("Rest",  "RestBtn");
-    smithBtn = makeButton("Smith", "SmithBtn");
-    liftBtn  = makeButton("Girya", "GiryaBtn");
-    leaveBtn = makeButton("Leave", "BackBtn");
+    restBtn  = makeButton("RestBtn");
+    smithBtn = makeButton("SmithBtn");
+    liftBtn  = makeButton("GiryaBtn");
+
+
+    leaveBtn = new QPushButton(this);
+    leaveBtn->setFixedSize(140, 80);
+    leaveBtn->move(0, 450);
+    leaveBtn->setCursor(Qt::PointingHandCursor);
+    leaveBtn->setStyleSheet(
+        "QPushButton { border-image: url(:/RestSite/BackBtn.png); border: none; background: transparent; }"
+        "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
+        );
+    connect(leaveBtn, &QPushButton::pressed, this, []() {
+        AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+    });
+    leaveBtn->raise();
+
+
 
     connect(restBtn,  &QPushButton::clicked, this, &CampfirePage::onRestClicked);
     connect(smithBtn, &QPushButton::clicked, this, &CampfirePage::onSmithClicked);
     connect(liftBtn,  &QPushButton::clicked, this, &CampfirePage::onLiftClicked);
     connect(leaveBtn, &QPushButton::clicked, this, &CampfirePage::onLeaveClicked);
 
-    buttonsLayout->addWidget(restBtn);
-    buttonsLayout->addWidget(smithBtn);
-    buttonsLayout->addWidget(liftBtn);
-    buttonsLayout->addWidget(leaveBtn);
+    auto createButtonContainer = [this](QPushButton* btn, const QString& labelText) {
+        QVBoxLayout* container = new QVBoxLayout();
+        container->setAlignment(Qt::AlignCenter);
+        container->setSpacing(10);
+        container->addWidget(btn);
+        QLabel* label = new QLabel(labelText, this);
+        label->setAlignment(Qt::AlignCenter);
+        label->setStyleSheet("color: #facc15; font-family: Tahoma; font-weight: bold; font-size: 20px;");
+        container->addWidget(label);
+
+        return container;
+    };
+
+    buttonsLayout->addLayout(createButtonContainer(restBtn, "Rest"));
+    buttonsLayout->addLayout(createButtonContainer(smithBtn, "Smith"));
+    buttonsLayout->addLayout(createButtonContainer(liftBtn, "Girya"));
 
     mainLayout->addLayout(buttonsLayout);
-    mainLayout->addSpacing(60);
+    mainLayout->addSpacing(450);
 }
 
 void CampfirePage::refreshButtonStates()

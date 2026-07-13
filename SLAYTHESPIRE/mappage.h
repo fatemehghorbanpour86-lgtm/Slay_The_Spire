@@ -18,6 +18,8 @@ class MapPage : public QWidget {
 public:
     explicit MapPage(Map* gameMap, Player* player, QWidget *parent = nullptr);
     void updateTopBarData();
+    Player* getPlayer() const;
+    Map* getMap() const;
 
 private slots:
     void onNodeClicked(int nodeId);
@@ -57,5 +59,6 @@ protected:
 
 signals:
     void battleRequested();
+    void campfireEntered();
 };
 #endif // MAPPAGE_H
