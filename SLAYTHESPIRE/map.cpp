@@ -197,20 +197,27 @@ NodeType Map::pickWeightedType(int floorIndex) const
 
     QVector<WeightedType> filtered;
     int totalWeight = 0;
+    bool ItsOk = true;
 
     for (const WeightedType& option : options)
     {
         if (option.type == NodeType::Shop && nearBoss)
-            continue; // Doc rule: Shops should not appear right before the Boss.
+        {
+            ItsOk = false;
+        }
+
         for(int i = 0; i < guaranteedCampfireFloors.size(); ++i)
         {
-            if(option.type == NodeType::Campfire && (floorIndex == i + 1 || floorIndex == i - 1))
+            if(option.type == NodeType::Campfire && (floorIndex == guaranteedCampfireFloors[i] + 1 || floorIndex == guaranteedCampfireFloors[i] - 1))
             {
-                continue;
+                ItsOk = false;
             }
         }
-        filtered.append(option);
-        totalWeight += option.weight;
+        if(ItsOk)
+        {
+            filtered.append(option);
+            totalWeight += option.weight;
+        }
     }
 
     int roll = QRandomGenerator::global()->bounded(totalWeight);
