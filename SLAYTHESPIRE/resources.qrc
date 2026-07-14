@@ -16,6 +16,8 @@
         <file>mapIcon.png</file>
         <file>deckIcon.png</file>
         <file>energybutton.png</file>
+        <file>drawPile.png</file>
+        <file>discardPile.png</file>
     </qresource>
     <qresource prefix="/Audio"/>
     <qresource prefix="/map">
@@ -132,4 +134,8 @@
         <file>potionEmpty.png</file>
         <file>swift_potion.png</file>
     </qresource>
+    <qresource prefix="/Enemy">
+        <file>Cultist.png</file>
+    </qresource>
+    <qresource prefix="/new/prefix1"/>
 </RCC>

@@ -70,6 +70,7 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     connect(combatManager, &CombatManager::battleWon,    this, &BattlePage::onBattleWon);
     connect(combatManager, &CombatManager::battleLost,   this, &BattlePage::onBattleLost);
     connect(endTurnBtn,    &QPushButton::clicked,        combatManager, &CombatManager::endTurn);
+    connect(combatManager, &CombatManager::enemyIntentUpdated,this, &BattlePage::updateEnemyIntent);
 
     combatManager->startCombat();
 }
@@ -123,7 +124,7 @@ void BattlePage::setupTopBar()
              ));
     goldIcon->setAlignment(Qt::AlignCenter);
 
-    QLabel *goldValueLabel = new QLabel("149", topBar);
+    goldValueLabel = new QLabel(QString::number(player->getGold()), topBar);
     goldValueLabel->setStyleSheet("color: #f5c518; font-size: 14px; font-weight: bold; background: transparent;");
 
     leftGroup->addWidget(nameLabel);
@@ -260,14 +261,14 @@ void BattlePage::setupBattleField()
 
     // Single placeholder enemy widget
     QWidget *enemyWidget = new QWidget(enemyContainer);
-    enemyWidget->setFixedSize(220, 300);
+    enemyWidget->setFixedSize(250, 400);
     enemyWidget->setStyleSheet("background: transparent;");
     QVBoxLayout *enemyInnerLayout = new QVBoxLayout(enemyWidget);
     enemyInnerLayout->setContentsMargins(0, 0, 0, 10);
     enemyInnerLayout->setSpacing(5);
 
     // Enemy intent (attack/defend indicator)
-    intentLabel = new QLabel("⚔ 12", enemyWidget);
+    intentLabel = new QLabel(getIntentText(enemies[0]), enemyWidget);
     intentLabel->setAlignment(Qt::AlignCenter);
     intentLabel->setFixedHeight(30);
     intentLabel->setStyleSheet(
@@ -278,20 +279,19 @@ void BattlePage::setupBattleField()
     QLabel *enemyImg = new QLabel(enemyWidget);
     enemyImg->setFixedSize(190, 210);
     enemyImg->setAlignment(Qt::AlignCenter);
-    enemyImg->setStyleSheet(
-        "background: qlineargradient(x1:0, y1:0, x2:1, y2:1,"
-        "stop:0 #3b82f6, stop:1 #1e40af);"
-        "border: 3px dashed #60a5fa; border-radius: 12px;"
-        );
+    enemyImg->setStyleSheet("background: transparent;");
+    enemyImg->setPixmap(QPixmap(enemyImagePath(enemies[0])).scaled(
+        190, 210,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        ));
 
-    enemyImg->setText("Enemy Sprite");
-    enemyImg->setStyleSheet(enemyImg->styleSheet() + "color: white; font-size: 14px;");
 
 
     // Enemy HP bar
     enemyHPBar  = new QProgressBar(enemyWidget);
-    enemyHPBar->setRange(0, 50);
-    enemyHPBar->setValue(50);
+    enemyHPBar->setRange(0, enemies[0]->getMaxHealth());
+    enemyHPBar->setValue(enemies[0]->getCurrentHealth());
     enemyHPBar->setFixedSize(170, 16);
     enemyHPBar->setTextVisible(true);
     enemyHPBar->setFormat("%v / %m");
@@ -394,7 +394,59 @@ void BattlePage::setupBottomBar()
         400
         );
 
+
+    // ===== Draw Pile button (bottom-left) =====
+    drawPileBtn = new QPushButton(this);
+    drawPileBtn->setFixedSize(70, 90);
+    drawPileBtn->setCursor(Qt::PointingHandCursor);
+    drawPileBtn->setIcon(QIcon(QPixmap(":/drawPile.png").scaled(
+        80, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+    drawPileBtn->setIconSize(QSize(80, 100));
+    drawPileBtn->setStyleSheet(
+        "QPushButton { border: none; background: transparent; }"
+        );
+    drawPileBtn->setGeometry(30, 720 - 110, 70, 90);
+    drawPileBtn->raise();
+
+    drawPileCountLabel = new QLabel(drawPileBtn);
+    drawPileCountLabel->setAlignment(Qt::AlignCenter);
+    drawPileCountLabel->setStyleSheet(
+        "color: white; font-size: 16px; font-weight: bold; background: transparent;"
+        );
+    drawPileCountLabel->setGeometry(0, 0, 110, 110);
+    drawPileCountLabel->setText("0");
+    drawPileCountLabel->raise();
+
+    connect(drawPileBtn, &QPushButton::clicked, this, &BattlePage::onDrawPileClicked);
+
+    // ===== Discard Pile button (bottom-right) =====
+    discardPileBtn = new QPushButton(this);
+    discardPileBtn->setFixedSize(70, 90);
+    discardPileBtn->setCursor(Qt::PointingHandCursor);
+    discardPileBtn->setIcon(QIcon(QPixmap(":/discardPile.png").scaled(
+        80, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+    discardPileBtn->setIconSize(QSize(80, 100));
+    discardPileBtn->setStyleSheet(
+        "QPushButton { border: none; background: transparent; }"
+        );
+    discardPileBtn->setGeometry(1280 - 100, 720 - 110, 70, 90);
+    discardPileBtn->raise();
+
+    discardPileCountLabel = new QLabel(discardPileBtn);
+    discardPileCountLabel->setAlignment(Qt::AlignCenter);
+    discardPileCountLabel->setStyleSheet(
+        "color: white; font-size: 16px; font-weight: bold; background: transparent;"
+        );
+    discardPileCountLabel->setGeometry(0, 0, 25, 110);
+    discardPileCountLabel->setText("0");
+    discardPileCountLabel->raise();
+
+    connect(discardPileBtn, &QPushButton::clicked, this, &BattlePage::onDiscardPileClicked);
+
+
 }
+
+
 bool BattlePage::eventFilter(QObject *obj, QEvent *event)
 {
     QPushButton* card = qobject_cast<QPushButton*>(obj);
@@ -463,8 +515,11 @@ bool BattlePage::eventFilter(QObject *obj, QEvent *event)
 
     return QWidget::eventFilter(obj, event);
 }
+
+
 void BattlePage::updateStats()
 {
+    CombatDeck* deck = player->getCombatDeck();
     playerHPBar->setMaximum(player->getMaxHealth());
     playerHPBar->setValue(player->getCurrentHealth());
 
@@ -481,10 +536,20 @@ void BattlePage::updateStats()
     if (!enemies.isEmpty() && !enemies[0]->isDead()) {
         enemyHPBar->setMaximum(enemies[0]->getMaxHealth());
         enemyHPBar->setValue(enemies[0]->getCurrentHealth());
+        intentLabel->setText(getIntentText(enemies[0]));
     }
 
     refreshHand();
+
+    if (deck)
+    {
+        drawPileCountLabel->setText(QString::number(deck->getDrawPile().size()));
+        discardPileCountLabel->setText(QString::number(deck->getDiscardPile().size()));
+    }
+
 }
+
+
 void BattlePage::refreshHand()
 {
     handScene->clear();
@@ -577,11 +642,14 @@ void BattlePage::refreshHand()
         });
     }
 }
+
+
 void BattlePage::onCardClicked(Card* card)
 {
     Enemy* target = enemies.isEmpty() ? nullptr : enemies[0];
     combatManager->playCard(card, target);
 }
+
 
 void BattlePage::onBattleWon()
 {
@@ -605,4 +673,62 @@ QString BattlePage::cardImagePath(const Card* card)
         cleanName += "Plus";
 
     return QString(":/card/%1.png").arg(cleanName);
+}
+
+void BattlePage::onDrawPileClicked()
+{
+    // TODO: نمایش کارت‌های draw pile
+}
+
+void BattlePage::onDiscardPileClicked()
+{
+    // TODO: نمایش کارت‌های discard pile
+}
+
+
+QString BattlePage::getIntentText(Enemy* enemy)
+{
+    if (!enemy) return "❓ Unknown";
+
+    QString emoji;
+    switch (enemy->getIntent())
+    {
+    case Intent::Attack:       emoji = "⚔️";      break;
+    case Intent::Defend:       emoji = "🛡️";      break;
+    case Intent::Buff:         emoji = "✨";       break;
+    case Intent::Debuff:       emoji = "💀";       break;
+    case Intent::AttackDefend: emoji = "⚔️🛡️";   break;
+    case Intent::AttackBuff:   emoji = "⚔️✨";    break;
+    case Intent::AttackDebuff: emoji = "⚔️💀";   break;
+    case Intent::DefendBuff:   emoji = "🛡️✨";    break;
+    case Intent::Escape:       emoji = "💨";       break;
+    case Intent::Unknown:      emoji = "❓";       break;
+    }
+
+    QString text = emoji;
+    if (enemy->getIntentDamage() > 0)
+    {
+        text += QString(" %1").arg(enemy->getIntentDamage());
+        if (enemy->getIntentHits() > 1)
+            text += QString(" x%1").arg(enemy->getIntentHits());
+    }
+    return text;
+}
+
+
+void BattlePage::updateEnemyIntent(Enemy* enemy)
+{
+    if (!enemy || !intentLabel) return;
+    intentLabel->setText(getIntentText(enemy));
+}
+
+
+QString BattlePage::enemyImagePath(Enemy* enemy)
+{
+    if (!enemy) return QString();
+
+    QString cleanName = enemy->getName();
+    cleanName.remove(' ');
+
+    return QString(":/Enemy/%1.png").arg(cleanName);
 }

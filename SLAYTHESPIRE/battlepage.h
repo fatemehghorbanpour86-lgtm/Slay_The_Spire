@@ -35,6 +35,10 @@ private slots:
     void onCardClicked(Card* card);
     void onBattleWon();
     void onBattleLost();
+    void onDrawPileClicked();
+    void onDiscardPileClicked();
+    void updateEnemyIntent(Enemy* enemy);
+
 
 signals:
     void battleEnded();
@@ -62,11 +66,23 @@ private:
     QPushButton *endTurnBtn = nullptr;
     QLabel *playerHpLabel = nullptr;
     QLabel *playerBlockLabel = nullptr;
+    QLabel *goldValueLabel;
     OutlinedLabel *energyValueLabel = nullptr;
     QLabel *intentLabel = nullptr;
     QProgressBar *playerHPBar = nullptr;
     QProgressBar *enemyHPBar = nullptr;
     QString cardImagePath(const Card* card);
+    QPushButton *drawPileBtn;
+    QPushButton *discardPileBtn;
+    QLabel      *drawPileCountLabel;
+    QLabel      *discardPileCountLabel;
+
+
+    QString getIntentText(Enemy* enemy);
+
+    QString enemyImagePath(Enemy* enemy);
+
+
 
 
 protected:
