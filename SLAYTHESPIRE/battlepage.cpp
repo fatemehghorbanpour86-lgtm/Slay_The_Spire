@@ -5,6 +5,7 @@
 #include "player.h"
 
 #include "outlinedlabel.h"
+#include "qtimer.h"
 
 #include <QPropertyAnimation>
 #include <QGraphicsProxyWidget>
@@ -12,6 +13,9 @@
 #include <QGraphicsScene>
 #include <QGraphicsDropShadowEffect>
 #include <QEasingCurve>
+#include <QPointer>
+
+#include <utility>
 
 
 
@@ -63,6 +67,9 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     setupTopBar();
     setupBattleField();
     setupBottomBar();
+    setupClickOverlays();
+    QTimer::singleShot(0, this, &BattlePage::repositionOverlays);
+
 
     combatManager = new CombatManager(player, enemies, this);
 
@@ -226,6 +233,7 @@ void BattlePage::setupBattleField()
     QWidget *playerWidget = new QWidget(battleField);
     playerWidget->setFixedSize(250, 330);
     playerWidget->setStyleSheet("background: transparent;");
+    this->playerWidget = playerWidget;
     QVBoxLayout *playerLayout = new QVBoxLayout(playerWidget);
 
     QLabel *playerImg = new QLabel(playerWidget);
@@ -263,6 +271,7 @@ void BattlePage::setupBattleField()
     QWidget *enemyWidget = new QWidget(enemyContainer);
     enemyWidget->setFixedSize(250, 400);
     enemyWidget->setStyleSheet("background: transparent;");
+    enemyWidgets.append(enemyWidget);
     QVBoxLayout *enemyInnerLayout = new QVBoxLayout(enemyWidget);
     enemyInnerLayout->setContentsMargins(0, 0, 0, 10);
     enemyInnerLayout->setSpacing(5);
@@ -311,6 +320,51 @@ void BattlePage::setupBattleField()
     layout->addWidget(playerWidget, 0, Qt::AlignBottom);
     layout->addStretch(2);
     layout->addWidget(enemyContainer, 0, Qt::AlignBottom);
+}
+
+void BattlePage::setupClickOverlays()
+{
+    // Enemy overlay — covers the full enemyWidget area
+    enemyClickOverlay = new QPushButton(this);
+    enemyClickOverlay->setStyleSheet("background: transparent; border: none;");
+    enemyClickOverlay->setCursor(Qt::ArrowCursor);
+    enemyClickOverlay->hide();   // only shown when targeting
+
+    // Player overlay — covers the full playerWidget area
+    playerClickOverlay = new QPushButton(this);
+    playerClickOverlay->setStyleSheet("background: transparent; border: none;");
+    playerClickOverlay->setCursor(Qt::ArrowCursor);
+    playerClickOverlay->hide();
+
+    connect(enemyClickOverlay, &QPushButton::clicked, this, [this]() {
+        if (pendingCard && !enemies.isEmpty())
+            playCardWithAnimation(pendingCard, selectedProxy, enemies[0]);
+    });
+
+    connect(playerClickOverlay, &QPushButton::clicked, this, [this]() {
+        if (pendingCard)
+            playCardWithAnimation(pendingCard, selectedProxy, nullptr);
+    });
+}
+void BattlePage::repositionOverlays()
+{
+    if (enemyClickOverlay && !enemyWidgets.isEmpty() && enemyWidgets[0])
+    {
+        QWidget* w = enemyWidgets[0];
+        QPoint p = w->mapTo(this, QPoint(0, 0));
+        enemyClickOverlay->setGeometry(p.x(), p.y(), w->width(), w->height());
+    }
+
+    if (playerClickOverlay && playerWidget)
+    {
+        QPoint p = playerWidget->mapTo(this, QPoint(0, 0));
+        playerClickOverlay->setGeometry(p.x(), p.y(),
+                                        playerWidget->width(),
+                                        playerWidget->height());
+    }
+
+    if (enemyClickOverlay)  enemyClickOverlay->raise();
+    if (playerClickOverlay) playerClickOverlay->raise();
 }
 
 
@@ -449,11 +503,39 @@ void BattlePage::setupBottomBar()
 
 bool BattlePage::eventFilter(QObject *obj, QEvent *event)
 {
+
+    // --- Enemy widget clicked as target ---
+    if (obj->property("isEnemyTarget").toBool() &&
+        event->type() == QEvent::MouseButtonPress)
+    {
+        QWidget* w = qobject_cast<QWidget*>(obj);
+        int idx = enemyWidgets.indexOf(w);
+        if (idx >= 0 && idx < enemies.size() && pendingCard)
+        {
+            Enemy* target = enemies[idx];
+            playCardWithAnimation(pendingCard, selectedProxy, target);
+        }
+        return true;
+    }
+
+    // --- Player widget clicked as target ---
+    if (obj->property("isPlayerTarget").toBool() &&
+        event->type() == QEvent::MouseButtonPress)
+    {
+        if (pendingCard)
+            playCardWithAnimation(pendingCard, selectedProxy, nullptr);
+        return true;
+    }
+
     QPushButton* card = qobject_cast<QPushButton*>(obj);
     if (!card) return QWidget::eventFilter(obj, event);
 
     QGraphicsProxyWidget* proxy = card->property("proxy").value<QGraphicsProxyWidget*>();
     if (!proxy) return QWidget::eventFilter(obj, event);
+
+    Card* cardData = card->property("cardData").value<Card*>();
+    if (pendingCard && cardData != pendingCard)
+        return QWidget::eventFilter(obj, event);
 
     if (event->type() == QEvent::Enter)
     {
@@ -488,6 +570,12 @@ bool BattlePage::eventFilter(QObject *obj, QEvent *event)
     }
     else if (event->type() == QEvent::Leave)
     {
+        // If this card is the selected one, don't animate back down
+        Card* cardData = card->property("cardData").value<Card*>();
+        if (cardData && cardData == pendingCard)
+            return QWidget::eventFilter(obj, event);  // skip leave animation
+
+
         QPropertyAnimation* moveDown = new QPropertyAnimation(proxy, "pos");
         moveDown->setDuration(200);
         moveDown->setStartValue(proxy->pos());
@@ -539,7 +627,8 @@ void BattlePage::updateStats()
         intentLabel->setText(getIntentText(enemies[0]));
     }
 
-    refreshHand();
+    if (!animatingCard)
+        refreshHand();
 
     if (deck)
     {
@@ -600,7 +689,8 @@ void BattlePage::refreshHand()
             btn->setStyleSheet(
                 "QPushButton { border: none; background: transparent; padding: 0; }"
                 );
-        } else {
+        }
+        else {
             // Fallback styled card (no image)
             QString typeColor = (card->getType() == CardType::Attack) ? "#7f1d1d" : "#1e3a5f";
             btn->setStyleSheet(QString(
@@ -623,31 +713,77 @@ void BattlePage::refreshHand()
         QGraphicsProxyWidget* proxy = handScene->addWidget(btn);
         proxy->setFlag(QGraphicsItem::ItemClipsChildrenToShape, false);
         proxy->setFlag(QGraphicsItem::ItemClipsToShape, false);
-        proxy->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
-
+        proxy->setCacheMode(QGraphicsItem::NoCache);
         proxy->setPos(x, y);
         proxy->setRotation(rotation);
         proxy->setTransformOriginPoint(cardW / 2.0, cardH / 2.0);
         proxy->setZValue(i);
+        proxy->setData(0, y);                  // ← add this
+        proxy->setData(1, (double)rotation);   // ← add this
 
-        // Store properties — exactly the same as the old working code
         btn->setProperty("proxy",           QVariant::fromValue(proxy));
         btn->setProperty("defaultY",        y);
         btn->setProperty("defaultRotation", rotation);
         btn->setProperty("index",           i);
+        btn->setProperty("cardData",        QVariant::fromValue(card));
         btn->installEventFilter(this);
 
-        connect(btn, &QPushButton::clicked, [this, card]() {
-            onCardClicked(card);
+        QPointer<QGraphicsProxyWidget> safeProxy = proxy;   // ← add this
+        connect(btn, &QPushButton::clicked, [this, card, safeProxy]() {
+            if (safeProxy)
+                onCardClicked(card, safeProxy.data());
         });
     }
 }
 
-
-void BattlePage::onCardClicked(Card* card)
+void BattlePage::onCardClicked(Card* card, QGraphicsProxyWidget* proxy)
 {
-    Enemy* target = enemies.isEmpty() ? nullptr : enemies[0];
-    combatManager->playCard(card, target);
+
+    if (pendingCard == card)
+    {
+        clearSelection();
+        if (proxy)
+        {
+            QPropertyAnimation* moveDown = new QPropertyAnimation(proxy, "pos");
+            moveDown->setDuration(200);
+            moveDown->setStartValue(proxy->pos());
+            moveDown->setEndValue(QPointF(proxy->pos().x(), proxy->data(0).toInt()));  // ← fixed
+            moveDown->setEasingCurve(QEasingCurve::OutCubic);
+            moveDown->start(QAbstractAnimation::DeleteWhenStopped);
+
+            QPropertyAnimation* rotateBack = new QPropertyAnimation(proxy, "rotation");
+            rotateBack->setDuration(200);
+            rotateBack->setStartValue(proxy->rotation());
+            rotateBack->setEndValue(proxy->data(1).toDouble());  // ← fixed
+            rotateBack->setEasingCurve(QEasingCurve::OutCubic);
+            rotateBack->start(QAbstractAnimation::DeleteWhenStopped);
+
+            QPropertyAnimation* scaleDown = new QPropertyAnimation(proxy, "scale");
+            scaleDown->setDuration(200);
+            scaleDown->setStartValue(proxy->scale());
+            scaleDown->setEndValue(1.0);
+            scaleDown->setEasingCurve(QEasingCurve::OutCubic);
+            scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
+
+            proxy->setGraphicsEffect(nullptr);
+        }
+        return;
+    }
+
+    if (pendingCard != nullptr)
+        return;
+
+    // --- Select this card ---
+    clearSelection();   // deselect any previously selected card first
+    pendingCard   = card;
+    selectedProxy = proxy;
+
+    // Show target highlights based on card type
+    CardTarget target = getCardTarget(card);
+    if (target == CardTarget::Enemy)
+        showEnemyHighlights();
+    else if (target == CardTarget::Player)
+        showPlayerHighlight();
 }
 
 
@@ -731,4 +867,149 @@ QString BattlePage::enemyImagePath(Enemy* enemy)
     cleanName.remove(' ');
 
     return QString(":/Enemy/%1.png").arg(cleanName);
+}
+
+BattlePage::CardTarget BattlePage::getCardTarget(Card* card)
+{
+    if (!card) return CardTarget::None;
+    if (card->getType() == CardType::Attack)
+        return CardTarget::Enemy;
+    // Skills and Powers that target player (Defend, Flex, etc.)
+    return CardTarget::Player;
+}
+void BattlePage::showEnemyHighlights()
+{
+    clearHighlights();
+    for (QWidget* w : std::as_const(enemyWidgets))
+    {
+        if (!w) continue;
+        auto* glow = new QGraphicsDropShadowEffect();
+        glow->setColor(QColor(220, 50, 50, 255));
+        glow->setBlurRadius(60);
+        glow->setOffset(0, 0);
+        w->setGraphicsEffect(glow);
+        enemyGlowEffects.append(glow);  // نگه‌داری برای پاک‌کردن بعدی
+    }
+    if (enemyClickOverlay) { enemyClickOverlay->setCursor(Qt::PointingHandCursor); enemyClickOverlay->raise(); enemyClickOverlay->show(); }
+}
+
+void BattlePage::showPlayerHighlight()
+{
+    clearHighlights();
+    if (!playerWidget) return;
+    auto* glow = new QGraphicsDropShadowEffect();
+    glow->setColor(QColor(50, 200, 50, 255));
+    glow->setBlurRadius(60);
+    glow->setOffset(0, 0);
+    playerWidget->setGraphicsEffect(glow);
+    playerGlowEffect = glow;
+    if (playerClickOverlay) { playerClickOverlay->setCursor(Qt::PointingHandCursor); playerClickOverlay->raise(); playerClickOverlay->show(); }
+}
+
+void BattlePage::clearHighlights()
+{
+    for (QWidget* w : std::as_const(enemyWidgets))
+        if (w) w->setGraphicsEffect(nullptr);
+    enemyGlowEffects.clear();
+
+    if (playerWidget) playerWidget->setGraphicsEffect(nullptr);
+    playerGlowEffect = nullptr;
+
+    if (enemyClickOverlay)  enemyClickOverlay->hide();
+    if (playerClickOverlay) playerClickOverlay->hide();
+}
+
+void BattlePage::clearSelection()
+{
+    pendingCard   = nullptr;
+    selectedProxy = nullptr;
+    clearHighlights();
+}
+void BattlePage::playCardWithAnimation(Card* card,
+                                       QGraphicsProxyWidget* proxy,
+                                       Enemy* target)
+{
+    Card* cardToPlay = card;
+    QGraphicsProxyWidget* proxyToAnim = proxy;
+
+    clearSelection();
+
+    if (!proxyToAnim)
+    {
+        combatManager->playCard(cardToPlay, target);
+        return;
+    }
+
+    if (player->getCurrentEnergy() < cardToPlay->getEnergyCost())
+    {
+        // Not enough energy — snap card back to default position
+        QPropertyAnimation* moveDown = new QPropertyAnimation(proxyToAnim, "pos");
+        moveDown->setDuration(200);
+        moveDown->setStartValue(proxyToAnim->pos());
+        moveDown->setEndValue(QPointF(proxyToAnim->pos().x(),
+                                      proxyToAnim->data(0).toInt()));
+        moveDown->setEasingCurve(QEasingCurve::OutCubic);
+        moveDown->start(QAbstractAnimation::DeleteWhenStopped);
+
+        QPropertyAnimation* scaleDown = new QPropertyAnimation(proxyToAnim, "scale");
+        scaleDown->setDuration(200);
+        scaleDown->setStartValue(proxyToAnim->scale());
+        scaleDown->setEndValue(1.0);
+        scaleDown->setEasingCurve(QEasingCurve::OutCubic);
+        scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
+
+        proxyToAnim->setGraphicsEffect(nullptr);
+        return;
+    }
+
+    animatingCard = true;
+
+    // Step 1: fly to center
+    QPointF center(handScene->width() / 2.0 - 75, handScene->height() / 2.0 - 110);
+
+    auto* flyToCenter = new QPropertyAnimation(proxyToAnim, "pos");
+    flyToCenter->setDuration(200);
+    flyToCenter->setStartValue(proxyToAnim->pos());
+    flyToCenter->setEndValue(center);
+    flyToCenter->setEasingCurve(QEasingCurve::OutCubic);
+
+    connect(flyToCenter, &QPropertyAnimation::finished, this,
+            [this, proxyToAnim, cardToPlay, target]()
+            {
+                // Step 2: fly to discard pile and shrink
+                QPoint discardInPage  = discardPileBtn->pos() + QPoint(35, 45);
+                QPoint handViewInPage = handView->pos();
+                QPoint discardInView  = discardInPage - handViewInPage;
+                QPointF discardScene  = handView->mapToScene(discardInView);
+
+                // Clamp to scene so card doesn't vanish before animation ends:
+                discardScene.setX(qMin(discardScene.x(), handScene->width() - 20));
+                discardScene.setY(qMin(discardScene.y(), handScene->height() - 20));
+
+                auto* flyOut = new QPropertyAnimation(proxyToAnim, "pos");
+                flyOut->setDuration(300);
+                flyOut->setStartValue(proxyToAnim->pos());
+                flyOut->setEndValue(discardScene);
+                flyOut->setEasingCurve(QEasingCurve::InCubic);
+
+                auto* shrink = new QPropertyAnimation(proxyToAnim, "scale");
+                shrink->setDuration(300);
+                shrink->setStartValue(proxyToAnim->scale());
+                shrink->setEndValue(0.0);
+                shrink->setEasingCurve(QEasingCurve::InCubic);
+
+                // Step 3: after animation — remove from scene and play card
+                connect(flyOut, &QPropertyAnimation::finished, this,
+                        [this, proxyToAnim, cardToPlay, target]()
+                        {
+                            handScene->removeItem(proxyToAnim);
+                            animatingCard = false;
+                            combatManager->playCard(cardToPlay, target);
+                        });
+
+                flyOut->start(QAbstractAnimation::DeleteWhenStopped);
+                shrink->start(QAbstractAnimation::DeleteWhenStopped);
+            });
+
+    flyToCenter->start(QAbstractAnimation::DeleteWhenStopped);
 }

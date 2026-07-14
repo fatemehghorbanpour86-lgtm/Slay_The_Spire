@@ -15,6 +15,7 @@
 
 #include "combatmanager.h"
 #include "outlinedlabel.h"
+#include "qgraphicseffect.h"
 
 class Player;
 class Enemy;
@@ -32,7 +33,7 @@ public:
 
 private slots:
     void updateStats();
-    void onCardClicked(Card* card);
+    void onCardClicked(Card* card, QGraphicsProxyWidget* proxy);
     void onBattleWon();
     void onBattleLost();
     void onDrawPileClicked();
@@ -83,6 +84,35 @@ private:
     QString enemyImagePath(Enemy* enemy);
 
 
+    // -- Card selection state --
+    Card* pendingCard = nullptr;           // card currently selected
+    QGraphicsProxyWidget* selectedProxy = nullptr;  // its proxy in the scene
+
+    QVector<QGraphicsDropShadowEffect*> enemyGlowEffects;
+    QGraphicsDropShadowEffect* playerGlowEffect = nullptr;
+
+    // -- Enemy widget tracking (needed to know where to draw rings) --
+    QVector<QWidget*> enemyWidgets;   // one per enemy, filled in setupBattleField
+    QWidget* playerWidget = nullptr;  // player widget, save as member
+
+    QPushButton* enemyClickOverlay  = nullptr;   // one per enemy for now
+    QPushButton* playerClickOverlay = nullptr;
+
+
+    enum class CardTarget { Enemy, Player, None };
+    CardTarget getCardTarget(Card* card);
+
+    void showEnemyHighlights();
+    void showPlayerHighlight();
+    void clearHighlights();
+    void clearSelection();
+
+    void repositionOverlays();
+    void setupClickOverlays();
+
+void playCardWithAnimation(Card* card,QGraphicsProxyWidget* proxy, Enemy* target);
+
+bool animatingCard = false;
 
 
 protected:
