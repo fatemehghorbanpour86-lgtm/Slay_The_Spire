@@ -129,34 +129,49 @@ void Map::generateConnections()
         const int currentCount = currentNodes.size();
         const int nextCount = nextNodes.size();
 
-        // Step 1: every node on the current floor gets at least one child,
-        // proportionally mapped toward the next floor's columns.
-        for (int c = 0; c < currentCount; ++c)
-        {
-            const int mappedColumn = mapColumn(c, currentCount, nextCount);
-            connectNodes(currentNodes[c], nextNodes[mappedColumn]);
+        QVector<QVector<int>> connections(currentCount);
 
-            // Occasionally branch to a neighboring column for path variety.
-            if (QRandomGenerator::global()->bounded(100) < 35)
-            {
-                const int direction = (QRandomGenerator::global()->bounded(2) == 0) ? -1 : 1;
-                const int branchColumn = mappedColumn + direction;
+        auto addEdge = [&](int c, int n) {
+            if (!connections[c].contains(n)) {
+                connections[c].append(n);
+            }
+        };
 
-                if (branchColumn >= 0 && branchColumn < nextCount)
-                {
-                    connectNodes(currentNodes[c], nextNodes[branchColumn]);
+        for (int c = 0; c < currentCount; ++c) {
+            addEdge(c, mapColumn(c, currentCount, nextCount));
+        }
+        for (int n = 0; n < nextCount; ++n) {
+            addEdge(mapColumn(n, nextCount, currentCount), n);
+        }
+
+        for (int c = 0; c < currentCount; ++c) {
+
+            int n_min = 0;
+            for (int prev_c = 0; prev_c < c; ++prev_c) {
+                for (int n : std::as_const(connections[prev_c])) {
+                    n_min = qMax(n_min, n);
+                }
+            }
+
+            int n_max = nextCount - 1;
+            for (int next_c = c + 1; next_c < currentCount; ++next_c) {
+                for (int n : std::as_const(connections[next_c])) {
+                    n_max = qMin(n_max, n);
+                }
+            }
+
+            for (int n = n_min; n <= n_max; ++n) {
+                if (!connections[c].contains(n)) {
+                    if (QRandomGenerator::global()->bounded(100) < 35) {
+                        addEdge(c, n);
+                    }
                 }
             }
         }
 
-        // Step 2: guarantee every node on the next floor has at least one
-        // parent (fixes any node that Step 1 did not happen to reach).
-        for (int n = 0; n < nextCount; ++n)
-        {
-            if (nextNodes[n]->getParents().isEmpty())
-            {
-                const int mappedColumn = mapColumn(n, nextCount, currentCount);
-                connectNodes(currentNodes[mappedColumn], nextNodes[n]);
+        for (int c = 0; c < currentCount; ++c) {
+            for (int n : std::as_const(connections[c])) {
+                connectNodes(currentNodes[c], nextNodes[n]);
             }
         }
     }
