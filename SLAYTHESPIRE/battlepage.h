@@ -115,6 +115,11 @@ void playCardWithAnimation(Card* card,QGraphicsProxyWidget* proxy, Enemy* target
 bool animatingCard = false;
 
 
+QGraphicsScene* animScene = nullptr;
+QGraphicsView*  animView  = nullptr;
+
+
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 };

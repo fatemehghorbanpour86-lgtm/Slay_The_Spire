@@ -449,6 +449,27 @@ void BattlePage::setupBottomBar()
         );
 
 
+    animScene = new QGraphicsScene(bottomBar);
+    animScene->setSceneRect(0, 0, 1280, 720);
+
+    animView = new QGraphicsView(animScene, this);
+    animView->setStyleSheet("background: transparent; border: none;");
+    animView->setFrameShape(QFrame::NoFrame);
+    animView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    animView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    animView->setRenderHint(QPainter::Antialiasing);
+    animView->setResizeAnchor(QGraphicsView::NoAnchor);
+    animView->setTransformationAnchor(QGraphicsView::NoAnchor);
+    animView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    animView->viewport()->setAutoFillBackground(false);
+    animView->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    animView->setGeometry(0, 0, 1280, 720);
+
+    animView->raise();
+
+
+
     // ===== Draw Pile button (bottom-left) =====
     drawPileBtn = new QPushButton(this);
     drawPileBtn->setFixedSize(70, 90);
@@ -888,7 +909,7 @@ void BattlePage::showEnemyHighlights()
         glow->setBlurRadius(60);
         glow->setOffset(0, 0);
         w->setGraphicsEffect(glow);
-        enemyGlowEffects.append(glow);  // نگه‌داری برای پاک‌کردن بعدی
+        enemyGlowEffects.append(glow);
     }
     if (enemyClickOverlay) { enemyClickOverlay->setCursor(Qt::PointingHandCursor); enemyClickOverlay->raise(); enemyClickOverlay->show(); }
 }
@@ -925,6 +946,7 @@ void BattlePage::clearSelection()
     selectedProxy = nullptr;
     clearHighlights();
 }
+
 void BattlePage::playCardWithAnimation(Card* card,
                                        QGraphicsProxyWidget* proxy,
                                        Enemy* target)
@@ -963,9 +985,23 @@ void BattlePage::playCardWithAnimation(Card* card,
     }
 
     animatingCard = true;
+    // ── transfer proxy to animScene before animating ──
+    double currentRot   = proxyToAnim->rotation();
+    double currentScale = proxyToAnim->scale();
+
+    QPoint viewPt = handView->mapFromScene(proxyToAnim->pos());
+    QPoint globalPt = handView->mapToGlobal(viewPt);
+    QPointF animScenePos = animView->mapToScene(animView->mapFromGlobal(globalPt));
+
+
+    handScene->removeItem(proxyToAnim);
+    animScene->addItem(proxyToAnim);
+    proxyToAnim->setPos(animScenePos);
+    proxyToAnim->setRotation(currentRot);
+    proxyToAnim->setScale(currentScale);
 
     // Step 1: fly to center
-    QPointF center(handScene->width() / 2.0 - 75, handScene->height() / 2.0 - 110);
+    QPointF center(1280 / 2.0 - 75, 720 / 2.0 - 110);
 
     auto* flyToCenter = new QPropertyAnimation(proxyToAnim, "pos");
     flyToCenter->setDuration(200);
@@ -977,14 +1013,18 @@ void BattlePage::playCardWithAnimation(Card* card,
             [this, proxyToAnim, cardToPlay, target]()
             {
                 // Step 2: fly to discard pile and shrink
-                QPoint discardInPage  = discardPileBtn->pos() + QPoint(35, 45);
-                QPoint handViewInPage = handView->pos();
-                QPoint discardInView  = discardInPage - handViewInPage;
-                QPointF discardScene  = handView->mapToScene(discardInView);
 
-                // Clamp to scene so card doesn't vanish before animation ends:
-                discardScene.setX(qMin(discardScene.x(), handScene->width() - 20));
-                discardScene.setY(qMin(discardScene.y(), handScene->height() - 20));
+                QPoint discardInAnimView = animView->mapFromGlobal
+                    (
+                         discardPileBtn->mapToGlobal(
+                         QPoint(discardPileBtn->width() / 2,
+                         discardPileBtn->height() / 2))
+                    );
+
+                QPointF discardScene = animView->mapToScene(discardInAnimView);
+
+                QSizeF proxySize = proxyToAnim->size();
+                discardScene -= QPointF(proxySize.width() / 2.0,proxySize.height() / 2.0);
 
                 auto* flyOut = new QPropertyAnimation(proxyToAnim, "pos");
                 flyOut->setDuration(300);
@@ -1002,7 +1042,7 @@ void BattlePage::playCardWithAnimation(Card* card,
                 connect(flyOut, &QPropertyAnimation::finished, this,
                         [this, proxyToAnim, cardToPlay, target]()
                         {
-                            handScene->removeItem(proxyToAnim);
+                            animScene->removeItem(proxyToAnim);
                             animatingCard = false;
                             combatManager->playCard(cardToPlay, target);
                         });
@@ -1011,5 +1051,7 @@ void BattlePage::playCardWithAnimation(Card* card,
                 shrink->start(QAbstractAnimation::DeleteWhenStopped);
             });
 
+
     flyToCenter->start(QAbstractAnimation::DeleteWhenStopped);
+
 }
