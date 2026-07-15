@@ -18,6 +18,10 @@
         <file>energybutton.png</file>
         <file>drawPile.png</file>
         <file>discardPile.png</file>
+        <file>buff.png</file>
+        <file>debuff.png</file>
+        <file>attack.png</file>
+        <file>defendIcon.png</file>
     </qresource>
     <qresource prefix="/Audio"/>
     <qresource prefix="/map">
@@ -138,4 +142,13 @@
         <file>Cultist.png</file>
     </qresource>
     <qresource prefix="/new/prefix1"/>
+    <qresource prefix="/Effect">
+        <file>WeakEff.png</file>
+        <file>FrailEff.png</file>
+        <file>FeelNoPainEff.png</file>
+        <file>StrengthEff.png</file>
+        <file>BrutalityEff.png</file>
+        <file>DemonFormEff.png</file>
+        <file>VulnerableEff.png</file>
+    </qresource>
 </RCC>
