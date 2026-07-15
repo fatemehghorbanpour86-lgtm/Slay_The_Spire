@@ -15,27 +15,8 @@ enum class RewardType
     Potion
 };
 
-/*
- * Reward
- * ------
- * A single pending reward "slot" shown on RewardPage (one button, or one
- * row of buttons for a choice-reward).
- *
- * Depending on its RewardType, only the matching data below is populated:
- *
- *   Gold   -> goldAmount
- *   Potion -> potion                     (single, ready-made Potion*)
- *   Relic  -> relic                      (Normal / Elite tier: 1 ready-made Relic*)
- *          -> relicChoices (isChoice())  (Boss tier: 3 candidates, pick 1)
- *   Card   -> cardChoices (isChoice())   (always 3 candidates, pick 1)
- *
- * Ownership: Reward owns whatever Card*/Relic*/Potion* it was given until
-                    * it is claimed. RewardSystem calls clearPotion()/clearRelic() (single
-                           * rewards) or resolveCardChoice()/resolveRelicChoice() (choice rewards)
-           * right after handing the chosen object to Player, so the destructor
-            * below only ever deletes objects nobody else owns.
-                */
-        class Reward
+
+class Reward
 {
 public:
 

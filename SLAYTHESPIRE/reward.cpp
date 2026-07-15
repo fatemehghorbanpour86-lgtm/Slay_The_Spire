@@ -35,8 +35,6 @@ Reward::Reward(const QVector<Relic*>& relicChoices, bool isBossChoice)
 
 Reward::~Reward()
 {
-    // Anything still non-null / non-empty here was never claimed by the
-    // player, so this Reward still owns it and must clean it up.
     delete potion;
     delete relic;
 
