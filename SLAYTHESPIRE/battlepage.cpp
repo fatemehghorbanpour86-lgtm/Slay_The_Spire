@@ -303,7 +303,7 @@ void BattlePage::setupBattleField()
     intentLabel->setFixedHeight(30);
     intentLabel->setStyleSheet(
         "color: #f87171; font-size: 16px; font-weight: bold;"
-        "background: rgba(0,0,0,120); border-radius: 8px; padding: 4px;"
+        "background: transparent; border-radius: 8px; padding: 4px;"
         );
 
     QLabel *enemyImg = new QLabel(enemyWidget);
@@ -935,7 +935,9 @@ QString BattlePage::getIntentText(Enemy* enemy)
 
 void BattlePage::updateEnemyIntent(Enemy* enemy)
 {
-    if (!enemy || !intentLabel) return;
+    if (!enemy || !intentLabel)
+        return;
+
     intentLabel->setText(getIntentText(enemy));
 }
 

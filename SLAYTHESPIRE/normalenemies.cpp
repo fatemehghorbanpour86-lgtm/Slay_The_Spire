@@ -471,12 +471,13 @@ void Cultist::executeMove(Player* player)
 
     case Stab:
 
-        addEffect(Effect::Type::Strength, Effect::Category::Buff, 3,-1);
 
          CombatCalculator::dealDamage(this, player, 6);
 
         break;
     }
+
+    addEffect(Effect::Type::Strength, Effect::Category::Buff, 3,-1);
 }
 
 
