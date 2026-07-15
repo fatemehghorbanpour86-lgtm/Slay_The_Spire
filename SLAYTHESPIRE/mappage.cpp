@@ -7,6 +7,8 @@
 #include "audiomanager.h"
 #include "relicviewer.h"
 #include "deckviewer.h"
+#include "rewardpage.h"
+#include "rewardsystem.h"
 
 static const QString BONE_COLOR = "#E8DCC0";
 
@@ -294,7 +296,32 @@ void MapPage::onNodeClicked(int nodeId) {
         //     emit battleRequested();
         // }
 
-        if (map->getCurrentNodeType() == NodeType::Campfire)
+        if (map->getCurrentNodeType() == NodeType::Monster)
+        {
+            RewardSystem* rewardSystem = new RewardSystem();
+            rewardSystem->generateNormalReward(player);
+
+            // ۲. ساخت صفحه UI
+            RewardPage* rewardPage = new RewardPage(player, rewardSystem);
+
+            // ۳. تنظیمات ظاهری برای حالت تست (نمایش به عنوان یک پنجره مستقل)
+            rewardPage->setWindowTitle("Test Reward Page");
+            rewardPage->resize(800, 600); // سایز پیش‌فرض برای راحت‌تر دیدن دکمه‌ها
+            rewardPage->setAttribute(Qt::WA_DeleteOnClose); // اطمینان از پاک شدن ویجت هنگام بسته شدن پنجره
+
+            // ۴. مدیریت حافظه و بسته شدن فرم وقتی بازیکن Continue را می‌زند
+            connect(rewardPage, &RewardPage::continueClicked, [rewardPage, rewardSystem]() {
+                rewardPage->close();         // بستن فرم
+                rewardPage->deleteLater();   // پاک کردن ویجت از حافظه به شکل ایمن
+                delete rewardSystem;         // پاک کردن سیستم پاداش (چون QObject نیست از delete استفاده می‌کنیم)
+            });
+
+            // ۵. نمایش فرم روی صفحه
+            rewardPage->show();
+        }
+
+
+        else if (map->getCurrentNodeType() == NodeType::Campfire)
         {
             emit campfireEntered();
         }

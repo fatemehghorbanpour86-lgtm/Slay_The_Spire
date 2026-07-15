@@ -46,6 +46,7 @@ SOURCES += \
     relicsystem.cpp \
     relicviewer.cpp \
     reward.cpp \
+    rewardpage.cpp \
     rewardsystem.cpp \
     savemanager.cpp \
     skillcards.cpp \
@@ -93,6 +94,7 @@ HEADERS += \
     relicsystem.h \
     relicviewer.h \
     reward.h \
+    rewardpage.h \
     rewardsystem.h \
     savemanager.h \
     skillcards.h \

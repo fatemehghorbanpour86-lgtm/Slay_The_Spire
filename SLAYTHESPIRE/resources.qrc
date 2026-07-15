@@ -150,4 +150,12 @@
         <file>FlashLabel.png</file>
         <file>UpgradeViewer.png</file>
     </qresource>
+    <qresource prefix="/Reward">
+        <file>CardReward.png</file>
+        <file>GoldReward.png</file>
+        <file>RelicReward.png</file>
+        <file>SelectionViewer.png</file>
+        <file>PotionReward.png</file>
+        <file>RewardViewer.png</file>
+    </qresource>
 </RCC>
