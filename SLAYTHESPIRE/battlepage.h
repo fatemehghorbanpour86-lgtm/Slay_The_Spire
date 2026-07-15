@@ -118,7 +118,13 @@ bool animatingCard = false;
 QGraphicsScene* animScene = nullptr;
 QGraphicsView*  animView  = nullptr;
 
+QLabel *playerBlockIconLabel = nullptr;
+int    lastPlayerBlock = 0;
 
+void repositionBlockIcon();
+
+
+void showEvent(QShowEvent* e)override;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

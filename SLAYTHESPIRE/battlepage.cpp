@@ -116,9 +116,6 @@ void BattlePage::setupTopBar()
     playerHpLabel = new QLabel("80/80", topBar);
     playerHpLabel->setStyleSheet("color: #e63946; font-size: 14px; font-weight: bold; background: transparent;");
 
-    playerBlockLabel = new QLabel("Block: 0", topBar);
-    playerBlockLabel->setStyleSheet("color: #60a5fa; font-size: 13px; font-weight: bold; background: transparent;");
-    leftGroup->addWidget(playerBlockLabel);
 
     // Gold icon + value
     QLabel *goldIcon = new QLabel(topBar);
@@ -260,6 +257,22 @@ void BattlePage::setupBattleField()
     playerLayout->addStretch();
     playerLayout->addWidget(playerImg);
     playerLayout->addWidget(playerHPBar, 0, Qt::AlignHCenter);
+
+
+    // Shield icon + block count
+    playerBlockIconLabel = new QLabel(playerWidget);
+    playerBlockIconLabel->setFixedSize(36, 36);
+    playerBlockIconLabel->setStyleSheet("background: transparent;");
+    playerBlockIconLabel->setPixmap(QPixmap(":/defendIcon.png").scaled(
+        36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+    playerBlockLabel = new QLabel(playerBlockIconLabel);
+    playerBlockLabel->setAlignment(Qt::AlignCenter);
+    playerBlockLabel->setGeometry(0, 0, 36, 36);
+    playerBlockLabel->setStyleSheet("color: black; font-size: 13px; font-weight: bold; background: transparent;");
+
+    playerBlockIconLabel->hide();
+
 
     // -- Enemy container (right side) --
     QWidget *enemyContainer = new QWidget(battleField);
@@ -636,7 +649,46 @@ void BattlePage::updateStats()
                                .arg(player->getCurrentHealth())
                                .arg(player->getMaxHealth()));
 
-    playerBlockLabel->setText(QString::number(player->getBlock()));
+
+    int block = player->getBlock();
+    bool hasBlock = block > 0;
+
+    if (playerBlockIconLabel && playerBlockLabel)
+    {
+        playerBlockIconLabel->setVisible(hasBlock);
+        if (hasBlock)
+            playerBlockLabel->setText(QString::number(block));
+    }
+
+    // Blue glow on HP bar while block > 0
+    if (hasBlock)
+    {
+        if (!playerHPBar->graphicsEffect())
+        {
+            auto* glow = new QGraphicsDropShadowEffect();
+            glow->setColor(QColor(96, 165, 250, 255));
+            glow->setBlurRadius(30);
+            glow->setOffset(0, 0);
+            playerHPBar->setGraphicsEffect(glow);
+        }
+
+        playerHPBar->setStyleSheet(
+            "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
+            "border-radius: 6px; color: black; font-size: 12px; text-align: center; }"
+            "QProgressBar::chunk { background: #60a5fa; border-radius: 4px; }"
+            );
+    }
+    else
+    {
+        playerHPBar->setGraphicsEffect(nullptr);
+        playerHPBar->setStyleSheet(
+            "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
+            "border-radius: 6px; color: white; font-size: 12px; text-align: center; }"
+            "QProgressBar::chunk { background: #e63946; border-radius: 4px; }"
+            );
+    }
+
+
 
     energyValueLabel->setText(QString("%1/%2")
                                   .arg(player->getCurrentEnergy())
@@ -1054,4 +1106,25 @@ void BattlePage::playCardWithAnimation(Card* card,
 
     flyToCenter->start(QAbstractAnimation::DeleteWhenStopped);
 
+}
+
+
+void BattlePage::showEvent(QShowEvent* e)
+{
+    QWidget::showEvent(e);
+    repositionBlockIcon();
+}
+
+void BattlePage::repositionBlockIcon()
+{
+    if (!playerBlockIconLabel || !playerHPBar || !playerWidget) return;
+    // Map HP bar position into playerWidget coordinates
+    QPoint hpBarInWidget = playerHPBar->mapTo(playerWidget, QPoint(0, 0));
+    // Place block icon to the left of the HP bar, vertically centered on it
+    int iconX = hpBarInWidget.x() - 40;
+    int iconY = hpBarInWidget.y() - 10;
+    playerBlockIconLabel->move(iconX, iconY);
+    playerBlockIconLabel->raise();
+    playerBlockLabel->move(0, 0);
+    playerBlockLabel->resize(36, 36);
 }
