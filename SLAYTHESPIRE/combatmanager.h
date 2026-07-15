@@ -46,6 +46,7 @@ signals:
     void combatStarted();
     void playerTurnStarted();
     void enemyTurnStarted();
+    void enemyAttacking(Enemy* enemy);
     void cardPlayed(Card* card, Enemy* target);
     void enemyIntentUpdated(Enemy* enemy);
 

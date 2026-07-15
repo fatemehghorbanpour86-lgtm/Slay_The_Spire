@@ -13,6 +13,9 @@
 #include <QMap>
 #include <QList>
 
+#include <functional>
+
+
 #include "combatmanager.h"
 #include "outlinedlabel.h"
 #include "qgraphicseffect.h"
@@ -125,6 +128,9 @@ void repositionBlockIcon();
 
 
 void showEvent(QShowEvent* e)override;
+
+void animateAttack(QWidget* attacker, QWidget* target, std::function<void()> onDone = nullptr);
+
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

@@ -80,6 +80,14 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     connect(combatManager, &CombatManager::enemyIntentUpdated,this, &BattlePage::updateEnemyIntent);
 
     combatManager->startCombat();
+
+    connect(combatManager, &CombatManager::enemyAttacking, this, [this](Enemy* e)
+    {
+        Q_UNUSED(e);
+        QWidget* enemyW = enemyWidgets.isEmpty() ? nullptr : enemyWidgets[0];
+        animateAttack(enemyW, playerWidget);
+    });
+
 }
 
 // ─────────────────────────────────────────
@@ -674,7 +682,7 @@ void BattlePage::updateStats()
 
         playerHPBar->setStyleSheet(
             "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
-            "border-radius: 6px; color: black; font-size: 12px; text-align: center; }"
+            "border-radius: 6px; color: white; font-size: 12px; text-align: center; }"
             "QProgressBar::chunk { background: #60a5fa; border-radius: 4px; }"
             );
     }
@@ -1096,7 +1104,17 @@ void BattlePage::playCardWithAnimation(Card* card,
                         {
                             animScene->removeItem(proxyToAnim);
                             animatingCard = false;
-                            combatManager->playCard(cardToPlay, target);
+                            if (target && cardToPlay->getType() == CardType::Attack)
+                            {
+                                QWidget* enemyW = enemyWidgets.isEmpty() ? nullptr : enemyWidgets[0];
+                                animateAttack(playerWidget, enemyW, [this, cardToPlay, target]() {
+                                    combatManager->playCard(cardToPlay, target);
+                                });
+                            }
+                            else
+                            {
+                                combatManager->playCard(cardToPlay, target);
+                            }
                         });
 
                 flyOut->start(QAbstractAnimation::DeleteWhenStopped);
@@ -1127,4 +1145,74 @@ void BattlePage::repositionBlockIcon()
     playerBlockIconLabel->raise();
     playerBlockLabel->move(0, 0);
     playerBlockLabel->resize(36, 36);
+}
+void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function<void()> onDone)
+{
+    if (!attacker || !target)
+    {
+        if (onDone) onDone();
+        return;
+    }
+
+
+    QPixmap snapshot = attacker->grab();
+    if (snapshot.isNull())
+    {
+        if (onDone) onDone();
+        return;
+    }
+
+    QLabel* ghost = new QLabel(this);
+    ghost->setPixmap(snapshot);
+    ghost->setFixedSize(attacker->size());
+    ghost->setAttribute(Qt::WA_TransparentForMouseEvents);
+    ghost->setStyleSheet("background: transparent; border: none;");
+    ghost->setScaledContents(false);
+
+    const QPoint origin = attacker->mapTo(this, QPoint(0, 0));
+    ghost->move(origin);
+    ghost->show();
+    ghost->raise();
+
+    // hiding the real one
+    const bool wasVisible = attacker->isVisible();
+    attacker->hide();
+
+    QPoint attackerCenter = attacker->mapTo(this, attacker->rect().center());
+    QPoint targetCenter   = target->mapTo(this, target->rect().center());
+
+    attackerCenter = origin + QPoint(attacker->width() / 2, attacker->height() / 2);
+
+    QPointF dir = QPointF(targetCenter - attackerCenter);
+    const float len = std::sqrt(dir.x() * dir.x() + dir.y() * dir.y());
+    const QPointF nudge = (len > 0.f) ? dir / len * 35.0f : QPointF(0, 0);
+
+    const QPoint forward = origin + QPoint(int(nudge.x()), int(nudge.y()));
+
+    auto* goForward = new QPropertyAnimation(ghost, "pos");
+    goForward->setDuration(120);
+    goForward->setStartValue(origin);
+    goForward->setEndValue(forward);
+    goForward->setEasingCurve(QEasingCurve::OutCubic);
+
+    auto* goBack = new QPropertyAnimation(ghost, "pos");
+    goBack->setDuration(200);
+    goBack->setStartValue(forward);
+    goBack->setEndValue(origin);
+    goBack->setEasingCurve(QEasingCurve::OutBounce);
+
+    connect(goForward, &QPropertyAnimation::finished, this,
+            [goBack, onDone]() {
+                goBack->start(QAbstractAnimation::DeleteWhenStopped);
+                if (onDone) onDone(); // deal damage as it returns
+            });
+
+    connect(goBack, &QPropertyAnimation::finished, this,
+            [ghost, attacker, wasVisible]() {
+                ghost->deleteLater();
+                if (wasVisible)
+                    attacker->show();
+            });
+
+    goForward->start(QAbstractAnimation::DeleteWhenStopped);
 }

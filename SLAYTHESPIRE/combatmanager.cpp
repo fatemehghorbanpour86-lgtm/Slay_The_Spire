@@ -242,6 +242,8 @@ void CombatManager::handleEnemyTurn()
         if (!enemy || enemy->isDead())
             continue;
 
+        emit enemyAttacking(enemy);
+
         enemy->executeMove(player);
 
         enemy->finishTurn();
