@@ -28,6 +28,7 @@ struct PlayerSaveData
 
     int gold = 0;
     int maxEnergy = 3;
+    int cardRemovalCost = 50;
 
     QVector<RelicSaveData> relics;
 
@@ -42,6 +43,8 @@ class Player : public Character
     int maxEnergy;
 
     int gold;
+
+    int cardRemovalCost;
 
     MasterDeck* masterDeck;
     CombatDeck* combatDeck;
@@ -134,6 +137,9 @@ public:
 
     PlayerSaveData extractState() const;
     void restoreState(const PlayerSaveData& data);
+
+    int getCardRemovalCost() const;
+    void increaseCardRemovalCost(int amount = 25);
 
 };
 

@@ -273,6 +273,7 @@ QJsonObject SaveManager::playerToJson(const PlayerSaveData& data)
     obj["character"] = characterToJson(data.characterData);
     obj["gold"] = data.gold;
     obj["maxEnergy"] = data.maxEnergy;
+    obj["cardRemovalCost"] = data.cardRemovalCost;
     obj["relics"] = relicListToJson(data.relics);
     obj["masterDeck"] = masterDeckToJson(data.masterDeckData);
     return obj;
@@ -285,6 +286,7 @@ PlayerSaveData SaveManager::playerFromJson(const QJsonObject& obj)
     data.gold = obj.value("gold").toInt();
 //  data.currentEnergy = obj.value("currentEnergy").toInt();
     data.maxEnergy = obj.value("maxEnergy").toInt(3);
+    data.cardRemovalCost = obj.value("cardRemovalCost").toInt(50);
     data.relics = relicListFromJson(obj.value("relics").toArray());
     data.masterDeckData = masterDeckFromJson(obj.value("masterDeck").toObject());
     return data;

@@ -10,6 +10,7 @@ Player::Player(const QString& name, int maxHealth)
     currentEnergy(3),
     maxEnergy(3),
     gold(99),
+    cardRemovalCost(50),
     masterDeck(new MasterDeck()),
     combatDeck(new CombatDeck()),
     relicSystem(new RelicSystem())
@@ -344,6 +345,7 @@ PlayerSaveData Player::extractState() const
     data.characterData = Character::extractState();
     data.gold = gold;
     data.maxEnergy = maxEnergy;
+    data.cardRemovalCost = cardRemovalCost;
     data.relics = relicSystem.extractState();
 
     if (masterDeck)
@@ -352,12 +354,24 @@ PlayerSaveData Player::extractState() const
     return data;
 }
 
+
+int Player::getCardRemovalCost() const
+{
+    return cardRemovalCost;
+}
+void Player::increaseCardRemovalCost(int amount)
+{
+    if (amount <= 0) return;
+    cardRemovalCost += amount;
+}
+
 void Player::restoreState(const PlayerSaveData& data)
 {
     Character::restoreState(data.characterData);
 
     gold = data.gold;
     maxEnergy = data.maxEnergy;
+    cardRemovalCost = data.cardRemovalCost;
 
     relicSystem.restoreState(data.relics, this);
 
