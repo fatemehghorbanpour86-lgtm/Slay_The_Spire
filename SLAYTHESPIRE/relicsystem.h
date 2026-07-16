@@ -65,6 +65,11 @@ public:
 
     static void grantRandomRelics(Player* player, Relic::Tier tier, int count);
 
+    static Relic* createRandomRelic(Player* player, Relic::Tier tier,
+                                    const QVector<RelicId>& exclude = QVector<RelicId>());
+
+    static QVector<Relic*> createRandomRelics(Player* player, Relic::Tier tier, int count);
+
 public slots:
 
     void onCombatStart(Player* player);
@@ -81,6 +86,8 @@ public slots:
 
 private:
     QVector<Relic*> relics;
+
+    static QVector<Relic*> buildRelicPool(Relic::Tier tier);
 };
 
 

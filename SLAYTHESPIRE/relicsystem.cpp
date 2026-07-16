@@ -294,3 +294,77 @@ void RelicSystem::restoreState(const QVector<RelicSaveData>& data, Player* playe
         addRelic(relic, player);
     }
 }
+
+QVector<Relic*> RelicSystem::buildRelicPool(Relic::Tier tier)
+{
+    QVector<Relic*> pool;
+
+    if (tier == Relic::Tier::Normal)
+    {
+        pool.append(new Girya());
+        pool.append(new IceCream());
+        pool.append(new Shuriken());
+        pool.append(new Kunai());
+        pool.append(new Anchor());
+        pool.append(new HappyFlower());
+        pool.append(new Orichalcum());
+        pool.append(new Vajra());
+    }
+    else if (tier == Relic::Tier::Boss)
+    {
+        pool.append(new CallingBell());
+        pool.append(new MarkOfPain());
+        pool.append(new VelvetChoker());
+        pool.append(new BlackStar());
+        pool.append(new CoffeeDripper());
+    }
+
+    return pool;
+}
+
+Relic* RelicSystem::createRandomRelic(Player* player, Relic::Tier tier, const QVector<RelicId>& exclude)
+{
+    QVector<Relic*> pool = buildRelicPool(tier);
+
+    for (int i = pool.size() - 1; i >= 0; --i)
+    {
+        bool owned = player && player->hasRelic(pool[i]->getId());
+        bool excluded = exclude.contains(pool[i]->getId());
+
+        if (owned || excluded)
+        {
+            delete pool[i];
+            pool.removeAt(i);
+        }
+    }
+
+    if (pool.isEmpty())
+        return nullptr;
+
+    int index = QRandomGenerator::global()->bounded(pool.size());
+    Relic* chosen = pool[index];
+    pool.removeAt(index);
+
+    qDeleteAll(pool);
+
+    return chosen;
+}
+
+QVector<Relic*> RelicSystem::createRandomRelics(Player* player, Relic::Tier tier, int count)
+{
+    QVector<Relic*> result;
+    QVector<RelicId> excluded;
+
+    for (int i = 0; i < count; ++i)
+    {
+        Relic* relic = createRandomRelic(player, tier, excluded);
+
+        if (relic == nullptr)
+            break; // pool for this tier is exhausted
+
+        excluded.append(relic->getId());
+        result.append(relic);
+    }
+
+    return result;
+}

@@ -165,6 +165,8 @@ private:
     int currentFloorIndex;
     MapNode* currentNode;
 
+    QVector<int> guaranteedCampfireFloors;
+
     int nextNodeId;
 };
 

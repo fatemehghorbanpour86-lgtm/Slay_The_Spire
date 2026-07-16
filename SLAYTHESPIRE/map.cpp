@@ -129,34 +129,49 @@ void Map::generateConnections()
         const int currentCount = currentNodes.size();
         const int nextCount = nextNodes.size();
 
-        // Step 1: every node on the current floor gets at least one child,
-        // proportionally mapped toward the next floor's columns.
-        for (int c = 0; c < currentCount; ++c)
-        {
-            const int mappedColumn = mapColumn(c, currentCount, nextCount);
-            connectNodes(currentNodes[c], nextNodes[mappedColumn]);
+        QVector<QVector<int>> connections(currentCount);
 
-            // Occasionally branch to a neighboring column for path variety.
-            if (QRandomGenerator::global()->bounded(100) < 35)
-            {
-                const int direction = (QRandomGenerator::global()->bounded(2) == 0) ? -1 : 1;
-                const int branchColumn = mappedColumn + direction;
+        auto addEdge = [&](int c, int n) {
+            if (!connections[c].contains(n)) {
+                connections[c].append(n);
+            }
+        };
 
-                if (branchColumn >= 0 && branchColumn < nextCount)
-                {
-                    connectNodes(currentNodes[c], nextNodes[branchColumn]);
+        for (int c = 0; c < currentCount; ++c) {
+            addEdge(c, mapColumn(c, currentCount, nextCount));
+        }
+        for (int n = 0; n < nextCount; ++n) {
+            addEdge(mapColumn(n, nextCount, currentCount), n);
+        }
+
+        for (int c = 0; c < currentCount; ++c) {
+
+            int n_min = 0;
+            for (int prev_c = 0; prev_c < c; ++prev_c) {
+                for (int n : std::as_const(connections[prev_c])) {
+                    n_min = qMax(n_min, n);
+                }
+            }
+
+            int n_max = nextCount - 1;
+            for (int next_c = c + 1; next_c < currentCount; ++next_c) {
+                for (int n : std::as_const(connections[next_c])) {
+                    n_max = qMin(n_max, n);
+                }
+            }
+
+            for (int n = n_min; n <= n_max; ++n) {
+                if (!connections[c].contains(n)) {
+                    if (QRandomGenerator::global()->bounded(100) < 35) {
+                        addEdge(c, n);
+                    }
                 }
             }
         }
 
-        // Step 2: guarantee every node on the next floor has at least one
-        // parent (fixes any node that Step 1 did not happen to reach).
-        for (int n = 0; n < nextCount; ++n)
-        {
-            if (nextNodes[n]->getParents().isEmpty())
-            {
-                const int mappedColumn = mapColumn(n, nextCount, currentCount);
-                connectNodes(currentNodes[mappedColumn], nextNodes[n]);
+        for (int c = 0; c < currentCount; ++c) {
+            for (int n : std::as_const(connections[c])) {
+                connectNodes(currentNodes[c], nextNodes[n]);
             }
         }
     }
@@ -182,14 +197,27 @@ NodeType Map::pickWeightedType(int floorIndex) const
 
     QVector<WeightedType> filtered;
     int totalWeight = 0;
+    bool ItsOk = true;
 
     for (const WeightedType& option : options)
     {
         if (option.type == NodeType::Shop && nearBoss)
-            continue; // Doc rule: Shops should not appear right before the Boss.
+        {
+            ItsOk = false;
+        }
 
-        filtered.append(option);
-        totalWeight += option.weight;
+        for(int i = 0; i < guaranteedCampfireFloors.size(); ++i)
+        {
+            if(option.type == NodeType::Campfire && (floorIndex == guaranteedCampfireFloors[i] + 1 || floorIndex == guaranteedCampfireFloors[i] - 1))
+            {
+                ItsOk = false;
+            }
+        }
+        if(ItsOk)
+        {
+            filtered.append(option);
+            totalWeight += option.weight;
+        }
     }
 
     int roll = QRandomGenerator::global()->bounded(totalWeight);
@@ -218,6 +246,22 @@ bool Map::violatesAdjacencyRule(MapNode* node, NodeType candidate) const
     {
         if (restrictedGroup.contains(parent->getType()))
             return true;
+    }
+
+    const QVector<NodeType> repeatedGroup = {
+        NodeType::Shop, NodeType::Campfire
+    };
+
+    if (!repeatedGroup.contains(candidate))
+        return false;
+
+    for(int i = 0; i < repeatedGroup.size(); ++i)
+    {
+        for (MapNode* parent : node->getParents())
+        {
+            if (repeatedGroup[i] == parent->getType())
+                return true;
+        }
     }
 
     return false;
@@ -249,7 +293,7 @@ void Map::assignNodeTypes()
     // ("at least 2 Campfires per path from floor 1 to 11") deterministically
     // instead of relying on random luck.
     QVector<int> restFloorCandidates;
-    for (int i = 1; i < bossFloorIndex; ++i)
+    for (int i = 2; i < bossFloorIndex - 2; ++i)
     {
         if (i != TREASURE_FLOOR_INDEX)
             restFloorCandidates.append(i);
@@ -261,11 +305,10 @@ void Map::assignNodeTypes()
         restFloorCandidates.swapItemsAt(i, j);
     }
 
-    QVector<int> guaranteedCampfireFloors;
-    if (restFloorCandidates.size() >= 2)
+    guaranteedCampfireFloors.append(bossFloorIndex - 1);
+    if (restFloorCandidates.size() >= 1)
     {
         guaranteedCampfireFloors.append(restFloorCandidates[0]);
-        guaranteedCampfireFloors.append(restFloorCandidates[1]);
     }
 
     for (int i = 0; i < floors.size(); ++i)

@@ -23,7 +23,6 @@
         <file>attack.png</file>
         <file>defendIcon.png</file>
     </qresource>
-    <qresource prefix="/Audio"/>
     <qresource prefix="/map">
         <file>boss_champ.png</file>
         <file>boss_hexaghost.png</file>
@@ -57,7 +56,7 @@
         <file>BurningBlood.png</file>
         <file>CallingBell.png</file>
         <file>CoffeeDripper.png</file>
-        <file>CultistHeadpience.png</file>
+        <file>CultistHeadpiece.png</file>
         <file>FaceOfCleric.png</file>
         <file>Girya.png</file>
         <file>GoldenIdol.png</file>
@@ -72,6 +71,7 @@
         <file>Vajra.png</file>
         <file>VelvetChoker.png</file>
         <file>WarpedTongs.png</file>
+        <file>RelicViewer.png</file>
     </qresource>
     <qresource prefix="/card">
         <file>Berserk.png</file>
@@ -129,6 +129,9 @@
         <file>TwinStrike.png</file>
         <file>TwinStrikePlus.png</file>
         <file>Wound.png</file>
+        <file>CardViewer.png</file>
+        <file>Barricade.png</file>
+        <file>BarricadePlus.png</file>
     </qresource>
     <qresource prefix="/Potion">
         <file>block_potion.png</file>
@@ -150,5 +153,27 @@
         <file>BrutalityEff.png</file>
         <file>DemonFormEff.png</file>
         <file>VulnerableEff.png</file>
+    <qresource prefix="/RestSite">
+        <file>BackBtn.png</file>
+        <file>YesBtn.png</file>
+        <file>TickBtn.png</file>
+        <file>SmithBtn.png</file>
+        <file>RestBtn.png</file>
+        <file>RestSite.png</file>
+        <file>NoBtn.png</file>
+        <file>GiryaBtn.png</file>
+        <file>GiryaBtnDis.png</file>
+        <file>RestBtnDis.png</file>
+        <file>SmithBtnDis.png</file>
+        <file>FlashLabel.png</file>
+        <file>UpgradeViewer.png</file>
+    </qresource>
+    <qresource prefix="/Reward">
+        <file>CardReward.png</file>
+        <file>GoldReward.png</file>
+        <file>RelicReward.png</file>
+        <file>SelectionViewer.png</file>
+        <file>PotionReward.png</file>
+        <file>RewardViewer.png</file>
     </qresource>
 </RCC>

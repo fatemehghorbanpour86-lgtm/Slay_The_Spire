@@ -14,11 +14,14 @@ SOURCES += \
     bossenemies.cpp \
     bossrelics.cpp \
     campfire.cpp \
+    campfirepage.cpp \
     card.cpp \
+    cardselection.cpp \
     combatcalculator.cpp \
     combatdeck.cpp \
     combatmanager.cpp \
     cursecards.cpp \
+    deckviewer.cpp \
     effect.cpp \
     eliteenemy.cpp \
     enemy.cpp \
@@ -41,12 +44,18 @@ SOURCES += \
     potion.cpp \
     powercard.cpp \
     relic.cpp \
+    relicselection.cpp \
     relicsystem.cpp \
+    relicviewer.cpp \
+    reward.cpp \
+    rewardpage.cpp \
+    rewardsystem.cpp \
     savemanager.cpp \
     skillcards.cpp \
     splashpage.cpp \
     character.cpp \
-    statuscards.cpp
+    statuscards.cpp \
+    upgradecards.cpp
 
 HEADERS += \
     attackcards.h \
@@ -55,11 +64,14 @@ HEADERS += \
     bossenemies.h \
     bossrelics.h \
     campfire.h \
+    campfirepage.h \
     card.h \
+    cardselection.h \
     combatcalculator.h \
     combatdeck.h \
     combatmanager.h \
     cursecards.h \
+    deckviewer.h \
     effect.h \
     eliteenemy.h \
     enemy.h \
@@ -82,12 +94,18 @@ HEADERS += \
     potion.h \
     powercard.h \
     relic.h \
+    relicselection.h \
     relicsystem.h \
+    relicviewer.h \
+    reward.h \
+    rewardpage.h \
+    rewardsystem.h \
     savemanager.h \
     skillcards.h \
     splashpage.h \
     character.h \
-    statuscards.h
+    statuscards.h \
+    upgradecards.h
 
 FORMS += \
     battlepage.ui \

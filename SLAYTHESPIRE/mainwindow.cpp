@@ -6,6 +6,8 @@
 #include "loginpage.h"
 #include "mainpage.h"
 #include "battlepage.h"
+#include "campfirepage.h"
+#include <QDebug>
 
 #include "map.h"
 #include "player.h"
@@ -40,11 +42,51 @@ void MainWindow::showMapPage()
     Map* currentMap = new Map();
     Player* currentPlayer = new Player("Ironclad", 80);
 
-    MapPage* mapPage = new MapPage(currentMap, currentPlayer);
+    mapPage = new MapPage(currentMap, currentPlayer);
 
     connect(mapPage, &MapPage::battleRequested, this, &MainWindow::showBattlePage);
 
     stackedWidget->addWidget(mapPage);
+    stackedWidget->setCurrentWidget(mapPage);
+
+    connect(mapPage, &MapPage::campfireEntered, this, &MainWindow::showCampfirePage);
+}
+
+void MainWindow::showCampfirePage()
+{
+    if (!mapPage)
+        return;
+
+    if (campfirePage)
+    {
+        stackedWidget->removeWidget(campfirePage);
+        campfirePage->deleteLater();
+        campfirePage = nullptr;
+
+    }
+
+    campfirePage = new CampfirePage(mapPage->getPlayer(), mapPage->getMap());
+
+    stackedWidget->addWidget(campfirePage);
+    stackedWidget->setCurrentWidget(campfirePage);
+
+    connect(campfirePage, &CampfirePage::leaveCampfire, this, &MainWindow::returnFromCampfireToMap);
+}
+
+void MainWindow::returnFromCampfireToMap()
+{
+    if (!mapPage)
+        return;
+
+    if (campfirePage)
+    {
+        stackedWidget->removeWidget(campfirePage);
+        campfirePage->deleteLater();
+        campfirePage = nullptr;
+    }
+
+
+    mapPage->updateTopBarData();
     stackedWidget->setCurrentWidget(mapPage);
 }
 
