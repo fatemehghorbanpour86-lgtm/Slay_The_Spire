@@ -10,13 +10,22 @@
 #include "rewardpage.h"
 #include "rewardsystem.h"
 
+MapPage* MapPage::instance = nullptr;
+
 static const QString BONE_COLOR = "#E8DCC0";
 
 MapPage::MapPage(Map* gameMap, Player* playerPtr, QWidget *parent)
     : QWidget(parent), map(gameMap), player(playerPtr)
 {
+    instance = this;
     setupUI();
     updateTopBarData();
+}
+
+MapPage::~MapPage() {
+    if (instance == this) {
+        instance = nullptr;
+    }
 }
 
 void MapPage::setupUI() {
@@ -216,12 +225,15 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
 }
 
 void MapPage::updateTopBarData() {
-    hpBar->setMaximum(player->getMaxHealth());
-    hpBar->setValue(player->getCurrentHealth());
-    hpBar->setFormat(QString("%1 / %2").arg(player->getCurrentHealth()).arg(player->getMaxHealth()));
 
-    double hpPercent = static_cast<double>(player->getCurrentHealth()) /
-                       player->getMaxHealth();
+    if (!instance) return;
+
+    instance->hpBar->setMaximum(instance->player->getMaxHealth());
+    instance->hpBar->setValue(instance->player->getCurrentHealth());
+    instance->hpBar->setFormat(QString("%1 / %2").arg(instance->player->getCurrentHealth()).arg(instance->player->getMaxHealth()));
+
+    double hpPercent = static_cast<double>(instance->player->getCurrentHealth()) /
+                       instance->player->getMaxHealth();
 
     QString chunkColor;
     QString textColor;
@@ -239,7 +251,7 @@ void MapPage::updateTopBarData() {
         textColor = BONE_COLOR;
     }
 
-    hpBar->setStyleSheet(QString(
+    instance->hpBar->setStyleSheet(QString(
                              "QProgressBar { border: 1px solid #555; border-radius: 10px;"
                              "background-color: #222; color: %1;"
                              "font-weight: bold; text-align: center;"
@@ -251,22 +263,23 @@ void MapPage::updateTopBarData() {
                              "}"
                              ).arg(textColor, chunkColor));
 
-    goldLabel->setText(QString("💰 %1").arg(player->getGold()));
+    instance->goldLabel->setText(QString("💰 %1").arg(instance->player->getGold()));
 
-    relicLabel->setText(QString("x%1").arg(player->getAllRelics().size()));
+    instance->relicLabel->setText(QString("x%1").arg(instance->player->getAllRelics().size()));
 
-    cardLabel->setText(QString("%1").arg(player->getMasterDeck()->getCardCount()));
+    instance->cardLabel->setText(QString("%1").arg(instance->player->getMasterDeck()->getCardCount()));
 
-    actLabel->setText(QString("Act %1").arg(map->getCurrentAct()));
-    floorNumberLabel->setText(QString::number(map->getCurrentFloorIndex()));
+    instance->actLabel->setText(QString("Act %1").arg(instance->map->getCurrentAct()));
+    instance->floorNumberLabel->setText(QString::number(instance->map->getCurrentFloorIndex()));
 
     for(int i = 0; i < 3; ++i) {
-        if(i < player->getPotionCount() && player->getPotion(i) != nullptr) {
-            QString potionName = player->getPotion(i)->getName().toLower().replace(" ", "_");
+        if(i < instance->player->getPotionCount() && instance->player->getPotion(i) != nullptr) {
+            QString potionName = instance->player->getPotion(i)->getName().toLower().replace(" ", "_");
             QString iconPath = QString(":/Potion/%1.png").arg(potionName);
-            potionSlots[i]->setStyleSheet(QString("border-image: url(%1); background: transparent;").arg(iconPath));
+            instance->potionSlots[i]->setStyleSheet(QString("border-image: url(%1); background: transparent;").arg(iconPath));
+            instance->potionSlots[i]->setFixedSize(42, 42);
         } else {
-            potionSlots[i]->setStyleSheet("border-image: url(:/Potion/potionEmpty.png); background: transparent;");
+            instance->potionSlots[i]->setStyleSheet("border-image: url(:/Potion/potionEmpty.png); background: transparent;");
         }
     }
 }
@@ -296,35 +309,67 @@ void MapPage::onNodeClicked(int nodeId) {
         //     emit battleRequested();
         // }
 
-        if (map->getCurrentNodeType() == NodeType::Monster)
-        {
-            RewardSystem* rewardSystem = new RewardSystem();
-            rewardSystem->generateNormalReward(player);
+        // if (map->getCurrentNodeType() == NodeType::Monster)
+        // {
+        //     RewardSystem* rewardSystem = new RewardSystem();
+        //     rewardSystem->generateNormalReward(player);
 
-            // ۲. ساخت صفحه UI
-            RewardPage* rewardPage = new RewardPage(player, rewardSystem);
+        //     RewardPage* rewardPage = new RewardPage(player, rewardSystem);
 
-            // ۳. تنظیمات ظاهری برای حالت تست (نمایش به عنوان یک پنجره مستقل)
-            rewardPage->setWindowTitle("Test Reward Page");
-            rewardPage->resize(800, 600); // سایز پیش‌فرض برای راحت‌تر دیدن دکمه‌ها
-            rewardPage->setAttribute(Qt::WA_DeleteOnClose); // اطمینان از پاک شدن ویجت هنگام بسته شدن پنجره
+        //     rewardPage->setWindowTitle("Reward");
+        //     rewardPage->setAttribute(Qt::WA_DeleteOnClose);
 
-            // ۴. مدیریت حافظه و بسته شدن فرم وقتی بازیکن Continue را می‌زند
-            connect(rewardPage, &RewardPage::continueClicked, [rewardPage, rewardSystem]() {
-                rewardPage->close();         // بستن فرم
-                rewardPage->deleteLater();   // پاک کردن ویجت از حافظه به شکل ایمن
-                delete rewardSystem;         // پاک کردن سیستم پاداش (چون QObject نیست از delete استفاده می‌کنیم)
-            });
+        //     connect(rewardPage, &RewardPage::continueClicked, [rewardPage, rewardSystem]() {
+        //         rewardPage->close();
+        //         rewardPage->deleteLater();
+        //         delete rewardSystem;
+        //     });
 
-            // ۵. نمایش فرم روی صفحه
-            rewardPage->show();
-        }
+        //     rewardPage->show();
+        // }
 
+        // else if (map->getCurrentNodeType() == NodeType::Elite)
+        // {
+        //     RewardSystem* rewardSystem = new RewardSystem();
+        //     rewardSystem->generateEliteReward(player);
 
-        else if (map->getCurrentNodeType() == NodeType::Campfire)
-        {
-            emit campfireEntered();
-        }
+        //     RewardPage* rewardPage = new RewardPage(player, rewardSystem);
+
+        //     rewardPage->setWindowTitle("Reward");
+        //     rewardPage->setAttribute(Qt::WA_DeleteOnClose);
+
+        //     connect(rewardPage, &RewardPage::continueClicked, [rewardPage, rewardSystem]() {
+        //         rewardPage->close();
+        //         rewardPage->deleteLater();
+        //         delete rewardSystem;
+        //     });
+
+        //     rewardPage->show();
+        // }
+
+        // if (map->getCurrentNodeType() == NodeType::Boss)
+        // {
+        //     RewardSystem* rewardSystem = new RewardSystem();
+        //     rewardSystem->generateBossReward(player);
+
+        //     RewardPage* rewardPage = new RewardPage(player, rewardSystem);
+
+        //     rewardPage->setWindowTitle("Reward");
+        //     rewardPage->setAttribute(Qt::WA_DeleteOnClose);
+
+        //     connect(rewardPage, &RewardPage::continueClicked, [rewardPage, rewardSystem]() {
+        //         rewardPage->close();
+        //         rewardPage->deleteLater();
+        //         delete rewardSystem;
+        //     });
+
+        //     rewardPage->show();
+        // }
+
+        // else if (map->getCurrentNodeType() == NodeType::Campfire)
+        // {
+        //     emit campfireEntered();
+        // }
     }
 }
 

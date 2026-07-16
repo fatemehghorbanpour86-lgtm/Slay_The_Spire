@@ -4,9 +4,11 @@
 #include "relic.h"
 #include "card.h"
 #include "potion.h"
-//#include "cardselectiondialog.h"
-//#include "relicselectiondialog.h"
+#include "cardselection.h"
+#include "relicselection.h"
 #include "audiomanager.h"
+#include "relicviewer.h"
+#include "mappage.h"
 #include <QVBoxLayout>
 #include <QLabel>
 
@@ -26,7 +28,7 @@ void RewardPage::setupUI()
         "QToolTip { color: #facc15; background-color: #1f2937; border: 1px solid #b91c1c;"
         "border-radius: 4px; padding: 6px; font-weight: bold; }"
         );
-    setFixedSize(400, 500);
+    setFixedSize(400, 550);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(40, 40, 40, 30);
@@ -54,7 +56,7 @@ void RewardPage::setupUI()
         "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
         );
 
-    continueBtn->move(0, 400);
+    continueBtn->move(0, 450);
 
     connect(continueBtn, &QPushButton::pressed, this, []() {
         AudioManager::instance().play(AudioManager::Sound::ButtonClick);
@@ -117,7 +119,7 @@ QPushButton* RewardPage::createRewardButton(Reward* reward)
             "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
             );
 
-        btn->setText(potion ? QString("Potion: %1").arg(potion->getName()) : "Potion");
+        btn->setText(potion ? QString("%1").arg(potion->getName()) : "Potion");
 
         bool full = player && player->getPotionCount() >= RewardSystem::MAX_POTIONS;
         btn->setEnabled(!full);
@@ -138,8 +140,7 @@ QPushButton* RewardPage::createRewardButton(Reward* reward)
             );
         if (reward->isChoice())
         {
-            // Boss Relic reward: opens RelicSelectionDialog to pick 1 of 3.
-            btn->setText("Choose a Boss Relic");
+            btn->setText("Choose a Relic");
             connect(btn, &QPushButton::clicked, this, [this, reward, btn]() {
                 onBossRelicClicked(reward, btn);
             });
@@ -149,13 +150,13 @@ QPushButton* RewardPage::createRewardButton(Reward* reward)
             Relic* relic = reward->getRelic();
             btn->setText(relic ? relic->getName() : "Relic");
 
-            // if (relic)
-            // {
-            //     btn->setToolTip(relic->getDescription());
-            //     btn->setStyleSheet(btn->styleSheet() +
-            //                        QString("QPushButton { border-image: url(%1); }")
-            //                            .arg(RelicSelectionDialog::relicIconPath(relic)));
-            // }
+            if (relic)
+            {
+                btn->setToolTip(relic->getDescription());
+                // btn->setStyleSheet(btn->styleSheet() +
+                //                    QString("QPushButton { border-image: url(%1); }")
+                //                        .arg(RelicViewerDialog::relicIconPath(relic)));
+            }
 
             connect(btn, &QPushButton::clicked, this, [this, reward, btn]() {
                 onRelicClicked(reward, btn);
@@ -188,6 +189,7 @@ void RewardPage::onGoldClicked(Reward* reward, QPushButton* button)
 
     rewardsLayout->removeWidget(button);
     button->deleteLater();
+    MapPage::updateTopBarData();
 }
 
 void RewardPage::onPotionClicked(Reward* reward, QPushButton* button)
@@ -199,6 +201,7 @@ void RewardPage::onPotionClicked(Reward* reward, QPushButton* button)
 
     rewardsLayout->removeWidget(button);
     button->deleteLater();
+    MapPage::updateTopBarData();
 }
 
 void RewardPage::onRelicClicked(Reward* reward, QPushButton* button)
@@ -210,6 +213,7 @@ void RewardPage::onRelicClicked(Reward* reward, QPushButton* button)
 
     rewardsLayout->removeWidget(button);
     button->deleteLater();
+    MapPage::updateTopBarData();
 }
 
 void RewardPage::onCardClicked(Reward* reward, QPushButton* button)
@@ -217,21 +221,22 @@ void RewardPage::onCardClicked(Reward* reward, QPushButton* button)
     Q_UNUSED(reward)
     Q_UNUSED(button)
 
-    // if (!reward)
-    //     return;
+    if (!reward)
+        return;
 
-    // CardSelectionDialog dialog(reward->getCardChoices(), this);
+    CardSelectionDialog dialog(reward->getCardChoices(), this);
 
-    // if (dialog.exec() != QDialog::Accepted)
-    //     return; // player closed the dialog: the reward stays pending
+    if (dialog.exec() != QDialog::Accepted)
+        return; // player closed the dialog: the reward stays pending
 
-    // Card* chosen = dialog.getChosenCard();
+    Card* chosen = dialog.getChosenCard();
 
-    // if (!rewardSystem || !rewardSystem->claimCardReward(player, reward, chosen))
-    //     return;
+    if (!rewardSystem || !rewardSystem->claimCardReward(player, reward, chosen))
+        return;
 
-    // rewardsLayout->removeWidget(button);
-    // button->deleteLater();
+    rewardsLayout->removeWidget(button);
+    button->deleteLater();
+    MapPage::updateTopBarData();
 }
 
 void RewardPage::onBossRelicClicked(Reward* reward, QPushButton* button)
@@ -240,21 +245,24 @@ void RewardPage::onBossRelicClicked(Reward* reward, QPushButton* button)
     Q_UNUSED(reward)
     Q_UNUSED(button)
 
-    // if (!reward)
-    //     return;
+    if (!reward)
+        return;
 
-    // RelicSelectionDialog dialog(reward->getRelicChoices(), this);
+    RelicSelectionDialog dialog(reward->getRelicChoices(), this);
 
-    // if (dialog.exec() != QDialog::Accepted)
-    //     return; // player closed the dialog: the reward stays pending
+    if (dialog.exec() != QDialog::Accepted)
+        return; // player closed the dialog: the reward stays pending
 
-    // Relic* chosen = dialog.getChosenRelic();
+    Relic* chosen = dialog.getChosenRelic();
 
-    // if (!rewardSystem || !rewardSystem->claimBossRelicReward(player, reward, chosen))
-    //     return;
+    if (!rewardSystem || !rewardSystem->claimBossRelicReward(player, reward, chosen))
+        return;
 
-    // rewardsLayout->removeWidget(button);
-    // button->deleteLater();
+    AudioManager::instance().play(AudioManager::Sound::Reward);
+
+    rewardsLayout->removeWidget(button);
+    button->deleteLater();
+    MapPage::updateTopBarData();
 }
 
 void RewardPage::onContinueClicked()

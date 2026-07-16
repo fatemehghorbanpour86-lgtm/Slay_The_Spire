@@ -37,8 +37,6 @@ QString UpgradePreviewDialog::UpgradeCardImagePath(const Card* card)
 void UpgradePreviewDialog::setupUI()
 {
     setWindowTitle("Upgrade Card");
-    // setStyleSheet("QDialog { background-color: #1f2937; }");
-
     setFixedSize(700, 500);
     setStyleSheet("QDialog { border-image: url(:/RestSite/UpgradeViewer.png); border: none; background: transparent; }"
                   );
@@ -72,7 +70,6 @@ void UpgradePreviewDialog::setupUI()
     previewLayout->addWidget(upgradedImage);
 
     mainLayout->addLayout(previewLayout);
-    //mainLayout->addSpacing(20);
 
     QHBoxLayout* buttonsLayout = new QHBoxLayout();
     buttonsLayout->setContentsMargins(0, 0, 0, 0);
@@ -133,11 +130,6 @@ void UpgradeCardsDialog::setupUI()
     setStyleSheet("QDialog { border-image: url(:/card/CardViewer.png); }"
                   "QScrollArea { border: none; background: transparent; }"
                   );
-    // resize(650, 500);
-    // setStyleSheet(
-    //     "QDialog { background-color: #1f2937; }"
-    //     "QScrollArea { border: none; background: transparent; }"
-    //     );
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(40, 45, 50, 50);

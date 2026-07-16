@@ -16,6 +16,7 @@ SOURCES += \
     campfire.cpp \
     campfirepage.cpp \
     card.cpp \
+    cardselection.cpp \
     combatcalculator.cpp \
     combatdeck.cpp \
     combatmanager.cpp \
@@ -43,6 +44,7 @@ SOURCES += \
     potion.cpp \
     powercard.cpp \
     relic.cpp \
+    relicselection.cpp \
     relicsystem.cpp \
     relicviewer.cpp \
     reward.cpp \
@@ -64,6 +66,7 @@ HEADERS += \
     campfire.h \
     campfirepage.h \
     card.h \
+    cardselection.h \
     combatcalculator.h \
     combatdeck.h \
     combatmanager.h \
@@ -91,6 +94,7 @@ HEADERS += \
     potion.h \
     powercard.h \
     relic.h \
+    relicselection.h \
     relicsystem.h \
     relicviewer.h \
     reward.h \

@@ -407,8 +407,6 @@ void CampfirePage::onSmithClicked()
 {
     UpgradeCardsDialog dialog(player, &campfireLogic, this);
 
-    // Accepted only happens once a card was actually upgraded
-    // (see UpgradeCardsDialog / UpgradePreviewDialog in upgradecardsdialog.cpp).
     if (dialog.exec() == QDialog::Accepted)
     {
         emit leaveCampfire();

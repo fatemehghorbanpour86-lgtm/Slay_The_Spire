@@ -10,12 +10,12 @@ class RelicViewerDialog : public QDialog
     Q_OBJECT
 public:
     explicit RelicViewerDialog(Player* player, QWidget* parent = nullptr);
+    static QString relicIconPath(const Relic* relic);
 
 private:
     Player* player;
 
     void setupUI();
-    static QString relicIconPath(const Relic* relic);
 };
 
 #endif // RELICVIEWER_H
