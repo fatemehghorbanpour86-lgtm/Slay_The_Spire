@@ -27,12 +27,13 @@ void MainWindow::showMainMenuPage()
 
 void MainWindow::showBattlePage()
 {
-       if (battlePage) {
+       if (battlePage)
+        {
             stackedWidget->removeWidget(battlePage);
             delete battlePage;
             battlePage = nullptr;
         }
-        battlePage = new BattlePage(new Player("Ironclad", 80), {new Cultist}, this);
+        battlePage = new BattlePage(new Player("Ana", 80), {new Cultist}, this);
         stackedWidget->addWidget(battlePage);
         stackedWidget->setCurrentWidget(battlePage);
 }
@@ -40,7 +41,7 @@ void MainWindow::showBattlePage()
 void MainWindow::showMapPage()
 {
     Map* currentMap = new Map();
-    Player* currentPlayer = new Player("Ironclad", 80);
+    Player* currentPlayer = new Player("Ana", 80);
 
     mapPage = new MapPage(currentMap, currentPlayer);
 

@@ -303,11 +303,11 @@ void MapPage::onNodeClicked(int nodeId) {
         //TODO (GameManager)
         //emit roomEntered(map->getCurrentNode()->getType());
 
-        // const MapNode* node = map->getCurrentNode();
-        // if (node && node->getType() == NodeType::Monster)
-        // {
-        //     emit battleRequested();
-        // }
+         const MapNode* node = map->getCurrentNode();
+         if (node && node->getType() == NodeType::Monster)
+         {
+             emit battleRequested();
+         }
 
         // if (map->getCurrentNodeType() == NodeType::Monster)
         // {

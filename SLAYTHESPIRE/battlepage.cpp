@@ -24,7 +24,7 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     : QWidget(parent), player(player), enemies(enemies)
 {
     if (this->player == nullptr)
-        this->player = new Player("Ironclad", 80);
+        this->player = new Player("َAna", 80);
 
     if (this->enemies.isEmpty())
         this->enemies.append (new Cultist);
@@ -102,7 +102,7 @@ void BattlePage::setupTopBar()
     leftGroup->setSpacing(10);
 
     // Character name
-    QLabel *nameLabel = new QLabel("anaconda", topBar);
+    QLabel *nameLabel = new QLabel(player->getName(), topBar);
     nameLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold; background: transparent;");
 
     QLabel *classLabel = new QLabel("the Ironclad", topBar);
