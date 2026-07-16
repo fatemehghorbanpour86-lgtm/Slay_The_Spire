@@ -153,6 +153,7 @@
         <file>BrutalityEff.png</file>
         <file>DemonFormEff.png</file>
         <file>VulnerableEff.png</file>
+    </qresource>
     <qresource prefix="/RestSite">
         <file>BackBtn.png</file>
         <file>YesBtn.png</file>
