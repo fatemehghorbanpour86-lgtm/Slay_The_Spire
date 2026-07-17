@@ -25,6 +25,7 @@ SOURCES += \
     effect.cpp \
     eliteenemy.cpp \
     enemy.cpp \
+    enemyfactory.cpp \
     event.cpp \
     eventrelics.cpp \
     eventsystem.cpp \
@@ -76,6 +77,7 @@ HEADERS += \
     effect.h \
     eliteenemy.h \
     enemy.h \
+    enemyfactory.h \
     event.h \
     eventrelics.h \
     eventsystem.h \
