@@ -3,12 +3,6 @@
 
 #include <QMainWindow>
 #include <QStackedWidget>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QWidget>
-#include <QProgressBar>
-#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -16,26 +10,12 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-
-class SplashPage;
-class loginpage;
-class mainpage;
-class BattlePage;
-class MapPage;
-class CampfirePage;
-
+class GameManager;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-private slots:
-    void showLoginPAge();
-    void showMainMenuPage();
-    void showBattlePage();
-    void showMapPage();
-    void showCampfirePage();
-    void returnFromCampfireToMap();
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
@@ -43,12 +23,6 @@ public:
 private:
     Ui::MainWindow *ui;
     QStackedWidget *stackedWidget;
-
-    SplashPage *splashPage;
-    loginpage *loginPage;
-    mainpage *mainMenuPage;
-    BattlePage *battlePage;
-    MapPage *mapPage = nullptr;
-    CampfirePage *campfirePage = nullptr;
+    GameManager *gameManager;
 };
 #endif // MAINWINDOW_H
