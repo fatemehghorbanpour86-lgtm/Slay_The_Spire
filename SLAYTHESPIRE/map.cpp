@@ -365,6 +365,11 @@ int Map::getCurrentAct() const
     return currentAct;
 }
 
+bool Map::isFinalAct() const
+{
+    return currentAct >= TOTAL_ACTS;
+}
+
 int Map::getCurrentFloorIndex() const
 {
     return currentFloorIndex;

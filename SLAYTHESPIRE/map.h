@@ -75,6 +75,7 @@ public:
     void goToNextAct();   // Advances currentAct and regenerates the map. Does nothing if already on the last Act.
 
     int getCurrentAct() const;
+    bool isFinalAct() const;
     int getCurrentFloorIndex() const;
 
     // True once the player has entered at least one node this Act
