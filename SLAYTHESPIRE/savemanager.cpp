@@ -338,6 +338,13 @@ QJsonObject SaveManager::mapStateToJson(const MapState& state)
     }
     obj["nodes"] = nodesArr;
 
+    QJsonArray usedFirstArr;
+    for (int id : state.usedFirstEncounterIds)
+        usedFirstArr.append(id);
+    obj["usedFirstEncounterIds"] = usedFirstArr;
+
+    obj["normalEncounterCount"] = state.normalEncounterCount;
+
     return obj;
 }
 
@@ -373,6 +380,11 @@ MapState SaveManager::mapStateFromJson(const QJsonObject& obj)
 
         state.nodes.append(node);
     }
+
+    for (const QJsonValue& v : obj.value("usedFirstEncounterIds").toArray())
+        state.usedFirstEncounterIds.append(v.toInt());
+
+    state.normalEncounterCount = obj.value("normalEncounterCount").toInt(0);
 
     return state;
 }

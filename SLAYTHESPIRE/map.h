@@ -39,6 +39,9 @@ struct MapState
     QVector<int> availableNodeIds;
 
     QVector<MapNodeState> nodes; // Full graph, floor/column/type/connections included.
+
+    QVector<int> usedFirstEncounterIds;
+    int normalEncounterCount = 0;
 };
 
 
@@ -77,6 +80,12 @@ public:
     int getCurrentAct() const;
     bool isFinalAct() const;
     int getCurrentFloorIndex() const;
+
+    const QVector<int>& getUsedFirstEncounterIds() const;
+    void setUsedFirstEncounterIds(const QVector<int>& ids);
+
+    int getNormalEncounterCount() const;
+    void setNormalEncounterCount(int count);
 
     // True once the player has entered at least one node this Act
     // (false right after generate(), before the first move).
@@ -165,6 +174,9 @@ private:
     int currentAct;
     int currentFloorIndex;
     MapNode* currentNode;
+
+    QVector<int> usedFirstEncounterIds;
+    int normalEncounterCount = 0;
 
     QVector<int> guaranteedCampfireFloors;
 

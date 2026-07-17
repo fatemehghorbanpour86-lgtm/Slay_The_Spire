@@ -47,6 +47,8 @@ void Map::generate()
 void Map::reset()
 {
     currentAct = 1;
+    usedFirstEncounterIds.clear();
+    normalEncounterCount = 0;
     generate();
 }
 
@@ -56,6 +58,10 @@ void Map::goToNextAct()
         return;
 
     currentAct++;
+
+    usedFirstEncounterIds.clear();
+    normalEncounterCount = 0;
+
     generate();
 }
 
@@ -474,6 +480,9 @@ MapState Map::extractState() const
     state.currentFloorIndex = currentFloorIndex;
     state.currentNodeId = (currentNode != nullptr) ? currentNode->getId() : -1;
 
+    state.usedFirstEncounterIds = usedFirstEncounterIds;
+    state.normalEncounterCount = normalEncounterCount;
+
     for (MapNode* node : allNodes)
     {
         MapNodeState nodeState;
@@ -555,4 +564,28 @@ void Map::restoreState(const MapState& state)
     currentAct = state.currentAct;
     currentFloorIndex = state.currentFloorIndex;
     currentNode = (state.currentNodeId >= 0) ? nodeLookup.value(state.currentNodeId, nullptr) : nullptr;
+
+    usedFirstEncounterIds = state.usedFirstEncounterIds;
+    normalEncounterCount = state.normalEncounterCount;
+
+}
+
+const QVector<int>& Map::getUsedFirstEncounterIds() const
+{
+    return usedFirstEncounterIds;
+}
+
+void Map::setUsedFirstEncounterIds(const QVector<int>& ids)
+{
+    usedFirstEncounterIds = ids;
+}
+
+int Map::getNormalEncounterCount() const
+{
+    return normalEncounterCount;
+}
+
+void Map::setNormalEncounterCount(int count)
+{
+    normalEncounterCount = count;
 }
