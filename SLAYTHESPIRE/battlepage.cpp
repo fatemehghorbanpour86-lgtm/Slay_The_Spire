@@ -266,6 +266,16 @@ void BattlePage::setupBattleField()
     playerLayout->addWidget(playerImg);
     playerLayout->addWidget(playerHPBar, 0, Qt::AlignHCenter);
 
+    // Effect icon
+    playerEffectsWidget = new QWidget(playerWidget);
+    playerEffectsWidget->setFixedHeight(32);
+    playerEffectsLayout = new QHBoxLayout(playerEffectsWidget);
+    playerEffectsLayout->setContentsMargins(0, 2, 0, 0);
+    playerEffectsLayout->setSpacing(4);
+    playerEffectsLayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+    playerLayout->addWidget(playerEffectsWidget, 0, Qt::AlignHCenter);
+
 
     // Shield icon + block count
     playerBlockIconLabel = new QLabel(playerWidget);
@@ -335,6 +345,16 @@ void BattlePage::setupBattleField()
     enemyInnerLayout->addStretch();
     enemyInnerLayout->addWidget(enemyImg);
     enemyInnerLayout->addWidget(enemyHPBar, 0, Qt::AlignHCenter);
+
+    // Effect iconS
+    enemyEffectsWidget = new QWidget(enemyWidget);
+    enemyEffectsWidget->setFixedHeight(32);
+    enemyEffectsLayout = new QHBoxLayout(enemyEffectsWidget);
+    enemyEffectsLayout->setContentsMargins(0, 2, 0, 0);
+    enemyEffectsLayout->setSpacing(4);
+    enemyEffectsLayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+    enemyInnerLayout->addWidget(enemyEffectsWidget, 0, Qt::AlignHCenter);
 
     enemyLayout->addWidget(enemyWidget);
 
@@ -716,6 +736,8 @@ void BattlePage::updateStats()
         drawPileCountLabel->setText(QString::number(deck->getDrawPile().size()));
         discardPileCountLabel->setText(QString::number(deck->getDiscardPile().size()));
     }
+
+    updateEffectsUI();
 
 }
 
@@ -1217,4 +1239,112 @@ void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function
             });
 
     goForward->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+QString BattlePage::effectImagePath(const Effect* effect)
+{
+    if (!effect) return QString();
+
+    QString cleanName = effect->getName();
+    cleanName.remove(' ');
+    cleanName.remove('\'');
+    cleanName.remove('.');
+
+    return QString(":/Effect/%1Eff.png").arg(cleanName);
+}
+
+void BattlePage::updateEffectsUI()
+{
+    // updaye player Effect
+    if (playerEffectsLayout && player)
+    {
+        // erasing previous incons
+        QLayoutItem* item;
+        while ((item = playerEffectsLayout->takeAt(0)) != nullptr)
+        {
+            if (item->widget())
+            {
+                item->widget()->deleteLater();
+            }
+            delete item;
+        }
+
+        const auto& effects = player->getEffects();
+        for (Effect* effect : effects)
+        {
+            if (!effect || effect->isExpired())
+                continue;
+
+            QWidget* iconContainer = new QWidget(playerEffectsWidget);
+            iconContainer->setFixedSize(26, 26);
+
+            QLabel* iconLabel = new QLabel(iconContainer);
+            iconLabel->setGeometry(0, 0, 24, 24);
+            iconLabel->setScaledContents(true);
+            iconLabel->setPixmap(QPixmap(effectImagePath(effect)).scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+            if (effect->getAmount() > 1)
+            {
+                QLabel* numLabel = new QLabel(iconContainer);
+                numLabel->setText(QString::number(effect->getAmount()));
+                numLabel->setAlignment(Qt::AlignRight | Qt::AlignBottom);
+                numLabel->setGeometry(10, 10, 16, 16);
+                numLabel->setStyleSheet
+                    (
+                    "color: #ffffff;"
+                    "font-size: 10px;"
+                    "font-weight: bold;"
+                    "background: transparent;"
+                    "border: none;"
+                    );
+            }
+
+            playerEffectsLayout->addWidget(iconContainer);
+        }
+    }
+
+    if (enemyEffectsLayout && !enemies.isEmpty() && enemies[0])
+    {
+        QLayoutItem* item;
+        while ((item = enemyEffectsLayout->takeAt(0)) != nullptr)
+        {
+            if (item->widget())
+            {
+                item->widget()->deleteLater();
+            }
+            delete item;
+        }
+
+        Enemy* currentEnemy = enemies[0];
+        const auto& effects = currentEnemy->getEffects();
+        for (Effect* effect : effects)
+        {
+            if (!effect || effect->isExpired()) continue;
+
+            QWidget* iconContainer = new QWidget(enemyEffectsWidget);
+            iconContainer->setFixedSize(26, 26);
+
+            QLabel* iconLabel = new QLabel(iconContainer);
+            iconLabel->setGeometry(0, 0, 24, 24);
+            iconLabel->setScaledContents(true);
+            iconLabel->setPixmap(QPixmap(effectImagePath(effect)).scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+            if (effect->getAmount() > 1) {
+                QLabel* numLabel = new QLabel(iconContainer);
+                numLabel->setText(QString::number(effect->getAmount()));
+                numLabel->setAlignment(Qt::AlignRight | Qt::AlignBottom);
+                numLabel->setGeometry(10, 10, 16, 16);
+                numLabel->setStyleSheet
+                    (
+                    "color: #ffffff;"
+                    "font-size: 10px;"
+                    "font-weight: bold;"
+                    "background: transparent;"
+                    "border: none;"
+                    );
+            }
+
+            enemyEffectsLayout->addWidget(iconContainer);
+        }
+    }
 }

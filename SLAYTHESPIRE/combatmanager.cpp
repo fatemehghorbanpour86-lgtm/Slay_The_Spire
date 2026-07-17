@@ -88,6 +88,8 @@ void CombatManager::handleBattleStart()
     emit combatStarted();
 
     changeState(CombatState::TurnStart);
+
+    emit statsUpdated();
 }
 
 void CombatManager::handleTurnStart()
@@ -229,6 +231,8 @@ void CombatManager::handleTurnEnd()
     }
 
     player->getRelicSystem().onTurnEnd(player);
+
+    emit statsUpdated();
 
     changeState(CombatState::EnemyTurn);
 }

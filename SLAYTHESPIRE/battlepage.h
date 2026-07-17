@@ -17,6 +17,7 @@
 
 
 #include "combatmanager.h"
+#include "effect.h"
 #include "outlinedlabel.h"
 #include "qgraphicseffect.h"
 
@@ -130,6 +131,17 @@ void repositionBlockIcon();
 void showEvent(QShowEvent* e)override;
 
 void animateAttack(QWidget* attacker, QWidget* target, std::function<void()> onDone = nullptr);
+
+
+QWidget* playerEffectsWidget = nullptr;
+QHBoxLayout* playerEffectsLayout = nullptr;
+
+QWidget* enemyEffectsWidget = nullptr;
+QHBoxLayout* enemyEffectsLayout = nullptr;
+
+void setupEffectsUI();
+void updateEffectsUI();
+QString effectImagePath(const Effect* effect);
 
 
 protected:
