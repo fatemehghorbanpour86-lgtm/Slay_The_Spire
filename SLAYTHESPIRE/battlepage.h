@@ -46,6 +46,7 @@ private slots:
 
 signals:
     void battleEnded();
+    void combatResult(bool playerWon);
 
 private:
 
@@ -75,7 +76,7 @@ private:
     QLabel *intentLabel = nullptr;
     QProgressBar *playerHPBar = nullptr;
     QProgressBar *enemyHPBar = nullptr;
-    QString cardImagePath(const Card* card);
+    //QString cardImagePath(const Card* card);
     QPushButton *drawPileBtn;
     QPushButton *discardPileBtn;
     QLabel      *drawPileCountLabel;

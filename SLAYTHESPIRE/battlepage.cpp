@@ -3,6 +3,7 @@
 #include "enemy.h"
 #include "normalenemies.h"
 #include "player.h"
+#include "deckviewer.h"
 
 #include "outlinedlabel.h"
 #include "qtimer.h"
@@ -759,7 +760,7 @@ void BattlePage::refreshHand()
         btn->setFixedSize(cardW, cardH);
         btn->setCursor(Qt::PointingHandCursor);
 
-        QPixmap px(cardImagePath(card));
+        QPixmap px(DeckViewerDialog::cardImagePath(card));
         if (!px.isNull()) {
             // Use the card image as the button background
             QPixmap scaled = px.scaled(cardW, cardH,
@@ -867,29 +868,15 @@ void BattlePage::onCardClicked(Card* card, QGraphicsProxyWidget* proxy)
         showPlayerHighlight();
 }
 
-
 void BattlePage::onBattleWon()
 {
+    emit combatResult(true);
     emit battleEnded();
 }
 void BattlePage::onBattleLost()
 {
+    emit combatResult(false);
     emit battleEnded();
-}
-QString BattlePage::cardImagePath(const Card* card)
-{
-    if (!card) return QString();
-
-    QString cleanName = card->getName();
-    cleanName.remove(' ');
-    cleanName.remove('\'');
-    cleanName.remove('.');
-    if (cleanName.endsWith('+'))
-        cleanName.chop(1);
-    if (card->getIsUpgraded())
-        cleanName += "Plus";
-
-    return QString(":/card/%1.png").arg(cleanName);
 }
 
 void BattlePage::onDrawPileClicked()
