@@ -318,9 +318,11 @@ void BattlePage::setupBattleField()
 
     QLabel *enemyImg = new QLabel(enemyWidget);
     enemyImg->setFixedSize(190, 210);
-    enemyImg->setAlignment(Qt::AlignCenter);
+    enemyImg->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
     enemyImg->setStyleSheet("background: transparent;");
-    enemyImg->setPixmap(QPixmap(enemyImagePath(enemies[0])).scaled(
+
+    QPixmap px(enemyImagePath(enemies[0]));
+    enemyImg->setPixmap(px.scaled(
         190, 210,
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
@@ -969,7 +971,6 @@ QString BattlePage::enemyImagePath(Enemy* enemy)
     if (!enemy) return QString();
 
     QString cleanName = enemy->getName();
-    cleanName.remove(' ');
 
     return QString(":/Enemy/%1.png").arg(cleanName);
 }
