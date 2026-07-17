@@ -105,4 +105,17 @@ loginpage::loginpage(QWidget *parent)
 
     connect(loginBtn, &QPushButton::clicked, this, [this]()
             {emit loginSuccess();});
+
+    connect(registerBtn, &QPushButton::clicked, this, [this]()
+            {emit registerRequsted();});
+}
+
+QString loginpage::getUsername() const
+{
+    return usernameInput->text();
+}
+
+QString loginpage::getPassword() const
+{
+    return passwordInput->text();
 }

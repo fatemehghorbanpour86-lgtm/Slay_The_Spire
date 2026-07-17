@@ -12,6 +12,8 @@ class loginpage : public QWidget
     Q_OBJECT
 public:
     explicit loginpage(QWidget *parent = nullptr);
+    QString getUsername() const;
+    QString getPassword() const;
 
 signals:
     void loginSuccess();
