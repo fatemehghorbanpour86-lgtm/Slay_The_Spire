@@ -29,6 +29,7 @@ SOURCES += \
     event.cpp \
     eventrelics.cpp \
     eventsystem.cpp \
+    gamemanager.cpp \
     loginpage.cpp \
     main.cpp \
     mainpage.cpp \
@@ -81,6 +82,7 @@ HEADERS += \
     event.h \
     eventrelics.h \
     eventsystem.h \
+    gamemanager.h \
     loginpage.h \
     mainpage.h \
     mainwindow.h \
