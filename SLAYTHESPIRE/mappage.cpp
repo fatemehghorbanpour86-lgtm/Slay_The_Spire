@@ -294,82 +294,13 @@ Map* MapPage::getMap() const
     return map;
 }
 
-
 void MapPage::onNodeClicked(int nodeId) {
     bool moved = map->moveToNode(nodeId);
     if (moved) {
         updateTopBarData();
         mapWidget->refreshUI();
-        //TODO (GameManager)
-        //emit roomEntered(map->getCurrentNode()->getType());
 
-        // const MapNode* node = map->getCurrentNode();
-        // if (node && node->getType() == NodeType::Monster)
-        // {
-        //     emit battleRequested();
-        // }
-
-        // if (map->getCurrentNodeType() == NodeType::Monster)
-        // {
-        //     RewardSystem* rewardSystem = new RewardSystem();
-        //     rewardSystem->generateNormalReward(player);
-
-        //     RewardPage* rewardPage = new RewardPage(player, rewardSystem);
-
-        //     rewardPage->setWindowTitle("Reward");
-        //     rewardPage->setAttribute(Qt::WA_DeleteOnClose);
-
-        //     connect(rewardPage, &RewardPage::continueClicked, [rewardPage, rewardSystem]() {
-        //         rewardPage->close();
-        //         rewardPage->deleteLater();
-        //         delete rewardSystem;
-        //     });
-
-        //     rewardPage->show();
-        // }
-
-        // else if (map->getCurrentNodeType() == NodeType::Elite)
-        // {
-        //     RewardSystem* rewardSystem = new RewardSystem();
-        //     rewardSystem->generateEliteReward(player);
-
-        //     RewardPage* rewardPage = new RewardPage(player, rewardSystem);
-
-        //     rewardPage->setWindowTitle("Reward");
-        //     rewardPage->setAttribute(Qt::WA_DeleteOnClose);
-
-        //     connect(rewardPage, &RewardPage::continueClicked, [rewardPage, rewardSystem]() {
-        //         rewardPage->close();
-        //         rewardPage->deleteLater();
-        //         delete rewardSystem;
-        //     });
-
-        //     rewardPage->show();
-        // }
-
-        // if (map->getCurrentNodeType() == NodeType::Boss)
-        // {
-        //     RewardSystem* rewardSystem = new RewardSystem();
-        //     rewardSystem->generateBossReward(player);
-
-        //     RewardPage* rewardPage = new RewardPage(player, rewardSystem);
-
-        //     rewardPage->setWindowTitle("Reward");
-        //     rewardPage->setAttribute(Qt::WA_DeleteOnClose);
-
-        //     connect(rewardPage, &RewardPage::continueClicked, [rewardPage, rewardSystem]() {
-        //         rewardPage->close();
-        //         rewardPage->deleteLater();
-        //         delete rewardSystem;
-        //     });
-
-        //     rewardPage->show();
-        // }
-
-        // else if (map->getCurrentNodeType() == NodeType::Campfire)
-        // {
-        //     emit campfireEntered();
-        // }
+        emit nodeEntered(map->getCurrentNodeType());
     }
 }
 

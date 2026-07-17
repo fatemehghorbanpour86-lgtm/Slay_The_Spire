@@ -61,7 +61,8 @@ protected:
     }
 
 signals:
-    void battleRequested();
-    void campfireEntered();
+    // void battleRequested();
+    // void campfireEntered();
+    void nodeEntered(NodeType type);
 };
 #endif // MAPPAGE_H

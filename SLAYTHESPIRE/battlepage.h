@@ -76,7 +76,6 @@ private:
     QLabel *intentLabel = nullptr;
     QProgressBar *playerHPBar = nullptr;
     QProgressBar *enemyHPBar = nullptr;
-    //QString cardImagePath(const Card* card);
     QPushButton *drawPileBtn;
     QPushButton *discardPileBtn;
     QLabel      *drawPileCountLabel;
