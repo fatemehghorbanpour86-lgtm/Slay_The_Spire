@@ -22,6 +22,8 @@
         <file>debuff.png</file>
         <file>attack.png</file>
         <file>defendIcon.png</file>
+        <file>SettingPushButton.png</file>
+        <file>ChangeUsernameViewer.png</file>
     </qresource>
     <qresource prefix="/map">
         <file>boss_champ.png</file>

@@ -16,27 +16,66 @@ SettingsDialog::SettingsDialog(const QString& currentUsername, QWidget* parent)
 
 void SettingsDialog::setupUI()
 {
+    setObjectName("SettingPage");
+    setStyleSheet(
+        "#SettingPage { border-image: url(:/Reward/SelectionViewer.png); }");
+    setFixedSize(500, 450);
+
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(30, 30, 30, 30);
-    mainLayout->setSpacing(15);
+    mainLayout->setContentsMargins(140, 30, 140, 30);
+    mainLayout->setSpacing(20);
+
+    QLabel* title = new QLabel("Setting", this);
+    title->setAlignment(Qt::AlignCenter);
+    title->setStyleSheet("color: #facc15; font-size: 30px; font-weight: bold; background: transparent;");
+    mainLayout->addWidget(title);
+    mainLayout->addStretch(1);
+
 
     toggleSoundBtn = new QPushButton(this);
     toggleSoundBtn->setCursor(Qt::PointingHandCursor);
+    toggleSoundBtn->setStyleSheet(
+        "QPushButton { border-image: url(:/SettingPushButton.png); font-size: 15px;"
+        "font-weight: bold; border: 1px solid rgba(255,255,255,40); }"
+        "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
+        );
+    toggleSoundBtn->setFixedSize(220, 60);
+    connect(toggleSoundBtn, &QPushButton::pressed, this, []() {
+        AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+    });
     refreshSoundButtonText();
     connect(toggleSoundBtn, &QPushButton::clicked, this, &SettingsDialog::onToggleSoundClicked);
 
+
     changeUsernameBtn = new QPushButton("Change Username", this);
     changeUsernameBtn->setCursor(Qt::PointingHandCursor);
+    changeUsernameBtn->setStyleSheet(
+        "QPushButton { border-image: url(:/SettingPushButton.png); font-size: 15px;"
+        "font-weight: bold; border: 1px solid rgba(255,255,255,40); }"
+        "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
+        );
+    changeUsernameBtn->setFixedSize(220, 60);
+    connect(changeUsernameBtn, &QPushButton::pressed, this, []() {
+        AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+    });
     connect(changeUsernameBtn, &QPushButton::clicked, this, &SettingsDialog::onChangeUsernameClicked);
 
-    closeBtn = new QPushButton("Close", this);
+    closeBtn = new QPushButton(this);
     closeBtn->setCursor(Qt::PointingHandCursor);
+    closeBtn->setStyleSheet(
+        "QPushButton { border-image: url(:/RestSite/BackBtn.png); border: none; background: transparent; }"
+        "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
+        );
+    closeBtn->move(0,300);
+    closeBtn->setFixedSize(140, 80);
+    connect(closeBtn, &QPushButton::pressed, this, []() {
+        AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+    });
     connect(closeBtn, &QPushButton::clicked, this, &QDialog::accept);
 
     mainLayout->addWidget(toggleSoundBtn);
     mainLayout->addWidget(changeUsernameBtn);
-    mainLayout->addSpacing(10);
-    mainLayout->addWidget(closeBtn);
+    mainLayout->addStretch(4);
 }
 
 void SettingsDialog::refreshSoundButtonText()
@@ -56,22 +95,56 @@ void SettingsDialog::onChangeUsernameClicked()
 {
     QDialog dialog(this);
     dialog.setWindowTitle("Change Username");
+    dialog.setObjectName("ChangeUsername");
+    dialog.setStyleSheet(
+        "#ChangeUsername { border-image: url(:/ChangeUsernameViewer.png); }");
+    dialog.setFixedSize(450, 400);
 
     QVBoxLayout* layout = new QVBoxLayout(&dialog);
+    layout->setContentsMargins(20, 40, 20, 140);
+    layout->setAlignment(Qt::AlignCenter);
 
     QLabel* label = new QLabel("Enter New Username", &dialog);
+    label->setAlignment(Qt::AlignCenter);
+    label->setStyleSheet("color: #facc15 ; font-size: 28px; font-weight: bold; background: transparent;");
     layout->addWidget(label);
 
-    QLineEdit* usernameEdit = new QLineEdit(&dialog);
-    layout->addWidget(usernameEdit);
+    layout->addSpacing(25);
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(
-        QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
-    QPushButton* confirmBtn = buttonBox->button(QDialogButtonBox::Ok);
-    QPushButton* cancelBtn  = buttonBox->button(QDialogButtonBox::Cancel);
-    confirmBtn->setText("Confirm");
-    cancelBtn->setText("Cancel");
-    layout->addWidget(buttonBox);
+    QLineEdit* usernameEdit = new QLineEdit(&dialog);
+    usernameEdit->setPlaceholderText("New Username");
+    usernameEdit->setFixedSize(250, 40);
+    usernameEdit->setStyleSheet("QLineEdit { background-color: rgba(31, 41, 55, 0.8);"
+                                 "color: white;"
+                                 "border: 1px solid #5a5a54;"
+                                 "padding: 5px;"
+                                 "font-weight: bold;"
+                                 "}");
+    layout->addWidget(usernameEdit, 0, Qt::AlignCenter);
+
+    QPushButton* cancelBtn = new QPushButton(&dialog);
+    cancelBtn->setFixedSize(150, 100);
+    cancelBtn->setStyleSheet("QPushButton { border-image: url(:/RestSite/NoBtn.png); }"
+                             "QPushButton:pressed { margin: 5px 5px 5px 5px; }");
+    cancelBtn->setCursor(Qt::PointingHandCursor);
+    cancelBtn->move(0,270);
+
+    QPushButton* confirmBtn = new QPushButton(&dialog);
+    confirmBtn->setFixedSize(150, 100);
+    confirmBtn->setStyleSheet("QPushButton { border-image: url(:/RestSite/YesBtn.png); }"
+                              "QPushButton:pressed { margin: 5px 5px 5px 5px; }");
+    confirmBtn->setCursor(Qt::PointingHandCursor);
+    confirmBtn->move(300,270);
+
+
+    connect(cancelBtn, &QPushButton::pressed, this, []() {
+        AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+    });
+
+    connect(confirmBtn, &QPushButton::pressed, this, []() {
+        AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+    });
+
 
     connect(cancelBtn, &QPushButton::clicked, &dialog, &QDialog::reject);
 

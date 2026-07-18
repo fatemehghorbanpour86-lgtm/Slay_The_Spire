@@ -13,8 +13,6 @@ public:
     explicit SettingsDialog(const QString& currentUsername, QWidget* parent = nullptr);
 
 signals:
-    // فقط وقتی تغییر Username با موفقیت انجام بشه emit می‌شه
-    // تا GameManager بتونه currentUsername خودش رو آپدیت کنه.
     void usernameChanged(const QString& newUsername);
 
 private slots:
