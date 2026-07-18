@@ -33,7 +33,7 @@ void MainWindow::showBattlePage()
             delete battlePage;
             battlePage = nullptr;
         }
-        battlePage = new BattlePage(new Player("Ana", 80), {new SmallSlime}, this);
+        battlePage = new BattlePage(new Player("Ana", 80), {new SmallSlime , new Cultist , new Cultist}, this);
         stackedWidget->addWidget(battlePage);
         stackedWidget->setCurrentWidget(battlePage);
 }

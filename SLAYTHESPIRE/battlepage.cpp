@@ -15,8 +15,8 @@
 #include <QEasingCurve>
 #include <QPointer>
 
-#include <utility>
 
+#include <utility>
 
 
 
@@ -77,16 +77,19 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     connect(combatManager, &CombatManager::battleWon,    this, &BattlePage::onBattleWon);
     connect(combatManager, &CombatManager::battleLost,   this, &BattlePage::onBattleLost);
     connect(endTurnBtn,    &QPushButton::clicked,        combatManager, &CombatManager::endTurn);
-    connect(combatManager, &CombatManager::enemyIntentUpdated,this, &BattlePage::updateEnemyIntent);
+    connect(combatManager, &CombatManager::enemyIntentUpdated, this, &BattlePage::updateEnemyIntent);
+
+    connect(combatManager, &CombatManager::enemyAttacking, this, [this](Enemy* e)
+            {
+                QWidget* enemyW = findWidgetForEnemy(e);
+                if (enemyW)
+                {
+                    animateAttack(enemyW, playerWidget);
+                }
+            });
 
     combatManager->startCombat();
 
-    connect(combatManager, &CombatManager::enemyAttacking, this, [this](Enemy* e)
-    {
-        Q_UNUSED(e);
-        QWidget* enemyW = enemyWidgets.isEmpty() ? nullptr : enemyWidgets[0];
-        animateAttack(enemyW, playerWidget);
-    });
 
 }
 
@@ -296,120 +299,188 @@ void BattlePage::setupBattleField()
     QWidget *enemyContainer = new QWidget(battleField);
     QHBoxLayout *enemyLayout = new QHBoxLayout(enemyContainer);
     enemyLayout->setAlignment(Qt::AlignCenter | Qt::AlignBottom);
-    enemyLayout->setSpacing(40);
+    enemyLayout->setSpacing(30);
 
-    // Single placeholder enemy widget
-    QWidget *enemyWidget = new QWidget(enemyContainer);
-    enemyWidget->setFixedSize(250, 400);
-    enemyWidget->setStyleSheet("background: transparent;");
-    enemyWidgets.append(enemyWidget);
-    QVBoxLayout *enemyInnerLayout = new QVBoxLayout(enemyWidget);
-    enemyInnerLayout->setContentsMargins(0, 0, 0, 10);
-    enemyInnerLayout->setSpacing(5);
+    enemyUIs.clear();
 
-    // Enemy intent (attack/defend indicator)
-    intentLabel = new QLabel(getIntentText(enemies[0]), enemyWidget);
-    intentLabel->setAlignment(Qt::AlignCenter);
-    intentLabel->setFixedHeight(30);
-    intentLabel->setStyleSheet(
-        "color: #f87171; font-size: 16px; font-weight: bold;"
-        "background: transparent; border-radius: 8px; padding: 4px;"
-        );
+    for (Enemy* enemy : std::as_const(enemies))
+    {
+        if (!enemy)
+            continue;
 
-    QLabel *enemyImg = new QLabel(enemyWidget);
-    enemyImg->setFixedSize(190, 210);
-    enemyImg->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
-    enemyImg->setStyleSheet("background: transparent;");
+        EnemyUI ui{};
+        ui.enemy = enemy;
 
-    QPixmap px(enemyImagePath(enemies[0]));
-    enemyImg->setPixmap(px.scaled(
-        190, 210,
-        Qt::KeepAspectRatio,
-        Qt::SmoothTransformation
-        ));
+        ui.widget = new QWidget(enemyContainer);
+        ui.widget->setFixedSize(220, 380);
+        ui.widget->setStyleSheet("background: transparent;");
+        enemyLayout->addWidget(ui.widget);
 
+        QVBoxLayout* enemyInnerLayout = new QVBoxLayout(ui.widget);
+        enemyInnerLayout->setContentsMargins(0, 0, 0, 10);
+        enemyInnerLayout->setSpacing(5);
 
+        // Enemy intent
+        ui.intentLabel = new QLabel(getIntentText(enemy), ui.widget);
+        ui.intentLabel->setAlignment(Qt::AlignCenter);
+        ui.intentLabel->setFixedHeight(30);
+        ui.intentLabel->setStyleSheet(
+            "color: #f87171; font-size: 15px; font-weight: bold;"
+            "background: transparent; border-radius: 8px; padding: 2px;"
+            );
 
-    // Enemy HP bar
-    enemyHPBar  = new QProgressBar(enemyWidget);
-    enemyHPBar->setRange(0, enemies[0]->getMaxHealth());
-    enemyHPBar->setValue(enemies[0]->getCurrentHealth());
-    enemyHPBar->setFixedSize(170, 16);
-    enemyHPBar->setTextVisible(true);
-    enemyHPBar->setFormat("%v / %m");
-    enemyHPBar->setStyleSheet(
-        "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
-        "border-radius: 6px; color: white; font-size: 12px; text-align: center; }"
-        "QProgressBar::chunk { background: #e63946; border-radius: 4px; }"
-        );
-    enemyInnerLayout->addStretch();
-    enemyInnerLayout->addWidget(intentLabel);
-    enemyInnerLayout->addStretch();
-    enemyInnerLayout->addWidget(enemyImg);
-    enemyInnerLayout->addWidget(enemyHPBar, 0, Qt::AlignHCenter);
+        // Enemy image
+        QLabel* enemyImg = new QLabel(ui.widget);
+        enemyImg->setFixedSize(180, 200);
+        enemyImg->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
+        enemyImg->setStyleSheet("background: transparent;");
 
-    // Effect iconS
-    enemyEffectsWidget = new QWidget(enemyWidget);
-    enemyEffectsWidget->setFixedHeight(32);
-    enemyEffectsLayout = new QHBoxLayout(enemyEffectsWidget);
-    enemyEffectsLayout->setContentsMargins(0, 2, 0, 0);
-    enemyEffectsLayout->setSpacing(4);
-    enemyEffectsLayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        QPixmap px(enemyImagePath(enemy));
+        enemyImg->setPixmap(px.scaled(
+            180,
+            200,
+            Qt::KeepAspectRatio,
+            Qt::SmoothTransformation
+            ));
 
-    enemyInnerLayout->addWidget(enemyEffectsWidget, 0, Qt::AlignHCenter);
+        // Enemy HP bar
+        ui.hpBar = new QProgressBar(ui.widget);
+        ui.hpBar->setRange(0, enemy->getMaxHealth());
+        ui.hpBar->setValue(enemy->getCurrentHealth());
+        ui.hpBar->setFixedSize(150, 16);
+        ui.hpBar->setTextVisible(true);
+        ui.hpBar->setFormat("%v / %m");
+        ui.hpBar->setStyleSheet(
+            "QProgressBar {"
+            "background: #1a1a1a;"
+            "border: 2px solid #333;"
+            "border-radius: 6px;"
+            "color: white;"
+            "font-size: 11px;"
+            "text-align: center;"
+            "}"
+            "QProgressBar::chunk {"
+            "background: #e63946;"
+            "border-radius: 4px;"
+            "}"
+            );
 
-    enemyLayout->addWidget(enemyWidget);
+        // Enemy effects
+        ui.effectsWidget = new QWidget(ui.widget);
+        ui.effectsWidget->setFixedHeight(28);
+
+        ui.effectsLayout = new QHBoxLayout(ui.effectsWidget);
+        ui.effectsLayout->setContentsMargins(0, 2, 0, 0);
+        ui.effectsLayout->setSpacing(4);
+        ui.effectsLayout->setAlignment(Qt::AlignCenter);
+
+        enemyInnerLayout->addWidget(
+            ui.intentLabel,
+            0,
+            Qt::AlignHCenter
+            );
+
+        enemyInnerLayout->addStretch();
+
+        enemyInnerLayout->addWidget(
+            enemyImg,
+            0,
+            Qt::AlignHCenter | Qt::AlignBottom
+            );
+
+        enemyInnerLayout->addWidget(
+            ui.hpBar,
+            0,
+            Qt::AlignHCenter
+            );
+
+        enemyInnerLayout->addWidget(
+            ui.effectsWidget,
+            0,
+            Qt::AlignHCenter
+            );
+
+        enemyUIs.append(ui);
+    }
 
     layout->addWidget(playerWidget, 0, Qt::AlignBottom);
-    layout->addStretch(2);
+    layout->addStretch(1);
     layout->addWidget(enemyContainer, 0, Qt::AlignBottom);
-}
 
+
+}
 void BattlePage::setupClickOverlays()
 {
-    // Enemy overlay — covers the full enemyWidget area
-    enemyClickOverlay = new QPushButton(this);
-    enemyClickOverlay->setStyleSheet("background: transparent; border: none;");
-    enemyClickOverlay->setCursor(Qt::ArrowCursor);
-    enemyClickOverlay->hide();   // only shown when targeting
+    for (EnemyUI& ui : enemyUIs)
+    {
+        if (ui.clickOverlay)
+        {
+            ui.clickOverlay->deleteLater();
+            ui.clickOverlay = nullptr;
+        }
+    }
 
-    // Player overlay — covers the full playerWidget area
+    if (playerClickOverlay)
+    {
+        playerClickOverlay->deleteLater();
+        playerClickOverlay = nullptr;
+    }
+
+    for (EnemyUI& ui : enemyUIs)
+    {
+        if (!ui.widget || !ui.enemy)
+            continue;
+
+        QPushButton* overlay = new QPushButton(this);
+        overlay->setStyleSheet("background: transparent; border: none;");
+        overlay->setCursor(Qt::ArrowCursor);
+        overlay->hide();
+
+        ui.clickOverlay = overlay;
+
+        connect(overlay, &QPushButton::clicked, this, [this, enemy = ui.enemy]()
+                {
+                    if (pendingCard && enemy)
+                        playCardWithAnimation(pendingCard, selectedProxy, enemy);
+                });
+    }
+
     playerClickOverlay = new QPushButton(this);
     playerClickOverlay->setStyleSheet("background: transparent; border: none;");
     playerClickOverlay->setCursor(Qt::ArrowCursor);
     playerClickOverlay->hide();
 
-    connect(enemyClickOverlay, &QPushButton::clicked, this, [this]() {
-        if (pendingCard && !enemies.isEmpty())
-            playCardWithAnimation(pendingCard, selectedProxy, enemies[0]);
-    });
-
-    connect(playerClickOverlay, &QPushButton::clicked, this, [this]() {
-        if (pendingCard)
-            playCardWithAnimation(pendingCard, selectedProxy, nullptr);
-    });
+    connect(playerClickOverlay, &QPushButton::clicked, this, [this]()
+            {
+                if (pendingCard)
+                    playCardWithAnimation(pendingCard, selectedProxy, nullptr);
+            });
 }
+
 void BattlePage::repositionOverlays()
 {
-    if (enemyClickOverlay && !enemyWidgets.isEmpty() && enemyWidgets[0])
+    for (const EnemyUI& ui : std::as_const(enemyUIs))
     {
-        QWidget* w = enemyWidgets[0];
-        QPoint p = w->mapTo(this, QPoint(0, 0));
-        enemyClickOverlay->setGeometry(p.x(), p.y(), w->width(), w->height());
+        if (!ui.widget || !ui.clickOverlay)
+            continue;
+
+        const QPoint p = ui.widget->mapTo(this, QPoint(0, 0));
+        ui.clickOverlay->setGeometry(p.x(), p.y(), ui.widget->width(), ui.widget->height());
+        ui.clickOverlay->raise();
     }
 
     if (playerClickOverlay && playerWidget)
     {
-        QPoint p = playerWidget->mapTo(this, QPoint(0, 0));
-        playerClickOverlay->setGeometry(p.x(), p.y(),
-                                        playerWidget->width(),
-                                        playerWidget->height());
+        const QPoint p = playerWidget->mapTo(this, QPoint(0, 0));
+        playerClickOverlay->setGeometry(
+            p.x(),
+            p.y(),
+            playerWidget->width(),
+            playerWidget->height()
+            );
+        playerClickOverlay->raise();
     }
-
-    if (enemyClickOverlay)  enemyClickOverlay->raise();
-    if (playerClickOverlay) playerClickOverlay->raise();
 }
-
 
 
 // ─────────────────────────────────────────
@@ -563,23 +634,31 @@ void BattlePage::setupBottomBar()
 
 
 }
-
-
-bool BattlePage::eventFilter(QObject *obj, QEvent *event)
+bool BattlePage::eventFilter(QObject* obj, QEvent* event)
 {
-
     // --- Enemy widget clicked as target ---
     if (obj->property("isEnemyTarget").toBool() &&
         event->type() == QEvent::MouseButtonPress)
     {
         QWidget* w = qobject_cast<QWidget*>(obj);
-        int idx = enemyWidgets.indexOf(w);
-        if (idx >= 0 && idx < enemies.size() && pendingCard)
+        Enemy* target = nullptr;
+
+        for (const EnemyUI& ui : std::as_const(enemyUIs))
         {
-            Enemy* target = enemies[idx];
-            playCardWithAnimation(pendingCard, selectedProxy, target);
+            if (ui.widget == w || ui.clickOverlay == w)
+            {
+                target = ui.enemy;
+                break;
+            }
         }
-        return true;
+
+        if (target && pendingCard)
+        {
+            playCardWithAnimation(pendingCard, selectedProxy, target);
+            return true;
+        }
+
+        return QWidget::eventFilter(obj, event);
     }
 
     // --- Player widget clicked as target ---
@@ -587,20 +666,27 @@ bool BattlePage::eventFilter(QObject *obj, QEvent *event)
         event->type() == QEvent::MouseButtonPress)
     {
         if (pendingCard)
+        {
             playCardWithAnimation(pendingCard, selectedProxy, nullptr);
-        return true;
+            return true;
+        }
+        return QWidget::eventFilter(obj, event);
     }
 
     QPushButton* card = qobject_cast<QPushButton*>(obj);
-    if (!card) return QWidget::eventFilter(obj, event);
+    if (!card)
+        return QWidget::eventFilter(obj, event);
 
     QGraphicsProxyWidget* proxy = card->property("proxy").value<QGraphicsProxyWidget*>();
-    if (!proxy) return QWidget::eventFilter(obj, event);
+    if (!proxy)
+        return QWidget::eventFilter(obj, event);
 
     Card* cardData = card->property("cardData").value<Card*>();
+
     if (pendingCard && cardData != pendingCard)
         return QWidget::eventFilter(obj, event);
 
+    // --- Hover Enter Animation ---
     if (event->type() == QEvent::Enter)
     {
         QPropertyAnimation* moveUp = new QPropertyAnimation(proxy, "pos");
@@ -632,13 +718,13 @@ bool BattlePage::eventFilter(QObject *obj, QEvent *event)
         glow->setOffset(0, 0);
         proxy->setGraphicsEffect(glow);
     }
+    // --- Hover Leave Animation ---
     else if (event->type() == QEvent::Leave)
     {
         // If this card is the selected one, don't animate back down
         Card* cardData = card->property("cardData").value<Card*>();
         if (cardData && cardData == pendingCard)
             return QWidget::eventFilter(obj, event);  // skip leave animation
-
 
         QPropertyAnimation* moveDown = new QPropertyAnimation(proxy, "pos");
         moveDown->setDuration(200);
@@ -668,66 +754,155 @@ bool BattlePage::eventFilter(QObject *obj, QEvent *event)
     return QWidget::eventFilter(obj, event);
 }
 
-
 void BattlePage::updateStats()
 {
-    CombatDeck* deck = player->getCombatDeck();
-    playerHPBar->setMaximum(player->getMaxHealth());
-    playerHPBar->setValue(player->getCurrentHealth());
+    CombatDeck* deck = player ? player->getCombatDeck() : nullptr;
 
-    playerHpLabel->setText(QString("%1 / %2")
-                               .arg(player->getCurrentHealth())
-                               .arg(player->getMaxHealth()));
-
-
-    int block = player->getBlock();
-    bool hasBlock = block > 0;
-
-    if (playerBlockIconLabel && playerBlockLabel)
+    if (player)
     {
-        playerBlockIconLabel->setVisible(hasBlock);
-        if (hasBlock)
-            playerBlockLabel->setText(QString::number(block));
-    }
-
-    // Blue glow on HP bar while block > 0
-    if (hasBlock)
-    {
-        if (!playerHPBar->graphicsEffect())
+        if (playerHPBar)
         {
-            auto* glow = new QGraphicsDropShadowEffect();
-            glow->setColor(QColor(96, 165, 250, 255));
-            glow->setBlurRadius(30);
-            glow->setOffset(0, 0);
-            playerHPBar->setGraphicsEffect(glow);
+            playerHPBar->setMaximum(player->getMaxHealth());
+            playerHPBar->setValue(player->getCurrentHealth());
         }
 
-        playerHPBar->setStyleSheet(
-            "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
-            "border-radius: 6px; color: white; font-size: 12px; text-align: center; }"
-            "QProgressBar::chunk { background: #60a5fa; border-radius: 4px; }"
-            );
+        if (playerHpLabel)
+        {
+            playerHpLabel->setText(QString("%1 / %2")
+                                       .arg(player->getCurrentHealth())
+                                       .arg(player->getMaxHealth()));
+        }
+
+         int block = player->getBlock();
+         bool hasBlock = block > 0;
+
+        if (playerBlockIconLabel)
+            playerBlockIconLabel->setVisible(hasBlock);
+
+        if (playerBlockLabel)
+        {
+            playerBlockLabel->setVisible(hasBlock);
+            if (hasBlock)
+                playerBlockLabel->setText(QString::number(block));
+            else
+                playerBlockLabel->clear();
+        }
+
+        if (playerHPBar)
+        {
+            if (hasBlock)
+            {
+                if (!playerHPBar->graphicsEffect())
+                {
+                    auto* glow = new QGraphicsDropShadowEffect(playerHPBar);
+                    glow->setColor(QColor(96, 165, 250, 255));
+                    glow->setBlurRadius(30);
+                    glow->setOffset(0, 0);
+                    playerHPBar->setGraphicsEffect(glow);
+                }
+
+                playerHPBar->setStyleSheet(
+                    "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
+                    "border-radius: 6px; color: white; font-size: 12px; text-align: center; }"
+                    "QProgressBar::chunk { background: #60a5fa; border-radius: 4px; }"
+                    );
+            }
+            else
+            {
+                playerHPBar->setGraphicsEffect(nullptr);
+                playerHPBar->setStyleSheet(
+                    "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
+                    "border-radius: 6px; color: white; font-size: 12px; text-align: center; }"
+                    "QProgressBar::chunk { background: #e63946; border-radius: 4px; }"
+                    );
+            }
+        }
+
+        if (energyValueLabel)
+        {
+            energyValueLabel->setText(QString("%1/%2")
+                                          .arg(player->getCurrentEnergy())
+                                          .arg(player->getMaxEnergy()));
+        }
     }
     else
     {
-        playerHPBar->setGraphicsEffect(nullptr);
-        playerHPBar->setStyleSheet(
-            "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
-            "border-radius: 6px; color: white; font-size: 12px; text-align: center; }"
-            "QProgressBar::chunk { background: #e63946; border-radius: 4px; }"
-            );
+        if (playerHPBar)
+        {
+            playerHPBar->setMaximum(1);
+            playerHPBar->setValue(0);
+
+            if (QGraphicsEffect* effect = playerHPBar->graphicsEffect())
+            {
+                playerHPBar->setGraphicsEffect(nullptr);
+                effect->deleteLater();
+            }
+
+            playerHPBar->setStyleSheet(
+                "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
+                "border-radius: 6px; color: white; font-size: 12px; text-align: center; }"
+                "QProgressBar::chunk { background: #e63946; border-radius: 4px; }"
+                );
+        }
+
+        if (playerHpLabel)
+            playerHpLabel->setText("0 / 0");
+
+        if (playerBlockIconLabel)
+            playerBlockIconLabel->hide();
+
+        if (playerBlockLabel)
+        {
+            playerBlockLabel->hide();
+            playerBlockLabel->clear();
+        }
+
+        if (energyValueLabel)
+            energyValueLabel->setText("0/0");
     }
 
+    for (EnemyUI& ui : enemyUIs)
+    {
+        if (!ui.enemy)
+            continue;
 
+        if (ui.hpBar)
+        {
+            ui.hpBar->setMaximum(ui.enemy->getMaxHealth());
+            ui.hpBar->setValue(ui.enemy->getCurrentHealth());
+        }
 
-    energyValueLabel->setText(QString("%1/%2")
-                                  .arg(player->getCurrentEnergy())
-                                  .arg(player->getMaxEnergy()));
+        if (ui.enemy->isDead())
+        {
+            if (ui.intentLabel)
+                ui.intentLabel->setText("Defeated");
 
-    if (!enemies.isEmpty() && !enemies[0]->isDead()) {
-        enemyHPBar->setMaximum(enemies[0]->getMaxHealth());
-        enemyHPBar->setValue(enemies[0]->getCurrentHealth());
-        intentLabel->setText(getIntentText(enemies[0]));
+            if (ui.widget)
+            {
+                ui.widget->setEnabled(false);
+                ui.widget->hide();
+            }
+
+            if (ui.clickOverlay)
+            {
+                ui.clickOverlay->setEnabled(false);
+                ui.clickOverlay->hide();
+            }
+        }
+        else
+        {
+            if (ui.intentLabel)
+                ui.intentLabel->setText(getIntentText(ui.enemy));
+
+            if (ui.widget)
+            {
+                ui.widget->setEnabled(true);
+                ui.widget->show();
+            }
+
+            if (ui.clickOverlay)
+                ui.clickOverlay->setEnabled(true);
+        }
     }
 
     if (!animatingCard)
@@ -735,69 +910,87 @@ void BattlePage::updateStats()
 
     if (deck)
     {
-        drawPileCountLabel->setText(QString::number(deck->getDrawPile().size()));
-        discardPileCountLabel->setText(QString::number(deck->getDiscardPile().size()));
+        if (drawPileCountLabel)
+            drawPileCountLabel->setText(QString::number(deck->getDrawPile().size()));
+
+        if (discardPileCountLabel)
+            discardPileCountLabel->setText(QString::number(deck->getDiscardPile().size()));
+    }
+    else
+    {
+        if (drawPileCountLabel)
+            drawPileCountLabel->setText("0");
+
+        if (discardPileCountLabel)
+            discardPileCountLabel->setText("0");
     }
 
     updateEffectsUI();
-
 }
-
-
 void BattlePage::refreshHand()
 {
+
     handScene->clear();
 
-    CombatDeck* deck = player->getCombatDeck();
-    if (!deck) return;
-    const auto& hand = deck->getHand();
-    if (hand.isEmpty()) return;
+    if (!player)
+        return;
 
-    const int cardW      = 150;
-    const int cardH      = 220;
-    const int spacing    = 105;
-    const int viewW      = 900;
-    const float maxRot   = 12.0f;
-    const int arcH       = 20;
-    const int baseY = 400 - cardH + 120;
+    CombatDeck* deck = player->getCombatDeck();
+    if (!deck)
+        return;
+
+    const auto& hand = deck->getHand();
+    // Scene is already empty; nothing left to layout.
+    if (hand.isEmpty())
+        return;
+
+    const int cardW    = 150;
+    const int cardH    = 220;
+    const int spacing  = 105;
+    const int viewW    = 900;
+    const float maxRot = 12.0f;
+    const int arcH     = 20;
+    const int baseY    = 400 - cardH + 120;
 
     const int totalW = (hand.size() - 1) * spacing + cardW;
     const int startX = (viewW - totalW) / 2;
 
     for (int i = 0; i < hand.size(); ++i) {
         Card* card = hand[i];
-        if (!card) continue;
+        if (!card)
+            continue;
 
-        float norm = hand.size() > 1
-                         ? (i - (hand.size()-1) / 2.0f) / ((hand.size()-1) / 2.0f)
-                         : 0.0f;
+        const float norm = hand.size() > 1
+                               ? (i - (hand.size() - 1) / 2.0f) / ((hand.size() - 1) / 2.0f)
+                               : 0.0f;
 
-        int arcOffset  = static_cast<int>(arcH * (1.0f - norm * norm));
-        float rotation = maxRot * norm;
-        int x = startX + i * spacing;
-        int y = baseY - arcOffset;
+        const int arcOffset  = static_cast<int>(arcH * (1.0f - norm * norm));
+        const float rotation = maxRot * norm;
+        const int x = startX + i * spacing;
+        const int y = baseY - arcOffset;
 
-        // Build the card as a single QPushButton styled with the card image
-        // This is exactly the old approach — one widget, no children, clean hover events
+        // Single QPushButton per card (no nested child widgets) so hover/click
+        // events stay simple and predictable.
         QPushButton* btn = new QPushButton();
         btn->setFixedSize(cardW, cardH);
         btn->setCursor(Qt::PointingHandCursor);
 
-        QPixmap px(cardImagePath(card));
+        const QPixmap px(cardImagePath(card));
         if (!px.isNull()) {
-            // Use the card image as the button background
-            QPixmap scaled = px.scaled(cardW, cardH,
-                                       Qt::IgnoreAspectRatio,
-                                       Qt::SmoothTransformation);
+            const QPixmap scaled = px.scaled(
+                cardW, cardH,
+                Qt::IgnoreAspectRatio,
+                Qt::SmoothTransformation);
             btn->setIcon(QIcon(scaled));
             btn->setIconSize(QSize(cardW, cardH));
             btn->setStyleSheet(
-                "QPushButton { border: none; background: transparent; padding: 0; }"
-                );
+                "QPushButton { border: none; background: transparent; padding: 0; }");
         }
-        else {
-            // Fallback styled card (no image)
-            QString typeColor = (card->getType() == CardType::Attack) ? "#7f1d1d" : "#1e3a5f";
+        else
+        {
+            // Fallback when the card art is missing.
+            const QString typeColor =
+                (card->getType() == CardType::Attack) ? "#7f1d1d" : "#1e3a5f";
             btn->setStyleSheet(QString(
                                    "QPushButton {"
                                    "  background: qlineargradient(x1:0,y1:0,x2:0,y2:1,"
@@ -816,6 +1009,9 @@ void BattlePage::refreshHand()
         }
 
         QGraphicsProxyWidget* proxy = handScene->addWidget(btn);
+        if (!proxy)
+            continue;
+
         proxy->setFlag(QGraphicsItem::ItemClipsChildrenToShape, false);
         proxy->setFlag(QGraphicsItem::ItemClipsToShape, false);
         proxy->setCacheMode(QGraphicsItem::NoCache);
@@ -823,19 +1019,23 @@ void BattlePage::refreshHand()
         proxy->setRotation(rotation);
         proxy->setTransformOriginPoint(cardW / 2.0, cardH / 2.0);
         proxy->setZValue(i);
-        proxy->setData(0, y);                  // ← add this
-        proxy->setData(1, (double)rotation);   // ← add this
 
-        btn->setProperty("proxy",           QVariant::fromValue(proxy));
-        btn->setProperty("defaultY",        y);
+        // Store rest pose for hover / cancel animations.
+        proxy->setData(0, y);
+        proxy->setData(1, static_cast<double>(rotation));
+
+        btn->setProperty("proxy", QVariant::fromValue(proxy));
+        btn->setProperty("defaultY", y);
         btn->setProperty("defaultRotation", rotation);
-        btn->setProperty("index",           i);
-        btn->setProperty("cardData",        QVariant::fromValue(card));
+        btn->setProperty("index", i);
+        btn->setProperty("cardData", QVariant::fromValue(card));
         btn->installEventFilter(this);
 
-        QPointer<QGraphicsProxyWidget> safeProxy = proxy;   // ← add this
+        // QPointer auto-nulls if the proxy is destroyed (e.g. next refreshHand).
+        // This protects the click lambda from use-after-free.
+        QPointer<QGraphicsProxyWidget> safeProxy = proxy;
         connect(btn, &QPushButton::clicked, [this, card, safeProxy]() {
-            if (safeProxy)
+             if (safeProxy)
                 onCardClicked(card, safeProxy.data());
         });
     }
@@ -843,7 +1043,6 @@ void BattlePage::refreshHand()
 
 void BattlePage::onCardClicked(Card* card, QGraphicsProxyWidget* proxy)
 {
-
     if (pendingCard == card)
     {
         clearSelection();
@@ -852,14 +1051,14 @@ void BattlePage::onCardClicked(Card* card, QGraphicsProxyWidget* proxy)
             QPropertyAnimation* moveDown = new QPropertyAnimation(proxy, "pos");
             moveDown->setDuration(200);
             moveDown->setStartValue(proxy->pos());
-            moveDown->setEndValue(QPointF(proxy->pos().x(), proxy->data(0).toInt()));  // ← fixed
+            moveDown->setEndValue(QPointF(proxy->pos().x(), proxy->data(0).toInt()));
             moveDown->setEasingCurve(QEasingCurve::OutCubic);
             moveDown->start(QAbstractAnimation::DeleteWhenStopped);
 
             QPropertyAnimation* rotateBack = new QPropertyAnimation(proxy, "rotation");
             rotateBack->setDuration(200);
             rotateBack->setStartValue(proxy->rotation());
-            rotateBack->setEndValue(proxy->data(1).toDouble());  // ← fixed
+            rotateBack->setEndValue(proxy->data(1).toDouble());
             rotateBack->setEasingCurve(QEasingCurve::OutCubic);
             rotateBack->start(QAbstractAnimation::DeleteWhenStopped);
 
@@ -871,6 +1070,7 @@ void BattlePage::onCardClicked(Card* card, QGraphicsProxyWidget* proxy)
             scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
 
             proxy->setGraphicsEffect(nullptr);
+
         }
         return;
     }
@@ -878,19 +1078,26 @@ void BattlePage::onCardClicked(Card* card, QGraphicsProxyWidget* proxy)
     if (pendingCard != nullptr)
         return;
 
-    // --- Select this card ---
+    // Select this card
     clearSelection();   // deselect any previously selected card first
+
     pendingCard   = card;
     selectedProxy = proxy;
 
-    // Show target highlights based on card type
+    if (selectedProxy) {
+        selectedProxy->setZValue(105);
+    }
+
     CardTarget target = getCardTarget(card);
     if (target == CardTarget::Enemy)
+    {
         showEnemyHighlights();
+    }
     else if (target == CardTarget::Player)
+    {
         showPlayerHighlight();
+    }
 }
-
 
 void BattlePage::onBattleWon()
 {
@@ -956,14 +1163,28 @@ QString BattlePage::getIntentText(Enemy* enemy)
     return text;
 }
 
-
 void BattlePage::updateEnemyIntent(Enemy* enemy)
 {
-    if (!enemy || !intentLabel)
+    if (!enemy)
         return;
 
-    intentLabel->setText(getIntentText(enemy));
+    for (EnemyUI& ui : enemyUIs)
+    {
+        if (ui.enemy != enemy)
+            continue;
+
+        if (!ui.intentLabel)
+            return;
+
+        if (enemy->isDead())
+            ui.intentLabel->setText("Defeated");
+        else
+            ui.intentLabel->setText(getIntentText(enemy));
+
+        return;
+    }
 }
+
 
 
 QString BattlePage::enemyImagePath(Enemy* enemy)
@@ -986,43 +1207,86 @@ BattlePage::CardTarget BattlePage::getCardTarget(Card* card)
 void BattlePage::showEnemyHighlights()
 {
     clearHighlights();
-    for (QWidget* w : std::as_const(enemyWidgets))
+
+    for (EnemyUI& ui : enemyUIs)
     {
-        if (!w) continue;
-        auto* glow = new QGraphicsDropShadowEffect();
+        if (!ui.enemy || !ui.widget || ui.enemy->isDead())
+            continue;
+
+        auto* glow = new QGraphicsDropShadowEffect(ui.widget);
         glow->setColor(QColor(220, 50, 50, 255));
         glow->setBlurRadius(60);
         glow->setOffset(0, 0);
-        w->setGraphicsEffect(glow);
-        enemyGlowEffects.append(glow);
+
+        ui.widget->setGraphicsEffect(glow);
+
+        if (ui.clickOverlay)
+        {
+            ui.clickOverlay->setCursor(Qt::PointingHandCursor);
+            ui.clickOverlay->raise();
+            ui.clickOverlay->show();
+            ui.clickOverlay->setEnabled(true);
+        }
     }
-    if (enemyClickOverlay) { enemyClickOverlay->setCursor(Qt::PointingHandCursor); enemyClickOverlay->raise(); enemyClickOverlay->show(); }
 }
+
 
 void BattlePage::showPlayerHighlight()
 {
     clearHighlights();
-    if (!playerWidget) return;
-    auto* glow = new QGraphicsDropShadowEffect();
+
+    if (!playerWidget)
+        return;
+
+    auto* glow = new QGraphicsDropShadowEffect(playerWidget);
     glow->setColor(QColor(50, 200, 50, 255));
     glow->setBlurRadius(60);
     glow->setOffset(0, 0);
+
     playerWidget->setGraphicsEffect(glow);
     playerGlowEffect = glow;
-    if (playerClickOverlay) { playerClickOverlay->setCursor(Qt::PointingHandCursor); playerClickOverlay->raise(); playerClickOverlay->show(); }
+
+    if (playerClickOverlay)
+    {
+        playerClickOverlay->setCursor(Qt::PointingHandCursor);
+        playerClickOverlay->raise();
+        playerClickOverlay->show();
+        playerClickOverlay->setEnabled(true);
+    }
 }
 
 void BattlePage::clearHighlights()
 {
-    for (QWidget* w : std::as_const(enemyWidgets))
-        if (w) w->setGraphicsEffect(nullptr);
-    enemyGlowEffects.clear();
+    for (EnemyUI& ui : enemyUIs)
+    {
+        if (ui.widget)
+        {
+            ui.widget->setGraphicsEffect(nullptr);
+            ui.widget->unsetCursor();
+        }
 
-    if (playerWidget) playerWidget->setGraphicsEffect(nullptr);
+        if (ui.clickOverlay)
+        {
+            ui.clickOverlay->hide();
+            ui.clickOverlay->setEnabled(false);
+            ui.clickOverlay->unsetCursor();
+        }
+    }
+
+    if (playerWidget)
+    {
+        playerWidget->setGraphicsEffect(nullptr);
+        playerWidget->unsetCursor();
+    }
+
+    if (playerClickOverlay)
+    {
+        playerClickOverlay->hide();
+        playerClickOverlay->setEnabled(false);
+        playerClickOverlay->unsetCursor();
+    }
+
     playerGlowEffect = nullptr;
-
-    if (enemyClickOverlay)  enemyClickOverlay->hide();
-    if (playerClickOverlay) playerClickOverlay->hide();
 }
 
 void BattlePage::clearSelection()
@@ -1036,19 +1300,18 @@ void BattlePage::playCardWithAnimation(Card* card,
                                        QGraphicsProxyWidget* proxy,
                                        Enemy* target)
 {
-    Card* cardToPlay = card;
+
     QGraphicsProxyWidget* proxyToAnim = proxy;
+    Card* cardToPlay = card;   // Card is not QObject here; keep raw + check before use
+    Enemy* targetEnemy = target;
 
     clearSelection();
 
-    if (!proxyToAnim)
-    {
-        combatManager->playCard(cardToPlay, target);
-        return;
-    }
 
+    // Not enough energy: bounce the card back; do NOT set animatingCard.
     if (player->getCurrentEnergy() < cardToPlay->getEnergyCost())
     {
+
         // Not enough energy — snap card back to default position
         QPropertyAnimation* moveDown = new QPropertyAnimation(proxyToAnim, "pos");
         moveDown->setDuration(200);
@@ -1070,14 +1333,15 @@ void BattlePage::playCardWithAnimation(Card* card,
     }
 
     animatingCard = true;
-    // ── transfer proxy to animScene before animating ──
+
+    // Capture pose, then transfer ownership from handScene -> animScene.
+    // After removeItem, refreshHand must not destroy this proxy (it lives in animScene).
     double currentRot   = proxyToAnim->rotation();
     double currentScale = proxyToAnim->scale();
 
     QPoint viewPt = handView->mapFromScene(proxyToAnim->pos());
     QPoint globalPt = handView->mapToGlobal(viewPt);
     QPointF animScenePos = animView->mapToScene(animView->mapFromGlobal(globalPt));
-
 
     handScene->removeItem(proxyToAnim);
     animScene->addItem(proxyToAnim);
@@ -1094,16 +1358,18 @@ void BattlePage::playCardWithAnimation(Card* card,
     flyToCenter->setEndValue(center);
     flyToCenter->setEasingCurve(QEasingCurve::OutCubic);
 
-    connect(flyToCenter, &QPropertyAnimation::finished, this,
-            [this, proxyToAnim, cardToPlay, target]()
-            {
-                // Step 2: fly to discard pile and shrink
 
+    // Capture QPointer (by value), not raw QGraphicsProxyWidget*.
+    connect(flyToCenter, &QPropertyAnimation::finished, this,
+            [this, proxyToAnim, cardToPlay, targetEnemy]()
+            {
+
+                // Step 2: fly to discard pile + shrink.
                 QPoint discardInAnimView = animView->mapFromGlobal
                     (
-                         discardPileBtn->mapToGlobal(
-                         QPoint(discardPileBtn->width() / 2,
-                         discardPileBtn->height() / 2))
+                      discardPileBtn->mapToGlobal(
+                      QPoint(discardPileBtn->width() / 2,
+                      discardPileBtn->height() / 2))
                     );
 
                 QPointF discardScene = animView->mapToScene(discardInAnimView);
@@ -1123,34 +1389,41 @@ void BattlePage::playCardWithAnimation(Card* card,
                 shrink->setEndValue(0.0);
                 shrink->setEasingCurve(QEasingCurve::InCubic);
 
-                // Step 3: after animation — remove from scene and play card
+                // Step 3: remove visual, unlock hand refresh, then apply rules.
                 connect(flyOut, &QPropertyAnimation::finished, this,
-                        [this, proxyToAnim, cardToPlay, target]()
+                        [this, proxyToAnim, cardToPlay, targetEnemy]()
                         {
+
                             animScene->removeItem(proxyToAnim);
                             animatingCard = false;
-                            if (target && cardToPlay->getType() == CardType::Attack)
+
+
+                            // Attack cards may play a lunge animation first.
+                            if (targetEnemy &&
+                                cardToPlay->getType() == CardType::Attack)
                             {
-                                QWidget* enemyW = enemyWidgets.isEmpty() ? nullptr : enemyWidgets[0];
-                                animateAttack(playerWidget, enemyW, [this, cardToPlay, target]() {
-                                    combatManager->playCard(cardToPlay, target);
-                                });
+                                QWidget* enemyW = findWidgetForEnemy(targetEnemy);
+
+
+                                animateAttack(playerWidget,enemyW,[this, cardToPlay, targetEnemy]() {
+                                                combatManager->playCard(cardToPlay, targetEnemy);
+                                        });
+
                             }
+
                             else
                             {
-                                combatManager->playCard(cardToPlay, target);
+                                combatManager->playCard(cardToPlay, targetEnemy);
                             }
-                        });
+
+                         });
 
                 flyOut->start(QAbstractAnimation::DeleteWhenStopped);
                 shrink->start(QAbstractAnimation::DeleteWhenStopped);
             });
 
-
     flyToCenter->start(QAbstractAnimation::DeleteWhenStopped);
-
 }
-
 
 void BattlePage::showEvent(QShowEvent* e)
 {
@@ -1171,6 +1444,7 @@ void BattlePage::repositionBlockIcon()
     playerBlockLabel->move(0, 0);
     playerBlockLabel->resize(36, 36);
 }
+
 void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function<void()> onDone)
 {
     if (!attacker || !target)
@@ -1179,34 +1453,63 @@ void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function
         return;
     }
 
+    QWidget* realAttacker = attacker;
+    QWidget* attackerOverlay = nullptr;
 
-    QPixmap snapshot = attacker->grab();
+    for (EnemyUI& ui : enemyUIs)
+    {
+        QWidget* enemyWidget = ui.widget;
+
+        if (enemyWidget &&
+            (enemyWidget == attacker || enemyWidget->isAncestorOf(attacker)))
+        {
+            realAttacker = enemyWidget;
+            attackerOverlay = ui.clickOverlay;
+            break;
+        }
+    }
+
+    const QPixmap snapshot = realAttacker->grab();
     if (snapshot.isNull())
     {
         if (onDone) onDone();
         return;
     }
 
-    QLabel* ghost = new QLabel(this);
+    const QPoint origin = realAttacker->mapTo(this, QPoint(0, 0));
+    const QSize attackerSize = realAttacker->size();
+
+    QPointer<QWidget> safeAttacker = realAttacker;
+    QPointer<QWidget> safeAttackerOverlay = attackerOverlay;
+
+    const bool overlayWasVisible = attackerOverlay && attackerOverlay->isVisible();
+    const bool overlayWasEnabled = attackerOverlay && attackerOverlay->isEnabled();
+
+    auto* opacityEffect = new QGraphicsOpacityEffect(realAttacker);
+    opacityEffect->setOpacity(0.0);
+    realAttacker->setGraphicsEffect(opacityEffect);
+
+    if (attackerOverlay)
+    {
+        attackerOverlay->hide();
+        attackerOverlay->setEnabled(false);
+    }
+
+    auto* ghost = new QLabel(this);
+    QPointer<QLabel> safeGhost = ghost;
+
     ghost->setPixmap(snapshot);
-    ghost->setFixedSize(attacker->size());
+    ghost->setFixedSize(attackerSize);
     ghost->setAttribute(Qt::WA_TransparentForMouseEvents);
     ghost->setStyleSheet("background: transparent; border: none;");
     ghost->setScaledContents(false);
-
-    const QPoint origin = attacker->mapTo(this, QPoint(0, 0));
     ghost->move(origin);
     ghost->show();
     ghost->raise();
 
-    // hiding the real one
-    const bool wasVisible = attacker->isVisible();
-    attacker->hide();
-
-    QPoint attackerCenter = attacker->mapTo(this, attacker->rect().center());
-    QPoint targetCenter   = target->mapTo(this, target->rect().center());
-
-    attackerCenter = origin + QPoint(attacker->width() / 2, attacker->height() / 2);
+    const QPoint attackerCenter = origin + QPoint(attackerSize.width() / 2,
+                                                  attackerSize.height() / 2);
+    const QPoint targetCenter = target->mapTo(this, target->rect().center());
 
     QPointF dir = QPointF(targetCenter - attackerCenter);
     const float len = std::sqrt(dir.x() * dir.x() + dir.y() * dir.y());
@@ -1214,13 +1517,13 @@ void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function
 
     const QPoint forward = origin + QPoint(int(nudge.x()), int(nudge.y()));
 
-    auto* goForward = new QPropertyAnimation(ghost, "pos");
+    auto* goForward = new QPropertyAnimation(ghost, "pos", ghost);
     goForward->setDuration(120);
     goForward->setStartValue(origin);
     goForward->setEndValue(forward);
     goForward->setEasingCurve(QEasingCurve::OutCubic);
 
-    auto* goBack = new QPropertyAnimation(ghost, "pos");
+    auto* goBack = new QPropertyAnimation(ghost, "pos", ghost);
     goBack->setDuration(200);
     goBack->setStartValue(forward);
     goBack->setEndValue(origin);
@@ -1228,18 +1531,34 @@ void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function
 
     connect(goForward, &QPropertyAnimation::finished, this,
             [goBack, onDone]() {
-                goBack->start(QAbstractAnimation::DeleteWhenStopped);
-                if (onDone) onDone(); // deal damage as it returns
+                goBack->start();
+
+                if (onDone)
+                    onDone();
             });
 
     connect(goBack, &QPropertyAnimation::finished, this,
-            [ghost, attacker, wasVisible]() {
-                ghost->deleteLater();
-                if (wasVisible)
-                    attacker->show();
+            [safeGhost,
+             safeAttacker,
+             safeAttackerOverlay,
+             overlayWasVisible,
+             overlayWasEnabled]() {
+                if (safeAttacker)
+                    safeAttacker->setGraphicsEffect(nullptr);
+
+                if (safeAttackerOverlay)
+                {
+                    safeAttackerOverlay->setEnabled(overlayWasEnabled);
+
+                    if (overlayWasVisible)
+                        safeAttackerOverlay->show();
+                }
+
+                if (safeGhost)
+                    safeGhost->deleteLater();
             });
 
-    goForward->start(QAbstractAnimation::DeleteWhenStopped);
+    goForward->start();
 }
 
 QString BattlePage::effectImagePath(const Effect* effect)
@@ -1253,13 +1572,11 @@ QString BattlePage::effectImagePath(const Effect* effect)
 
     return QString(":/Effect/%1Eff.png").arg(cleanName);
 }
-
 void BattlePage::updateEffectsUI()
 {
-    // updaye player Effect
+    // update player effects
     if (playerEffectsLayout && player)
     {
-        // erasing previous incons
         QLayoutItem* item;
         while ((item = playerEffectsLayout->takeAt(0)) != nullptr)
         {
@@ -1282,32 +1599,47 @@ void BattlePage::updateEffectsUI()
             QLabel* iconLabel = new QLabel(iconContainer);
             iconLabel->setGeometry(0, 0, 24, 24);
             iconLabel->setScaledContents(true);
-            iconLabel->setPixmap(QPixmap(effectImagePath(effect)).scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            iconLabel->setPixmap(
+                QPixmap(effectImagePath(effect)).scaled(
+                    24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-            if (effect->getAmount() > 1)
+            // تعیین مقدار عددی برای نمایش روی آیکون بر اساس دسته بندی افکت
+            int displayValue = 0;
+            if (effect->isDebuff())
+            {
+                displayValue = effect->getDuration(); // دیباف‌ها بر اساس Duration
+            }
+            else
+            {
+                displayValue = effect->getAmount();   // باف‌ها بر اساس Amount
+            }
+
+            if (displayValue > 0)
             {
                 QLabel* numLabel = new QLabel(iconContainer);
-                numLabel->setText(QString::number(effect->getAmount()));
+                numLabel->setText(QString::number(displayValue));
                 numLabel->setAlignment(Qt::AlignRight | Qt::AlignBottom);
                 numLabel->setGeometry(10, 10, 16, 16);
-                numLabel->setStyleSheet
-                    (
+                numLabel->setStyleSheet(
                     "color: #ffffff;"
                     "font-size: 10px;"
                     "font-weight: bold;"
                     "background: transparent;"
-                    "border: none;"
-                    );
+                    "border: none;");
             }
 
             playerEffectsLayout->addWidget(iconContainer);
         }
     }
 
-    if (enemyEffectsLayout && !enemies.isEmpty() && enemies[0])
+    // update enemies effects
+    for (EnemyUI& enemyUI : enemyUIs)
     {
+        if (!enemyUI.effectsLayout || !enemyUI.effectsWidget || !enemyUI.enemy)
+            continue;
+
         QLayoutItem* item;
-        while ((item = enemyEffectsLayout->takeAt(0)) != nullptr)
+        while ((item = enemyUI.effectsLayout->takeAt(0)) != nullptr)
         {
             if (item->widget())
             {
@@ -1316,36 +1648,47 @@ void BattlePage::updateEffectsUI()
             delete item;
         }
 
-        Enemy* currentEnemy = enemies[0];
-        const auto& effects = currentEnemy->getEffects();
+        const auto& effects = enemyUI.enemy->getEffects();
         for (Effect* effect : effects)
         {
-            if (!effect || effect->isExpired()) continue;
+            if (!effect || effect->isExpired())
+                continue;
 
-            QWidget* iconContainer = new QWidget(enemyEffectsWidget);
+            QWidget* iconContainer = new QWidget(enemyUI.effectsWidget);
             iconContainer->setFixedSize(26, 26);
 
             QLabel* iconLabel = new QLabel(iconContainer);
             iconLabel->setGeometry(0, 0, 24, 24);
             iconLabel->setScaledContents(true);
-            iconLabel->setPixmap(QPixmap(effectImagePath(effect)).scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            iconLabel->setPixmap(
+                QPixmap(effectImagePath(effect)).scaled(
+                    24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-            if (effect->getAmount() > 1) {
+            int displayValue = 0;
+            if (effect->isDebuff())
+            {
+                displayValue = effect->getDuration(); // debuff based on durationا
+            }
+            else
+            {
+                displayValue = effect->getAmount();   // buff based on amount
+            }
+
+            if (displayValue > 0)
+            {
                 QLabel* numLabel = new QLabel(iconContainer);
-                numLabel->setText(QString::number(effect->getAmount()));
+                numLabel->setText(QString::number(displayValue));
                 numLabel->setAlignment(Qt::AlignRight | Qt::AlignBottom);
                 numLabel->setGeometry(10, 10, 16, 16);
-                numLabel->setStyleSheet
-                    (
+                numLabel->setStyleSheet(
                     "color: #ffffff;"
                     "font-size: 10px;"
                     "font-weight: bold;"
                     "background: transparent;"
-                    "border: none;"
-                    );
+                    "border: none;");
             }
 
-            enemyEffectsLayout->addWidget(iconContainer);
+            enemyUI.effectsLayout->addWidget(iconContainer);
         }
     }
 }
