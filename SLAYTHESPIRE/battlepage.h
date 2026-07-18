@@ -16,6 +16,7 @@
 #include <QString>
 
 #include <functional>
+#include <utility>
 
 #include "combatmanager.h"
 #include "effect.h"
@@ -150,7 +151,7 @@ private:
         if (!enemy)
             return nullptr;
 
-        for (const EnemyUI& ui : enemyUIs)
+        for (const EnemyUI& ui : std ::as_const(enemyUIs))
         {
             if (ui.enemy == enemy)
                 return ui.widget;

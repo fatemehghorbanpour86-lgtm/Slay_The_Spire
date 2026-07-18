@@ -16,8 +16,6 @@
 #include <QPointer>
 
 
-#include <utility>
-
 
 
 BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
@@ -441,7 +439,7 @@ void BattlePage::setupClickOverlays()
 
         connect(overlay, &QPushButton::clicked, this, [this, enemy = ui.enemy]()
                 {
-                    if (pendingCard && enemy)
+                    if (pendingCard && enemy && !enemy->isDead())
                         playCardWithAnimation(pendingCard, selectedProxy, enemy);
                 });
     }
@@ -653,7 +651,7 @@ bool BattlePage::eventFilter(QObject* obj, QEvent* event)
             }
         }
 
-        if (target && pendingCard)
+        if (target && pendingCard && !target->isDead())
         {
             playCardWithAnimation(pendingCard, selectedProxy, target);
             return true;
@@ -872,10 +870,8 @@ void BattlePage::updateStats()
             if (ui.hpBar)
             {
                 ui.hpBar->setValue(0);
-                ui.hpBar->setEnabled(false);
                 ui.hpBar->hide();
             }
-
 
             if (ui.intentLabel)
                 ui.intentLabel->setText("Defeated");
@@ -883,16 +879,23 @@ void BattlePage::updateStats()
             if (ui.widget)
             {
                 ui.widget->setEnabled(false);
+                ui.widget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+                auto *ghost = new QGraphicsOpacityEffect(ui.widget);
+                ghost->setOpacity(0.45);
+                ui.widget->setGraphicsEffect(ghost);
             }
 
             if (ui.clickOverlay)
             {
                 ui.clickOverlay->setEnabled(false);
+                ui.clickOverlay->setAttribute(Qt::WA_TransparentForMouseEvents, true);
                 ui.clickOverlay->hide();
             }
 
             continue;
         }
+
 
         if (ui.hpBar)
         {
@@ -1145,7 +1148,8 @@ void BattlePage::onDiscardPileClicked()
 
 QString BattlePage::getIntentText(Enemy* enemy)
 {
-    if (!enemy) return "❓ Unknown";
+    if (!enemy || enemy->isDead())
+        return "Defeated";
 
     QString emoji;
     switch (enemy->getIntent())
@@ -1219,8 +1223,19 @@ void BattlePage::showEnemyHighlights()
 
     for (EnemyUI& ui : enemyUIs)
     {
-        if (!ui.enemy || !ui.widget || ui.enemy->isDead())
+        if (!ui.enemy || !ui.widget)
             continue;
+
+        if (ui.enemy->isDead())
+        {
+            if (ui.clickOverlay)
+            {
+                ui.clickOverlay->setEnabled(false);
+                ui.clickOverlay->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+                ui.clickOverlay->hide();
+            }
+            continue;
+        }
 
         auto* glow = new QGraphicsDropShadowEffect(ui.widget);
         glow->setColor(QColor(220, 50, 50, 255));
