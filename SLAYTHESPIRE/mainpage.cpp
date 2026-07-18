@@ -130,6 +130,7 @@ mainpage::mainpage(QWidget *parent)
             });
 
     connect(singlePlayerBtn, &QPushButton::clicked, this, &mainpage::singlePlayerClicked);
+    connect(settingBtn, &QPushButton::clicked, this, &mainpage::settingClicked);
 
     connect(exitBtn, &QPushButton::clicked, this, [](){
 
@@ -144,3 +145,9 @@ void mainpage::singlePlayerClicked()
 {
     emit startGame();
 }
+
+void mainpage::settingClicked()
+{
+    emit settingsRequested();
+}
+

@@ -14,11 +14,12 @@ public:
     explicit mainpage(QWidget *parent = nullptr);
 signals:
     void startGame();
+    void settingsRequested();
 private slots:
     void singlePlayerClicked();
     // void multiPlayerClicked();
     // void leaderBoardClicked();
-    // void settingClicked();
+    void settingClicked();
     // void exitClicked();
 private:
     QPushButton *singlePlayerBtn;
