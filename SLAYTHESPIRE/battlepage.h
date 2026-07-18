@@ -63,6 +63,9 @@ private:
 
     QVector<EnemyUI> enemyUIs;
 
+    QWidget* enemyContainer = nullptr;
+    QHBoxLayout* enemyLayout = nullptr;
+
     CombatManager* combatManager = nullptr;
     Player* player = nullptr;
     QVector<Enemy*> enemies;

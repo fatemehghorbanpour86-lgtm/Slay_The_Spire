@@ -296,8 +296,8 @@ void BattlePage::setupBattleField()
 
 
     // -- Enemy container (right side) --
-    QWidget *enemyContainer = new QWidget(battleField);
-    QHBoxLayout *enemyLayout = new QHBoxLayout(enemyContainer);
+    enemyContainer = new QWidget(battleField);
+    enemyLayout = new QHBoxLayout(enemyContainer);
     enemyLayout->setAlignment(Qt::AlignCenter | Qt::AlignBottom);
     enemyLayout->setSpacing(30);
 
@@ -409,6 +409,7 @@ void BattlePage::setupBattleField()
 
 
 }
+
 void BattlePage::setupClickOverlays()
 {
     for (EnemyUI& ui : enemyUIs)
@@ -866,21 +867,22 @@ void BattlePage::updateStats()
         if (!ui.enemy)
             continue;
 
-        if (ui.hpBar)
-        {
-            ui.hpBar->setMaximum(ui.enemy->getMaxHealth());
-            ui.hpBar->setValue(ui.enemy->getCurrentHealth());
-        }
-
         if (ui.enemy->isDead())
         {
+            if (ui.hpBar)
+            {
+                ui.hpBar->setValue(0);
+                ui.hpBar->setEnabled(false);
+                ui.hpBar->hide();
+            }
+
+
             if (ui.intentLabel)
                 ui.intentLabel->setText("Defeated");
 
             if (ui.widget)
             {
                 ui.widget->setEnabled(false);
-                ui.widget->hide();
             }
 
             if (ui.clickOverlay)
@@ -888,21 +890,27 @@ void BattlePage::updateStats()
                 ui.clickOverlay->setEnabled(false);
                 ui.clickOverlay->hide();
             }
+
+            continue;
         }
-        else
+
+        if (ui.hpBar)
         {
-            if (ui.intentLabel)
-                ui.intentLabel->setText(getIntentText(ui.enemy));
-
-            if (ui.widget)
-            {
-                ui.widget->setEnabled(true);
-                ui.widget->show();
-            }
-
-            if (ui.clickOverlay)
-                ui.clickOverlay->setEnabled(true);
+            ui.hpBar->setMaximum(ui.enemy->getMaxHealth());
+            ui.hpBar->setValue(ui.enemy->getCurrentHealth());
         }
+
+        if (ui.intentLabel)
+            ui.intentLabel->setText(getIntentText(ui.enemy));
+
+        if (ui.widget)
+        {
+            ui.widget->setEnabled(true);
+            ui.widget->show();
+        }
+
+        if (ui.clickOverlay)
+            ui.clickOverlay->setEnabled(true);
     }
 
     if (!animatingCard)
@@ -927,6 +935,7 @@ void BattlePage::updateStats()
 
     updateEffectsUI();
 }
+
 void BattlePage::refreshHand()
 {
 
@@ -1603,15 +1612,14 @@ void BattlePage::updateEffectsUI()
                 QPixmap(effectImagePath(effect)).scaled(
                     24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-            // تعیین مقدار عددی برای نمایش روی آیکون بر اساس دسته بندی افکت
             int displayValue = 0;
             if (effect->isDebuff())
             {
-                displayValue = effect->getDuration(); // دیباف‌ها بر اساس Duration
+                displayValue = effect->getDuration(); // debuff based on durationا
             }
             else
             {
-                displayValue = effect->getAmount();   // باف‌ها بر اساس Amount
+                displayValue = effect->getAmount();   // buff based on amount
             }
 
             if (displayValue > 0)
