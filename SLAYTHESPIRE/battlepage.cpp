@@ -1230,6 +1230,13 @@ void BattlePage::showEnemyHighlights()
         {
             if (ui.clickOverlay)
             {
+                ui.widget->setEnabled(false);
+                ui.widget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+                auto *ghost = new QGraphicsOpacityEffect(ui.widget);
+                ghost->setOpacity(0.45);
+                ui.widget->setGraphicsEffect(ghost);
+
                 ui.clickOverlay->setEnabled(false);
                 ui.clickOverlay->setAttribute(Qt::WA_TransparentForMouseEvents, true);
                 ui.clickOverlay->hide();
@@ -1283,6 +1290,22 @@ void BattlePage::clearHighlights()
 {
     for (EnemyUI& ui : enemyUIs)
     {
+        if (ui.enemy->isDead())
+        {
+            ui.widget->setEnabled(false);
+            ui.widget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+            auto *ghost = new QGraphicsOpacityEffect(ui.widget);
+            ghost->setOpacity(0.45);
+            ui.widget->setGraphicsEffect(ghost);
+
+            ui.clickOverlay->setEnabled(false);
+            ui.clickOverlay->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+            ui.clickOverlay->hide();
+
+            continue;
+        }
+
         if (ui.widget)
         {
             ui.widget->setGraphicsEffect(nullptr);
