@@ -109,6 +109,7 @@ private:
     void handleAuthAttempt();
     void handleRegisterAttempt();
     void onStartGameRequested();
+    void onSettingsRequested();
     void onMapNodeEntered(NodeType type);
     void onCombatResult(bool playerWon);
     void handlePlayerDefeat();

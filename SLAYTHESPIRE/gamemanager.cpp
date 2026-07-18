@@ -1,5 +1,5 @@
 #include "gamemanager.h"
-
+#include "settingpage.h"
 #include "splashpage.h"
 #include "loginpage.h"
 #include "mainpage.h"
@@ -56,6 +56,7 @@ void GameManager::connectStaticPages()
     connect(loginPage, &loginpage::registerRequsted, this, &GameManager::handleRegisterAttempt);
 
     connect(mainMenuPage, &mainpage::startGame, this, &GameManager::onStartGameRequested);
+    connect(mainMenuPage, &mainpage::settingsRequested, this, &GameManager::onSettingsRequested);
 }
 
 // ============================================================
@@ -470,6 +471,19 @@ void GameManager::onStartGameRequested()
     }
 
     showMapPage();
+}
+
+void GameManager::onSettingsRequested()
+{
+    SettingsDialog dialog(currentUsername, mainMenuPage);
+
+    connect(&dialog, &SettingsDialog::usernameChanged, this, [this](const QString& newUsername)
+            {
+                currentUsername = newUsername;
+                autoSave();
+            });
+
+    dialog.exec();
 }
 
 void GameManager::onMapNodeEntered(NodeType type)
