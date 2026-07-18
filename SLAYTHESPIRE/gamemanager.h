@@ -107,6 +107,7 @@ private:
 
     // ---- Slots (connected to existing pages' existing signals) ----
     void handleAuthAttempt();
+    void handleRegisterAttempt();
     void onStartGameRequested();
     void onMapNodeEntered(NodeType type);
     void onCombatResult(bool playerWon);

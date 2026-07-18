@@ -25,10 +25,15 @@ public:
         LoggedIn,      // Username exist, Password true
         Registered,    // New user registered
         WrongPassword, // Username exist, Password false
+        UserNotFound,  // For login
         Error          // File error
     };
+    enum class AuthMode {
+        Login,
+        Register
+    };
 
-    static AuthResult authenticate(const QString& username, const QString& password);
+    static AuthResult authenticate(const QString& username, const QString& password, AuthMode mode);
 
     static bool saveGame(const QString& username, const Player* player, const Map* map);
     static bool loadGame(const QString& username, Player* player, Map* map);

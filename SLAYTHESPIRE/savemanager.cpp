@@ -68,7 +68,7 @@ bool SaveManager::writeJsonFile(const QString& path, const QJsonObject& object)
 //  Login / Register
 // ============================================================
 
-SaveManager::AuthResult SaveManager::authenticate(const QString& username, const QString& password)
+SaveManager::AuthResult SaveManager::authenticate(const QString& username, const QString& password , AuthMode mode)
 {
     if (username.isEmpty())
         return AuthResult::Error;
@@ -82,25 +82,54 @@ SaveManager::AuthResult SaveManager::authenticate(const QString& username, const
     }
 
     QJsonObject usersObj = usersRoot.value("users").toObject();
+    bool userExists = usersObj.contains(username);
 
-    if (usersObj.contains(username))
+    // if (usersObj.contains(username))
+    // {
+    //     const QString storedPassword = usersObj.value(username).toString();
+
+    //     if (storedPassword == password)
+    //         return AuthResult::LoggedIn;
+
+    //     return AuthResult::WrongPassword;
+    // }
+
+    // // کاربر جدید: ثبت‌نام (پسورد به صورت متن ساده ذخیره می‌شود)
+    // usersObj.insert(username, password);
+    // usersRoot.insert("users", usersObj);
+
+    // if (!writeJsonFile(usersFilePath(), usersRoot))
+    //     return AuthResult::Error;
+
+    // return AuthResult::Registered;
+    if (mode == AuthMode::Login)
     {
-        const QString storedPassword = usersObj.value(username).toString();
+        if (!userExists)
+            return AuthResult::UserNotFound;
 
+        const QString storedPassword = usersObj.value(username).toString();
         if (storedPassword == password)
             return AuthResult::LoggedIn;
 
         return AuthResult::WrongPassword;
     }
 
-    // کاربر جدید: ثبت‌نام (پسورد به صورت متن ساده ذخیره می‌شود)
-    usersObj.insert(username, password);
-    usersRoot.insert("users", usersObj);
+    else if (mode == AuthMode::Register)
+    {
+        if (userExists)
+            return AuthResult::Error;
 
-    if (!writeJsonFile(usersFilePath(), usersRoot))
-        return AuthResult::Error;
+        usersObj.insert(username, password);
+        usersRoot.insert("users", usersObj);
 
-    return AuthResult::Registered;
+        if (!writeJsonFile(usersFilePath(), usersRoot))
+            return AuthResult::Error;
+
+        return AuthResult::Registered;
+    }
+
+    return AuthResult::Error;
+
 }
 
 bool SaveManager::hasSaveFile(const QString& username)

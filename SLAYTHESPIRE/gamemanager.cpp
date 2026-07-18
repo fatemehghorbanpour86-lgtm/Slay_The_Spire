@@ -53,7 +53,7 @@ void GameManager::connectStaticPages()
     connect(splashPage, &SplashPage::loadingFinished, this, &GameManager::showLoginPage);
 
     connect(loginPage, &loginpage::loginSuccess,     this, &GameManager::handleAuthAttempt);
-    connect(loginPage, &loginpage::registerRequsted, this, &GameManager::handleAuthAttempt);
+    connect(loginPage, &loginpage::registerRequsted, this, &GameManager::handleRegisterAttempt);
 
     connect(mainMenuPage, &mainpage::startGame, this, &GameManager::onStartGameRequested);
 }
@@ -374,11 +374,46 @@ void GameManager::handleAuthAttempt()
     const QString username = loginPage->getUsername();
     const QString password = loginPage->getPassword();
 
-    if (username.trimmed().isEmpty())
+    if (username.trimmed().isEmpty() || password.trimmed().isEmpty())
     {
-        QMessageBox::warning(nullptr, "Login", "Username cannot be empty.");
+        QMessageBox::warning(nullptr, "Login", "Fields cannot be empty.");
         return;
     }
+
+    const SaveManager::AuthResult result = SaveManager::authenticate(username, password, SaveManager::AuthMode::Login);
+
+    switch (result)
+    {
+    case SaveManager::AuthResult::LoggedIn:
+        currentUsername = username;
+        if (SaveManager::hasSaveFile(currentUsername)) loadRun(currentUsername);
+        else createNewRun(currentUsername);
+        showMainMenuPage();
+        break;
+    case SaveManager::AuthResult::UserNotFound:
+        QMessageBox::warning(nullptr, "Login", "This username does not exist. Please register first.");
+        break;
+
+    case SaveManager::AuthResult::WrongPassword:
+        QMessageBox::warning(nullptr, "Login", "Incorrect password.");
+        break;
+
+    case SaveManager::AuthResult::Error:
+        QMessageBox::warning(nullptr, "Login", "Error accessing user file.");
+        break;
+    }
+}
+
+void GameManager::handleRegisterAttempt()
+{
+    const QString username = loginPage->getUsername();
+    const QString password = loginPage->getPassword();
+
+    if (username.trimmed().isEmpty()) {
+        QMessageBox::warning(nullptr, "Register", "Username cannot be empty.");
+        return;
+    }
+
 
     bool hasUpper = false;
     bool hasLower = false;
@@ -404,31 +439,20 @@ void GameManager::handleAuthAttempt()
         return;
     }
 
-    const SaveManager::AuthResult result = SaveManager::authenticate(username, password);
+
+    const SaveManager::AuthResult result = SaveManager::authenticate(username, password, SaveManager::AuthMode::Register);
 
     switch (result)
     {
-    case SaveManager::AuthResult::LoggedIn:
     case SaveManager::AuthResult::Registered:
-    {
-        currentUsername = username;
-
-        if (SaveManager::hasSaveFile(currentUsername))
-            loadRun(currentUsername);
-        else
-            createNewRun(currentUsername);
-
-        showMainMenuPage();
-        break;
-    }
-
-    case SaveManager::AuthResult::WrongPassword:
-        QMessageBox::warning(nullptr, "Login", "Incorrect password.");
+        QMessageBox::information(nullptr, "Register", "Registration successful! Now you can login.");
         break;
 
     case SaveManager::AuthResult::Error:
-        QMessageBox::warning(nullptr, "Login", "Error accessing user file.");
+        QMessageBox::warning(nullptr, "Register", "Username is already taken or file error occurred.");
         break;
+
+    default: break;
     }
 }
 
