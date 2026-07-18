@@ -41,6 +41,7 @@ public:
     static bool hasSaveFile(const QString& username);
 
     static bool deleteSaveFile(const QString& username);
+    static bool changeUsername(const QString& oldUsername, const QString& newUsername);
 
 private:
     static QString usersFilePath();

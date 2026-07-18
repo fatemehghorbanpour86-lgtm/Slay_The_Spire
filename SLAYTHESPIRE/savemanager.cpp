@@ -84,24 +84,6 @@ SaveManager::AuthResult SaveManager::authenticate(const QString& username, const
     QJsonObject usersObj = usersRoot.value("users").toObject();
     bool userExists = usersObj.contains(username);
 
-    // if (usersObj.contains(username))
-    // {
-    //     const QString storedPassword = usersObj.value(username).toString();
-
-    //     if (storedPassword == password)
-    //         return AuthResult::LoggedIn;
-
-    //     return AuthResult::WrongPassword;
-    // }
-
-    // // کاربر جدید: ثبت‌نام (پسورد به صورت متن ساده ذخیره می‌شود)
-    // usersObj.insert(username, password);
-    // usersRoot.insert("users", usersObj);
-
-    // if (!writeJsonFile(usersFilePath(), usersRoot))
-    //     return AuthResult::Error;
-
-    // return AuthResult::Registered;
     if (mode == AuthMode::Login)
     {
         if (!userExists)
@@ -148,6 +130,53 @@ bool SaveManager::deleteSaveFile(const QString& username)
         return true; // چیزی برای پاک کردن نبود، خطا نیست
 
     return QFile::remove(path);
+}
+
+bool SaveManager::changeUsername(const QString& oldUsername, const QString& newUsername)
+{
+    if (oldUsername.isEmpty() || newUsername.isEmpty())
+        return false;
+
+    if (oldUsername == newUsername)
+        return false;
+
+    QJsonObject usersRoot;
+
+    if (QFile::exists(usersFilePath()))
+    {
+        if (!readJsonFile(usersFilePath(), usersRoot))
+            return false;
+    }
+
+    QJsonObject usersObj = usersRoot.value("users").toObject();
+
+    if (!usersObj.contains(oldUsername))
+        return false;
+
+    if (usersObj.contains(newUsername))
+        return false; // Username already exists.
+
+    QJsonValue passwordValue = usersObj.value(oldUsername);
+    usersObj.remove(oldUsername);
+    usersObj.insert(newUsername, passwordValue);
+    usersRoot.insert("users", usersObj);
+
+    if (!writeJsonFile(usersFilePath(), usersRoot))
+        return false;
+
+    const QString oldSavePath = saveFilePath(oldUsername);
+    const QString newSavePath = saveFilePath(newUsername);
+
+    if (QFile::exists(oldSavePath))
+    {
+        if (QFile::exists(newSavePath))
+            QFile::remove(newSavePath);
+
+        if (!QFile::rename(oldSavePath, newSavePath))
+            return false;
+    }
+
+    return true;
 }
 
 // ============================================================
