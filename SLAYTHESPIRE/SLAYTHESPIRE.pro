@@ -53,6 +53,7 @@ SOURCES += \
     rewardpage.cpp \
     rewardsystem.cpp \
     savemanager.cpp \
+    settingpage.cpp \
     shop.cpp \
     skillcards.cpp \
     splashpage.cpp \
@@ -106,6 +107,7 @@ HEADERS += \
     rewardpage.h \
     rewardsystem.h \
     savemanager.h \
+    settingpage.h \
     shop.h \
     skillcards.h \
     splashpage.h \
