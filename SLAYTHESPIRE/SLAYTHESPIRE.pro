@@ -60,6 +60,7 @@ SOURCES += \
     splashpage.cpp \
     character.cpp \
     statuscards.cpp \
+    treasure.cpp \
     upgradecards.cpp
 
 HEADERS += \
@@ -115,6 +116,7 @@ HEADERS += \
     splashpage.h \
     character.h \
     statuscards.h \
+    treasure.h \
     upgradecards.h
 
 FORMS += \
