@@ -55,6 +55,7 @@ SOURCES += \
     savemanager.cpp \
     settingpage.cpp \
     shop.cpp \
+    shoppage.cpp \
     skillcards.cpp \
     splashpage.cpp \
     character.cpp \
@@ -109,6 +110,7 @@ HEADERS += \
     savemanager.h \
     settingpage.h \
     shop.h \
+    shoppage.h \
     skillcards.h \
     splashpage.h \
     character.h \

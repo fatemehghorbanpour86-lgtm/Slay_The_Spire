@@ -12,9 +12,17 @@
 #include "map.h"
 #include "savemanager.h"
 #include "enemy.h"
+#include "ShopPage.h"
+#include "shop.h"
 
 #include <QRandomGenerator>
 #include <QMessageBox>
+
+namespace
+{
+constexpr bool FORCE_SHOP_FOR_DEBUG = true;
+}
+
 
 GameManager::GameManager(QStackedWidget* stackedWidget, QObject* parent)
     : QObject(parent), stackedWidget(stackedWidget)
@@ -171,6 +179,13 @@ void GameManager::cleanupTransientPages()
         campfirePage->deleteLater();
         campfirePage = nullptr;
     }
+
+    if (shopPage)
+    {
+        stackedWidget->removeWidget(shopPage);
+        shopPage->deleteLater();
+        shopPage = nullptr;
+    }
 }
 
 // ============================================================
@@ -180,13 +195,19 @@ void GameManager::cleanupTransientPages()
 
 void GameManager::showShopPage()
 {
-    // TODO: once ShopPage exists:
-    //   - ShopPage* shopPage = new ShopPage(player, new Shop(), nullptr);
-    //   - shopPage->generateStock() equivalent
-    //   - connect(shopPage, &ShopPage::shoppingDone, this, &GameManager::returnToMapAndAutosave);
-    //   - stackedWidget->addWidget(shopPage); stackedWidget->setCurrentWidget(shopPage);
-    // Until then, don't block progression:
-    returnToMapAndAutosave();
+    if (shopPage)
+    {
+        stackedWidget->removeWidget(shopPage);
+        shopPage->deleteLater();
+        shopPage = nullptr;
+    }
+
+    shopPage = new ShopPage(player, nullptr);
+    stackedWidget->addWidget(shopPage);
+
+    connect(shopPage, &ShopPage::shoppingDone, this, &GameManager::returnToMapAndAutosave);
+
+    stackedWidget->setCurrentWidget(shopPage);
 }
 
 void GameManager::showEventPage()
@@ -488,6 +509,14 @@ void GameManager::onSettingsRequested()
 
 void GameManager::onMapNodeEntered(NodeType type)
 {
+    if (FORCE_SHOP_FOR_DEBUG)
+    {
+        Q_UNUSED(type);
+
+        showShopPage();
+        return;
+    }
+
     switch (type)
     {
     case NodeType::Monster:
