@@ -315,5 +315,5 @@ void MapPage::onDeckButtonClicked() {
 }
 
 void MapPage::onSettingsButtonClicked() {
-    // TODO:
+    emit settingsRequested();
 }
