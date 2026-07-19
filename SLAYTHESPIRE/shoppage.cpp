@@ -28,8 +28,8 @@ ShopPage::ShopPage(Player *player, QWidget *parent)
     bottomBar = new QWidget(this);
 
     topBar->setFixedHeight(50);
-    shopField->setFixedHeight(430);
-    bottomBar->setFixedHeight(240);
+    shopField->setFixedHeight(580);
+    bottomBar->setFixedHeight(90);
 
     mainLayout->addWidget(topBar);
     mainLayout->addWidget(shopField);
@@ -245,7 +245,7 @@ void ShopPage::setupShopField()
 
     // ===== Browsing state =====
     inventoryContainer = new QWidget(shopField);
-    inventoryContainer->setFixedSize(1000, 400);
+    inventoryContainer->setFixedSize(1000, 540);
     inventoryContainer->setStyleSheet(
         "background: rgba(0,0,0,100);"
         "border-radius: 20px;"
@@ -312,19 +312,15 @@ QString ShopPage::getPotionImagePath(const QString &potionName)
 
 void ShopPage::populateInventory()
 {
-    // Remove old layout content if present
     QLayout *oldLayout = inventoryContainer->layout();
 
     if (oldLayout != nullptr)
     {
         QLayoutItem *child = nullptr;
-
         while ((child = oldLayout->takeAt(0)) != nullptr)
         {
             if (child->widget() != nullptr)
-            {
                 child->widget()->deleteLater();
-            }
 
             delete child;
         }
@@ -333,24 +329,30 @@ void ShopPage::populateInventory()
     }
 
     QVBoxLayout *mainInvLayout = new QVBoxLayout(inventoryContainer);
-    mainInvLayout->setContentsMargins(25, 25, 25, 25);
-    mainInvLayout->setSpacing(25);
+    mainInvLayout->setContentsMargins(30, 40, 30, 35);
+    mainInvLayout->setSpacing(45);
 
-    // ===== Row 1: cards =====
+    // =========================
+    // Row 1: cards
+    // =========================
     QHBoxLayout *cardsLayout = new QHBoxLayout();
-    cardsLayout->setSpacing(18);
+    cardsLayout->setSpacing(22);
+    cardsLayout->setContentsMargins(0, 0, 0, 0);
 
     const auto &cards = shopLogic->getCardOffers();
 
     for (int i = 0; i < cards.size(); ++i)
     {
         QWidget *cardWidget = new QWidget(inventoryContainer);
+        cardWidget->setFixedSize(150, 240);
+        cardWidget->setStyleSheet("background: transparent;");
+
         QVBoxLayout *cardLayout = new QVBoxLayout(cardWidget);
         cardLayout->setContentsMargins(0, 0, 0, 0);
-        cardLayout->setSpacing(8);
+        cardLayout->setSpacing(4);
 
         QPushButton *cardBtn = new QPushButton(cardWidget);
-        cardBtn->setFixedSize(140, 190);
+        cardBtn->setFixedSize(150, 200);
         cardBtn->setStyleSheet(
             "background: transparent;"
             "border: 1px solid rgba(255,215,0,50);"
@@ -359,7 +361,7 @@ void ShopPage::populateInventory()
 
         QPixmap cardPixmap(DeckViewerDialog::cardImagePath(cards[i].card));
         cardBtn->setIcon(QIcon(cardPixmap));
-        cardBtn->setIconSize(QSize(130, 180));
+        cardBtn->setIconSize(QSize(140, 190));
 
         QLabel *priceLabel = new QLabel(
             QString::number(cards[i].price) + " G",
@@ -368,8 +370,8 @@ void ShopPage::populateInventory()
         priceLabel->setAlignment(Qt::AlignCenter);
         priceLabel->setStyleSheet(
             cards[i].onSale
-                ? "color: #ff4500; font-size: 13px; font-weight: bold; background: transparent;"
-                : "color: #f5c518; font-size: 13px; font-weight: bold; background: transparent;"
+                ? "color: #ff4500; font-size: 14px; font-weight: bold; background: transparent;"
+                : "color: #f5c518; font-size: 14px; font-weight: bold; background: transparent;"
             );
 
         cardLayout->addWidget(cardBtn);
@@ -383,20 +385,30 @@ void ShopPage::populateInventory()
                 });
     }
 
+    cardsLayout->addStretch();
+
     mainInvLayout->addLayout(cardsLayout);
 
-    // ===== Row 2: potions + card removal =====
+    mainInvLayout->addSpacing(40);
+
+    // =========================
+    // Row 2: potions + card removal
+    // =========================
     QHBoxLayout *bottomRowLayout = new QHBoxLayout();
     bottomRowLayout->setSpacing(18);
+    bottomRowLayout->setContentsMargins(0, 0, 0, 0);
 
     const auto &potions = shopLogic->getPotionOffers();
 
     for (int i = 0; i < potions.size(); ++i)
     {
         QWidget *potWidget = new QWidget(inventoryContainer);
+        potWidget->setFixedSize(110, 140);
+        potWidget->setStyleSheet("background: transparent;");
+
         QVBoxLayout *potLayout = new QVBoxLayout(potWidget);
         potLayout->setContentsMargins(0, 0, 0, 0);
-        potLayout->setSpacing(8);
+        potLayout->setSpacing(6);
 
         QPushButton *potBtn = new QPushButton(potWidget);
         potBtn->setFixedSize(90, 90);
@@ -431,27 +443,38 @@ void ShopPage::populateInventory()
                 });
     }
 
-    bottomRowLayout->addStretch();
+    bottomRowLayout->addSpacing(70);
 
     QWidget *removalWidget = new QWidget(inventoryContainer);
+    removalWidget->setFixedSize(180, 230);
+    removalWidget->setStyleSheet("background: transparent;");
+
     QVBoxLayout *removalLayout = new QVBoxLayout(removalWidget);
     removalLayout->setContentsMargins(0, 0, 0, 0);
-    removalLayout->setSpacing(8);
+    removalLayout->setSpacing(5);
+    removalLayout->setAlignment(Qt::AlignCenter);
 
     QPushButton *remBtn = new QPushButton(removalWidget);
-    remBtn->setFixedSize(120, 150);
+    remBtn->setFixedSize(150, 190);
     remBtn->setIcon(QIcon(":/cardRemoval.png"));
-    remBtn->setIconSize(QSize(100, 130));
+    remBtn->setIconSize(QSize(130, 170));
     remBtn->setStyleSheet(
-        "background: rgba(200,200,200,20);"
-        "border: 2px dashed #555;"
-        "border-radius: 8px;"
+        "QPushButton {"
+        "   background: transparent;"
+        "   border: 2px dashed rgba(255,255,255,60);"
+        "   border-radius: 10px;"
+        "}"
+        "QPushButton:hover {"
+        "   border: 2px dashed rgba(255,215,0,100);"
+        "   background: rgba(255,255,255,10);"
+        "}"
         );
 
     QLabel *remPrice = new QLabel(
         QString::number(player->getCardRemovalCost()) + " G",
         removalWidget
         );
+
     remPrice->setAlignment(Qt::AlignCenter);
     remPrice->setStyleSheet(
         "color: #f5c518;"
@@ -460,10 +483,11 @@ void ShopPage::populateInventory()
         "background: transparent;"
         );
 
-    removalLayout->addWidget(remBtn);
-    removalLayout->addWidget(remPrice);
+    removalLayout->addWidget(remBtn, 0, Qt::AlignCenter);
+    removalLayout->addWidget(remPrice, 0, Qt::AlignCenter);
 
     bottomRowLayout->addWidget(removalWidget);
+    //bottomRowLayout->addStretch();
 
     connect(remBtn, &QPushButton::clicked, this, []()
             {
@@ -508,6 +532,8 @@ void ShopPage::updateUI()
         merchantBtn->hide();
         inventoryContainer->show();
         leaveBtn->show();
+
+        inventoryContainer->setGeometry(140, 15, 1000, 540);
 
         populateInventory();
 
