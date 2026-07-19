@@ -12,7 +12,7 @@
 #include "map.h"
 #include "savemanager.h"
 #include "enemy.h"
-
+#include "pauseviewer.h"
 #include <QRandomGenerator>
 #include <QMessageBox>
 
@@ -85,6 +85,7 @@ void GameManager::showMapPage()
         mapPage = new MapPage(map, player, nullptr);
         stackedWidget->addWidget(mapPage);
         connect(mapPage, &MapPage::nodeEntered, this, &GameManager::onMapNodeEntered);
+        connect(mapPage, &MapPage::settingsRequested, this, &GameManager::onMapPauseRequested);
     }
     else
     {
@@ -601,6 +602,59 @@ void GameManager::onBossDefeated()
 void GameManager::onCampfireLeft()
 {
     returnToMapAndAutosave();
+}
+
+void GameManager::onMapPauseRequested()
+{
+    PauseDialog dialog(mapPage);
+
+    connect(&dialog, &PauseDialog::resumeRequested, this, []()
+            {
+                // Map و بازی هیچ تغییری نمی‌کنند؛ PauseDialog خودش accept() می‌کند.
+            });
+
+    connect(&dialog, &PauseDialog::settingsRequested, this, [this, &dialog]()
+            {
+                SettingsDialog settingsDlg(currentUsername, &dialog);
+
+                connect(&settingsDlg, &SettingsDialog::usernameChanged, this, [this](const QString& newUsername)
+                        {
+                            currentUsername = newUsername;
+                            autoSave();
+                        });
+
+                settingsDlg.exec();
+            });
+
+    connect(&dialog, &PauseDialog::saveAndQuitRequested, this, [this, &dialog]()
+            {
+                if (!player || !map)
+                {
+                    QMessageBox::warning(&dialog, "Save and Quit", "No active run to save.");
+                    return;
+                }
+
+                bool saved = SaveManager::saveGame(currentUsername, player, map);
+
+                if (!saved)
+                {
+                    QMessageBox::warning(&dialog, "Save and Quit", "Failed to save the game. Please try again.");
+                    return;
+                }
+
+                dialog.accept();
+
+                cleanupRun();
+                showMainMenuPage();
+            });
+
+    connect(&dialog, &PauseDialog::giveUpRequested, this, [this, &dialog]()
+            {
+                dialog.accept();
+                onReturnToMainMenuRequested();
+            });
+
+    dialog.exec();
 }
 
 void GameManager::onReturnToMainMenuRequested()

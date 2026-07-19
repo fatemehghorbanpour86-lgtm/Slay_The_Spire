@@ -64,5 +64,6 @@ signals:
     // void battleRequested();
     // void campfireEntered();
     void nodeEntered(NodeType type);
+    void settingsRequested();
 };
 #endif // MAPPAGE_H

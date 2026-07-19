@@ -20,6 +20,7 @@ class RewardSystem;
 class Player;
 class Map;
 class Enemy;
+class PauseDialog;
 
 
 class GameManager : public QObject
@@ -116,6 +117,7 @@ private:
     void onRewardContinue();
     void onBossDefeated();
     void onCampfireLeft();
+    void onMapPauseRequested();
 
     // Hook: connect this to the (future) Defeat/Victory page's
     // "Return to Main Menu" button.

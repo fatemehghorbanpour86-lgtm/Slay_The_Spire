@@ -42,6 +42,7 @@ SOURCES += \
     masterdeck.cpp \
     normalenemies.cpp \
     normalrelics.cpp \
+    pauseviewer.cpp \
     player.cpp \
     potion.cpp \
     powercard.cpp \
@@ -96,6 +97,7 @@ HEADERS += \
     normalenemies.h \
     normalrelics.h \
     outlinedlabel.h \
+    pauseviewer.h \
     player.h \
     potion.h \
     powercard.h \
