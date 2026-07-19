@@ -50,10 +50,10 @@ void TreasurePage::setupUI()
 
     // --- Reward button: hidden until the chest is opened ---
     rewardBtn = new QPushButton(this);
-    rewardBtn->setFixedSize(90, 90);
+    rewardBtn->setFixedSize(110, 110);
     rewardBtn->setCursor(Qt::PointingHandCursor);
     rewardBtn->hide();
-    rewardBtn->move(500, 300);
+    rewardBtn->move(560, 220);
     connect(rewardBtn, &QPushButton::pressed, this, []() {
         AudioManager::instance().play(AudioManager::Sound::ButtonClick);
     });
@@ -64,7 +64,7 @@ void TreasurePage::setupUI()
 
     // --- Chest ---
     chestBtn = new QPushButton(this);
-    chestBtn->setFixedSize(600, 400);
+    chestBtn->setFixedSize(730, 450);
     chestBtn->setCursor(Qt::PointingHandCursor);
     connect(chestBtn, &QPushButton::pressed, this, []() {
         AudioManager::instance().play(AudioManager::Sound::ButtonClick);
@@ -76,7 +76,7 @@ void TreasurePage::setupUI()
 
     // --- Back ---
     backBtn = new QPushButton(this);
-    backBtn->setFixedSize(140, 80);
+    backBtn->setFixedSize(180, 80);
     backBtn->setCursor(Qt::PointingHandCursor);
     backBtn->setStyleSheet(
         "QPushButton { border-image: url(:/Treasure/ProceedBtn.png); border: none; background: transparent; }"
@@ -86,7 +86,7 @@ void TreasurePage::setupUI()
         AudioManager::instance().play(AudioManager::Sound::ButtonClick);
     });
     connect(backBtn, &QPushButton::clicked, this, &TreasurePage::onBackClicked);
-    backBtn->move(1000, 600);
+    backBtn->move(1050, 550);
     //mainLayout->addWidget(backBtn, 0, Qt::AlignHCenter);
     //mainLayout->addSpacing(30);
 
@@ -97,7 +97,7 @@ void TreasurePage::refreshChestVisual()
 {
     // Placeholder paths - swap in the real Closed/Opened art later,
     // nothing else in this method needs to change.
-    QString imagePath = chestOpened ? ":/Treasure/ChestOpen.png" : ":/Treasure/ChestClosed.png";
+    QString imagePath = chestOpened ? ":/Treasure/ChestOpen.png" : ":/Treasure/ChestClose.png";
 
     chestBtn->setStyleSheet(
         QString("QPushButton { border-image: url(%1); border: none; background: transparent; }"
@@ -106,13 +106,13 @@ void TreasurePage::refreshChestVisual()
 
     if(chestOpened)
     {
-        chestBtn->move(400, 200);
-        chestBtn->setFixedSize(600, 600);
+        chestBtn->move(220, 70);
+        chestBtn->setFixedSize(780, 600);
 
     }
     else
     {
-        chestBtn->move(400, 400);
+        chestBtn->move(250, 170);
     }
 }
 
@@ -169,6 +169,7 @@ void TreasurePage::refreshRewardVisual()
     }
 
     rewardBtn->setToolTip(tip);
+    rewardBtn->raise();
     rewardBtn->show();
 }
 
