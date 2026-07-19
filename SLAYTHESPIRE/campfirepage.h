@@ -51,10 +51,8 @@ public:
     explicit CampfirePage(Player* player, Map* map, QWidget* parent = nullptr);
 
 signals:
-    // Emitted once the player's turn at the Campfire is over:
-    // after Rest/Smith/Lift succeeds, or immediately on Leave.
-    // MainWindow listens to this to switch back to MapPage.
     void leaveCampfire();
+    void settingsRequested();
 
 private slots:
     void onRestClicked();

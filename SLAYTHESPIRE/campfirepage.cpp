@@ -441,5 +441,5 @@ void CampfirePage::onDeckButtonClicked()
 
 void CampfirePage::onSettingsButtonClicked()
 {
-    // TODO: open the same Settings Dialog used by MapPage.
+    emit settingsRequested();
 }

@@ -1,5 +1,5 @@
 #include "treasurepage.h"
-#include "campfirepage.h"   // TopBarWidget - reused, not redefined
+#include "campfirepage.h"
 #include "player.h"
 #include "map.h"
 #include "reward.h"
@@ -58,9 +58,6 @@ void TreasurePage::setupUI()
         AudioManager::instance().play(AudioManager::Sound::ButtonClick);
     });
     connect(rewardBtn, &QPushButton::clicked, this, &TreasurePage::onRewardClicked);
-    //mainLayout->addWidget(rewardBtn, 0, Qt::AlignHCenter);
-
-    //mainLayout->addSpacing(20);
 
     // --- Chest ---
     chestBtn = new QPushButton(this);
@@ -70,9 +67,6 @@ void TreasurePage::setupUI()
         AudioManager::instance().play(AudioManager::Sound::ButtonClick);
     });
     connect(chestBtn, &QPushButton::clicked, this, &TreasurePage::onChestClicked);
-    //mainLayout->addWidget(chestBtn, 0, Qt::AlignHCenter);
-
-   // mainLayout->addStretch();
 
     // --- Back ---
     backBtn = new QPushButton(this);
@@ -87,16 +81,12 @@ void TreasurePage::setupUI()
     });
     connect(backBtn, &QPushButton::clicked, this, &TreasurePage::onBackClicked);
     backBtn->move(1050, 550);
-    //mainLayout->addWidget(backBtn, 0, Qt::AlignHCenter);
-    //mainLayout->addSpacing(30);
 
     refreshChestVisual();
 }
 
 void TreasurePage::refreshChestVisual()
 {
-    // Placeholder paths - swap in the real Closed/Opened art later,
-    // nothing else in this method needs to change.
     QString imagePath = chestOpened ? ":/Treasure/ChestOpen.png" : ":/Treasure/ChestClose.png";
 
     chestBtn->setStyleSheet(
@@ -126,8 +116,6 @@ void TreasurePage::refreshRewardVisual()
         return;
     }
 
-    // Tooltip works today even without art; once icons are provided this
-    // is also the place to pick the right image per RewardType.
     QString tip = "Reward";
 
     switch (reward->getType())
@@ -222,6 +210,5 @@ void TreasurePage::onDeckButtonClicked()
 
 void TreasurePage::onSettingsButtonClicked()
 {
-    // TODO: open the same Settings Dialog used by MapPage/CampfirePage.
-    // emit settingsRequested();
+    emit settingsRequested();
 }

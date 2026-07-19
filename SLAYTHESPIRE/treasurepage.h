@@ -19,11 +19,8 @@ public:
     explicit TreasurePage(Player* player, Map* map, QWidget* parent = nullptr);
 
 signals:
-    // Emitted once the player leaves the Treasure Room via Back.
-    // Whatever happened to the reward has already been resolved on
-    // Player/TreasureManager by the time this fires - GameManager just
-    // needs to navigate back to the Map (and autosave).
     void treasureFinished();
+    void settingsRequested();
 
 private slots:
     void onChestClicked();

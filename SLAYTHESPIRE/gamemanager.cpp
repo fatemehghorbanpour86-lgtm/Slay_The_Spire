@@ -111,6 +111,7 @@ void GameManager::showCampfirePage()
     stackedWidget->addWidget(campfirePage);
 
     connect(campfirePage, &CampfirePage::leaveCampfire, this, &GameManager::onCampfireLeft);
+    connect(campfirePage, &CampfirePage::settingsRequested,this, &GameManager::onMapPauseRequested);
 
     stackedWidget->setCurrentWidget(campfirePage);
 }
@@ -220,6 +221,7 @@ void GameManager::showTreasurePage()
     stackedWidget->addWidget(treasurePage);
 
     connect(treasurePage, &TreasurePage::treasureFinished, this, &GameManager::onTreasureFinished);
+    connect(treasurePage, &TreasurePage::settingsRequested, this, &GameManager::onMapPauseRequested);
 
     stackedWidget->setCurrentWidget(treasurePage);
 }
@@ -511,33 +513,27 @@ void GameManager::onMapNodeEntered(NodeType type)
     switch (type)
     {
     case NodeType::Monster:
-        //startBattle(selectNormalEncounter(), EncounterKind::Normal);
-         returnToMapAndAutosave();
+        startBattle(selectNormalEncounter(), EncounterKind::Normal);
         break;
 
     case NodeType::Elite:
-        //startBattle(selectEliteEncounter(), EncounterKind::Elite);
-         returnToMapAndAutosave();
+        startBattle(selectEliteEncounter(), EncounterKind::Elite);
         break;
 
     case NodeType::Boss:
-        //startBattle(selectBossEncounter(), EncounterKind::Boss);
-         returnToMapAndAutosave();
+        startBattle(selectBossEncounter(), EncounterKind::Boss);
         break;
 
     case NodeType::Campfire:
-        //showCampfirePage();
-         returnToMapAndAutosave();
+        showCampfirePage();
         break;
 
     case NodeType::Shop:
-        //showShopPage();
-         returnToMapAndAutosave();
+        showShopPage();
         break;
 
     case NodeType::Event:
-        //showEventPage();
-         returnToMapAndAutosave();
+        showEventPage();
         break;
 
     case NodeType::Treasure:
