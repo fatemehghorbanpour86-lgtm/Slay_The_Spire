@@ -7,23 +7,27 @@
 #include <QProgressBar>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QGraphicsScene>   // added: needed for handScene member
-#include <QGraphicsView>    // added: needed for handView member
-
-#include <QMap>
-#include <QList>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QGraphicsDropShadowEffect>
+#include <QPointer>
+#include <QGraphicsProxyWidget>
+#include <QVector>
+#include <QString>
 
 #include <functional>
-
+#include <utility>
 
 #include "combatmanager.h"
+#include "effect.h"
 #include "outlinedlabel.h"
-#include "qgraphicseffect.h"
 
 class Player;
 class Enemy;
 class Card;
-
+class QGraphicsProxyWidget;
+class QShowEvent;
+class QEvent;
 
 class BattlePage : public QWidget
 {
@@ -34,6 +38,10 @@ public:
                         QVector<Enemy*> enemies = {},
                         QWidget* parent = nullptr);
 
+signals:
+    void battleEnded();
+    void combatResult(bool playerWon);
+
 private slots:
     void updateStats();
     void onCardClicked(Card* card, QGraphicsProxyWidget* proxy);
@@ -43,67 +51,81 @@ private slots:
     void onDiscardPileClicked();
     void updateEnemyIntent(Enemy* enemy);
 
-
-signals:
-    void battleEnded();
-    void combatResult(bool playerWon);
-
 private:
+    struct EnemyUI
+    {
+        Enemy* enemy = nullptr;
+        QPointer<QWidget> widget;
+        QPointer<QProgressBar> hpBar;
+        QPointer<QLabel> intentLabel;
+        QPointer<QWidget> effectsWidget;
+        QPointer<QHBoxLayout> effectsLayout;
+        QPointer<QPushButton> clickOverlay;
+    };
 
-    CombatManager* combatManager;
-    Player* player;
+    QVector<EnemyUI> enemyUIs;
+
+    QWidget* enemyContainer = nullptr;
+    QHBoxLayout* enemyLayout = nullptr;
+
+    CombatManager* combatManager = nullptr;
+    Player* player = nullptr;
     QVector<Enemy*> enemies;
 
-    // -- Three main sections of the battle screen --
-    QWidget *topBar;        // Top bar: HP, relics, potions
-    QWidget *battleField;   // Battle area: player + enemies
-    QWidget *bottomBar;     // Bottom bar: energy, hand cards, End Turn
+    QWidget* topBar = nullptr;
+    QWidget* battleField = nullptr;
+    QWidget* bottomBar = nullptr;
 
-    // -- Hand cards rendering (arc layout + hover animation) --
-    QGraphicsScene *handScene = nullptr;   // added: holds the card proxies
-    QGraphicsView  *handView  = nullptr;   // added: displays handScene
+    QGraphicsScene* handScene = nullptr;
+    QGraphicsView* handView = nullptr;
+
+    QPushButton* endTurnBtn = nullptr;
+
+    QLabel* playerHpLabel = nullptr;
+    QLabel* playerBlockLabel = nullptr;
+    QLabel* goldValueLabel = nullptr;
+    OutlinedLabel* energyValueLabel = nullptr;
+    QProgressBar* playerHPBar = nullptr;
+
+    QPushButton* drawPileBtn = nullptr;
+    QPushButton* discardPileBtn = nullptr;
+    QLabel* drawPileCountLabel = nullptr;
+    QLabel* discardPileCountLabel = nullptr;
+
+    QWidget* playerWidget = nullptr;
+    QPushButton* playerClickOverlay = nullptr;
+
+    Card* pendingCard = nullptr;
+    QPointer<QGraphicsProxyWidget> selectedProxy;
+
+    QGraphicsDropShadowEffect* playerGlowEffect = nullptr;
+
+    bool animatingCard = false;
+
+    QGraphicsScene* animScene = nullptr;
+    QGraphicsView* animView = nullptr;
+
+    QLabel* playerBlockIconLabel = nullptr;
+    int lastPlayerBlock = 0;
+
+    QWidget* playerEffectsWidget = nullptr;
+    QHBoxLayout* playerEffectsLayout = nullptr;
+
+    enum class CardTarget
+    {
+        Enemy,
+        Player,
+        None
+    };
 
     void setupTopBar();
     void setupBattleField();
     void setupBottomBar();
+    void setupEffectsUI();
+    void setupClickOverlays();
+
     void refreshHand();
-
-    QPushButton *endTurnBtn = nullptr;
-    QLabel *playerHpLabel = nullptr;
-    QLabel *playerBlockLabel = nullptr;
-    QLabel *goldValueLabel;
-    OutlinedLabel *energyValueLabel = nullptr;
-    QLabel *intentLabel = nullptr;
-    QProgressBar *playerHPBar = nullptr;
-    QProgressBar *enemyHPBar = nullptr;
-    QPushButton *drawPileBtn;
-    QPushButton *discardPileBtn;
-    QLabel      *drawPileCountLabel;
-    QLabel      *discardPileCountLabel;
-
-
-    QString getIntentText(Enemy* enemy);
-
-    QString enemyImagePath(Enemy* enemy);
-
-
-    // -- Card selection state --
-    Card* pendingCard = nullptr;           // card currently selected
-    QGraphicsProxyWidget* selectedProxy = nullptr;  // its proxy in the scene
-
-    QVector<QGraphicsDropShadowEffect*> enemyGlowEffects;
-    QGraphicsDropShadowEffect* playerGlowEffect = nullptr;
-
-    // -- Enemy widget tracking (needed to know where to draw rings) --
-    QVector<QWidget*> enemyWidgets;   // one per enemy, filled in setupBattleField
-    QWidget* playerWidget = nullptr;  // player widget, save as member
-
-    QPushButton* enemyClickOverlay  = nullptr;   // one per enemy for now
-    QPushButton* playerClickOverlay = nullptr;
-
-
-    enum class CardTarget { Enemy, Player, None };
-    CardTarget getCardTarget(Card* card);
+    void updateEffectsUI();
 
     void showEnemyHighlights();
     void showPlayerHighlight();
@@ -111,29 +133,51 @@ private:
     void clearSelection();
 
     void repositionOverlays();
-    void setupClickOverlays();
+    void repositionBlockIcon();
 
-void playCardWithAnimation(Card* card,QGraphicsProxyWidget* proxy, Enemy* target);
+    void playCardWithAnimation(Card* card, QGraphicsProxyWidget* proxy, Enemy* target);
+    void animateAttack(QWidget* attacker,
+                       QWidget* target,
+                       std::function<void()> onDone = nullptr);
 
-bool animatingCard = false;
+    CardTarget getCardTarget(Card* card);
 
+    //QString cardImagePath(const Card* card);
+    QString enemyImagePath(Enemy* enemy);
+    QString effectImagePath(const Effect* effect);
+    QString getIntentText(Enemy* enemy);
 
-QGraphicsScene* animScene = nullptr;
-QGraphicsView*  animView  = nullptr;
+    QWidget* findWidgetForEnemy(Enemy* enemy)
+    {
+        if (!enemy)
+            return nullptr;
 
-QLabel *playerBlockIconLabel = nullptr;
-int    lastPlayerBlock = 0;
+        for (const EnemyUI& ui : std ::as_const(enemyUIs))
+        {
+            if (ui.enemy == enemy)
+                return ui.widget;
+        }
 
-void repositionBlockIcon();
+        return nullptr;
+    }
 
+    EnemyUI* findEnemyUi(Enemy* enemy)
+    {
+        if (!enemy)
+            return nullptr;
 
-void showEvent(QShowEvent* e)override;
+        for (EnemyUI& ui : enemyUIs)
+        {
+            if (ui.enemy == enemy)
+                return &ui;
+        }
 
-void animateAttack(QWidget* attacker, QWidget* target, std::function<void()> onDone = nullptr);
-
+        return nullptr;
+    }
 
 protected:
-    bool eventFilter(QObject *obj, QEvent *event) override;
+    void showEvent(QShowEvent* e) override;
+    bool eventFilter(QObject* obj, QEvent* event) override;
 };
 
 #endif // BATTLEPAGE_H

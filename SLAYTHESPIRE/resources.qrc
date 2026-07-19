@@ -145,6 +145,24 @@
     </qresource>
     <qresource prefix="/Enemy">
         <file>Cultist.png</file>
+        <file>Mugger.png</file>
+        <file>Small Slime.png</file>
+        <file>Jaw Worm.png</file>
+        <file>Medium Slime.png</file>
+        <file>Large Slime.png</file>
+        <file>Looter.png</file>
+        <file>Blue Slaver.png</file>
+        <file>Red Louse.png</file>
+        <file>Green Louse.png</file>
+        <file>Red Slaver.png</file>
+        <file>Spheric Guardian.png</file>
+        <file>Gremlin Nob.png</file>
+        <file>Sentry.png</file>
+        <file>Book of Stabbing.png</file>
+        <file>Taskmaster.png</file>
+        <file>King Slime.png</file>
+        <file>HexaGhost.png</file>
+        <file>The Champ.png</file>
     </qresource>
     <qresource prefix="/new/prefix1"/>
     <qresource prefix="/Effect">
