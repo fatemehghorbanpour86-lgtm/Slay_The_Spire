@@ -7,6 +7,7 @@
 #include <QLayoutItem>
 #include <QSpacerItem>
 
+
 ShopPage::ShopPage(Player *player, QWidget *parent)
     : QWidget(parent),
     player(player),
@@ -310,21 +311,32 @@ QString ShopPage::getPotionImagePath(const QString &potionName)
     return ":/Potion/potionEmpty.png";
 }
 
-void ShopPage::populateInventory()
+static void clearLayout(QLayout *layout)
 {
-    QLayout *oldLayout = inventoryContainer->layout();
+    if (layout == nullptr)
+        return;
 
-    if (oldLayout != nullptr)
+    while (QLayoutItem *item = layout->takeAt(0))
     {
-        QLayoutItem *child = nullptr;
-        while ((child = oldLayout->takeAt(0)) != nullptr)
+        if (QWidget *widget = item->widget())
         {
-            if (child->widget() != nullptr)
-                child->widget()->deleteLater();
-
-            delete child;
+            delete widget;
+        }
+        else if (QLayout *childLayout = item->layout())
+        {
+            clearLayout(childLayout);
         }
 
+        delete item;
+    }
+}
+
+
+void ShopPage::populateInventory()
+{
+    if (QLayout *oldLayout = inventoryContainer->layout())
+    {
+        clearLayout(oldLayout);
         delete oldLayout;
     }
 
@@ -496,7 +508,6 @@ void ShopPage::populateInventory()
 
     mainInvLayout->addLayout(bottomRowLayout);
 
-    inventoryContainer->setLayout(mainInvLayout);
 }
 
 void ShopPage::updateUI()
@@ -558,6 +569,7 @@ void ShopPage::onBuyCard(int index)
     }
 }
 
+
 void ShopPage::onBuyPotion(int index)
 {
     if (shopLogic->buyPotion(player, index))
@@ -569,6 +581,7 @@ void ShopPage::onBuyPotion(int index)
         qDebug() << "Not enough gold to buy potion.";
     }
 }
+
 
 void ShopPage::positionGreetingActors()
 {
