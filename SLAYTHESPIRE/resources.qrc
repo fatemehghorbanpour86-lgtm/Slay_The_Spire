@@ -197,4 +197,11 @@
         <file>PotionReward.png</file>
         <file>RewardViewer.png</file>
     </qresource>
+    <qresource prefix="/Treasure">
+        <file>Money.png</file>
+        <file>TreasureBackground.png</file>
+        <file>ChestClose.png</file>
+        <file>ChestOpen.png</file>
+        <file>ProceedBtn.png</file>
+    </qresource>
 </RCC>
