@@ -1190,8 +1190,11 @@ void BattlePage::updateEnemyIntent(Enemy* enemy)
             return;
 
         if (enemy->isDead())
+        {
             ui.intentLabel->setText("Defeated");
-        else
+            continue;
+        }
+
             ui.intentLabel->setText(getIntentText(enemy));
 
         return;
@@ -1228,8 +1231,6 @@ void BattlePage::showEnemyHighlights()
 
         if (ui.enemy->isDead())
         {
-            if (ui.clickOverlay)
-            {
                 ui.widget->setEnabled(false);
                 ui.widget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
@@ -1240,7 +1241,7 @@ void BattlePage::showEnemyHighlights()
                 ui.clickOverlay->setEnabled(false);
                 ui.clickOverlay->setAttribute(Qt::WA_TransparentForMouseEvents, true);
                 ui.clickOverlay->hide();
-            }
+
             continue;
         }
 
