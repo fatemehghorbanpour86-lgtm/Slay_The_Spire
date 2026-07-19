@@ -21,6 +21,7 @@ class Player;
 class Map;
 class Enemy;
 class PauseDialog;
+class TreasurePage;
 
 
 class GameManager : public QObject
@@ -54,6 +55,7 @@ private:
     BattlePage*   battlePage   = nullptr;
     CampfirePage* campfirePage = nullptr;
     RewardPage*   rewardPage   = nullptr;
+    TreasurePage* treasurePage = nullptr;
 
     // ---- Run state ----
     QString currentUsername;
@@ -80,13 +82,13 @@ private:
     void showRewardPage(RewardSystem* rewardSystem);
     void showBattlePage(const QVector<Enemy*>& enemies);
 
-    void cleanupTransientPages(); // battlePage / rewardPage / campfirePage
+    void cleanupTransientPages(); // battlePage / rewardPage / campfirePage / TreasurePage
 
     // ---- Hooks for pages that don't exist yet ----
     // (Not implemented on purpose - wire the real UI to these once it exists.)
     void showShopPage();
+    void showTreasurePage();
     void showEventPage();
-    void handleTreasureNode();
     void showVictoryPage();
     void showDefeatPage();
     void updateLeaderboard();
@@ -117,6 +119,7 @@ private:
     void onRewardContinue();
     void onBossDefeated();
     void onCampfireLeft();
+    void onTreasureFinished();
     void onMapPauseRequested();
 
     // Hook: connect this to the (future) Defeat/Victory page's

@@ -13,6 +13,7 @@
 #include "savemanager.h"
 #include "enemy.h"
 #include "pauseviewer.h"
+#include "treasurepage.h"
 #include <QRandomGenerator>
 #include <QMessageBox>
 
@@ -172,6 +173,13 @@ void GameManager::cleanupTransientPages()
         campfirePage->deleteLater();
         campfirePage = nullptr;
     }
+
+    if (treasurePage)
+    {
+        stackedWidget->removeWidget(treasurePage);
+        treasurePage->deleteLater();
+        treasurePage = nullptr;
+    }
 }
 
 // ============================================================
@@ -199,10 +207,21 @@ void GameManager::showEventPage()
     returnToMapAndAutosave();
 }
 
-void GameManager::handleTreasureNode()
+void GameManager::showTreasurePage()
 {
-    // TODO: Treasure room reward/UI not implemented yet.
-    returnToMapAndAutosave();
+    if (treasurePage)
+    {
+        stackedWidget->removeWidget(treasurePage);
+        treasurePage->deleteLater();
+        treasurePage = nullptr;
+    }
+
+    treasurePage = new TreasurePage(player, map, nullptr);
+    stackedWidget->addWidget(treasurePage);
+
+    connect(treasurePage, &TreasurePage::treasureFinished, this, &GameManager::onTreasureFinished);
+
+    stackedWidget->setCurrentWidget(treasurePage);
 }
 
 void GameManager::showVictoryPage()
@@ -492,31 +511,37 @@ void GameManager::onMapNodeEntered(NodeType type)
     switch (type)
     {
     case NodeType::Monster:
-        startBattle(selectNormalEncounter(), EncounterKind::Normal);
+        //startBattle(selectNormalEncounter(), EncounterKind::Normal);
+         returnToMapAndAutosave();
         break;
 
     case NodeType::Elite:
-        startBattle(selectEliteEncounter(), EncounterKind::Elite);
+        //startBattle(selectEliteEncounter(), EncounterKind::Elite);
+         returnToMapAndAutosave();
         break;
 
     case NodeType::Boss:
-        startBattle(selectBossEncounter(), EncounterKind::Boss);
+        //startBattle(selectBossEncounter(), EncounterKind::Boss);
+         returnToMapAndAutosave();
         break;
 
     case NodeType::Campfire:
-        showCampfirePage();
+        //showCampfirePage();
+         returnToMapAndAutosave();
         break;
 
     case NodeType::Shop:
-        showShopPage();
+        //showShopPage();
+         returnToMapAndAutosave();
         break;
 
     case NodeType::Event:
-        showEventPage();
+        //showEventPage();
+         returnToMapAndAutosave();
         break;
 
     case NodeType::Treasure:
-        handleTreasureNode();
+        showTreasurePage();
         break;
     }
 }
@@ -600,6 +625,11 @@ void GameManager::onBossDefeated()
 }
 
 void GameManager::onCampfireLeft()
+{
+    returnToMapAndAutosave();
+}
+
+void GameManager::onTreasureFinished()
 {
     returnToMapAndAutosave();
 }
