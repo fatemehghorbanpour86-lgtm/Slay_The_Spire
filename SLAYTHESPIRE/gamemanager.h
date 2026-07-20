@@ -22,6 +22,7 @@ class Map;
 class Enemy;
 class PauseDialog;
 class TreasurePage;
+class ShopPage;
 
 
 class GameManager : public QObject
@@ -56,6 +57,7 @@ private:
     CampfirePage* campfirePage = nullptr;
     RewardPage*   rewardPage   = nullptr;
     TreasurePage* treasurePage = nullptr;
+    ShopPage*     shopPage     = nullptr;
 
     // ---- Run state ----
     QString currentUsername;

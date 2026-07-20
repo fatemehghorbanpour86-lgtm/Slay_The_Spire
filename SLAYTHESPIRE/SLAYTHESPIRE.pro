@@ -16,6 +16,7 @@ SOURCES += \
     campfire.cpp \
     campfirepage.cpp \
     card.cpp \
+    cardremovaldialog.cpp \
     cardselection.cpp \
     combatcalculator.cpp \
     combatdeck.cpp \
@@ -43,6 +44,7 @@ SOURCES += \
     normalenemies.cpp \
     normalrelics.cpp \
     pauseviewer.cpp \
+    pileviewerdialog.cpp \
     player.cpp \
     potion.cpp \
     powercard.cpp \
@@ -56,6 +58,7 @@ SOURCES += \
     savemanager.cpp \
     settingpage.cpp \
     shop.cpp \
+    shoppage.cpp \
     skillcards.cpp \
     splashpage.cpp \
     character.cpp \
@@ -73,6 +76,7 @@ HEADERS += \
     campfire.h \
     campfirepage.h \
     card.h \
+    cardremovaldialog.h \
     cardselection.h \
     combatcalculator.h \
     combatdeck.h \
@@ -100,6 +104,7 @@ HEADERS += \
     normalrelics.h \
     outlinedlabel.h \
     pauseviewer.h \
+    pileviewerdialog.h \
     player.h \
     potion.h \
     powercard.h \
@@ -113,6 +118,7 @@ HEADERS += \
     savemanager.h \
     settingpage.h \
     shop.h \
+    shoppage.h \
     skillcards.h \
     splashpage.h \
     character.h \

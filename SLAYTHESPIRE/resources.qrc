@@ -24,6 +24,10 @@
         <file>defendIcon.png</file>
         <file>SettingPushButton.png</file>
         <file>ChangeUsernameViewer.png</file>
+        <file>shop_background.png</file>
+        <file>cardRemoval.png</file>
+        <file>Merchant.png</file>
+        <file>sold_out.png</file>
     </qresource>
     <qresource prefix="/map">
         <file>boss_champ.png</file>
