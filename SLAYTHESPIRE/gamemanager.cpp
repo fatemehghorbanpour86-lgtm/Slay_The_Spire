@@ -17,11 +17,12 @@
 
 #include <QRandomGenerator>
 #include <QMessageBox>
-
+/*
 namespace
 {
 constexpr bool FORCE_SHOP_FOR_DEBUG = true;
 }
+*/
 
 
 
@@ -510,7 +511,7 @@ void GameManager::onSettingsRequested()
 
 void GameManager::onMapNodeEntered(NodeType type)
 {
-
+  /*
     if (FORCE_SHOP_FOR_DEBUG)
     {
         Q_UNUSED(type);
@@ -518,6 +519,7 @@ void GameManager::onMapNodeEntered(NodeType type)
         showShopPage();
         return;
     }
+*/
 
 
     switch (type)

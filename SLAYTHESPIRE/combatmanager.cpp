@@ -271,10 +271,8 @@ void CombatManager::handleEnemyTurn()
 
 void CombatManager::checkWinLossCondition()
 {
-    if (enemies.isEmpty())
+    if (!player)
     {
-        emit combatEnded(true);
-        changeState(CombatState::BattleWon);
         return;
     }
 
@@ -282,8 +280,27 @@ void CombatManager::checkWinLossCondition()
     {
         emit combatEnded(false);
         changeState(CombatState::BattleLost);
+        return;
+    }
+
+    bool hasAliveEnemy = false;
+
+    for (Enemy* enemy : std::as_const(enemies))
+    {
+        if (enemy && !enemy->isDead())
+        {
+            hasAliveEnemy = true;
+            break;
+        }
+    }
+
+    if (!hasAliveEnemy)
+    {
+        emit combatEnded(true);
+        changeState(CombatState::BattleWon);
     }
 }
+
 
 
 void CombatManager::connectEnemy(Enemy* enemy)
@@ -295,15 +312,16 @@ void CombatManager::connectEnemy(Enemy* enemy)
 void CombatManager::onEnemyDied(Enemy* enemy)
 {
     if (!enemy)
+    {
         return;
+    }
 
     player->getRelicSystem().onEnemyDeath(player, enemy);
 
-    enemies.removeOne(enemy);
-
-    enemy->deleteLater();
-
+    // Keep the dead enemy in the enemies vector.
+    // The UI may still need it to display the death state.
     emit statsUpdated();
 
     checkWinLossCondition();
 }
+
