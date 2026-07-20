@@ -16,6 +16,7 @@ SOURCES += \
     campfire.cpp \
     campfirepage.cpp \
     card.cpp \
+    cardremovaldialog.cpp \
     cardselection.cpp \
     combatcalculator.cpp \
     combatdeck.cpp \
@@ -71,6 +72,7 @@ HEADERS += \
     campfire.h \
     campfirepage.h \
     card.h \
+    cardremovaldialog.h \
     cardselection.h \
     combatcalculator.h \
     combatdeck.h \

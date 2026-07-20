@@ -1,11 +1,13 @@
 #include "ShopPage.h"
 
+#include "cardremovaldialog.h"
 #include "potion.h"
 #include "deckviewer.h"
 
 #include <QDebug>
 #include <QLayoutItem>
 #include <QSpacerItem>
+#include"Player.h"
 
 
 ShopPage::ShopPage(Player *player, QWidget *parent)
@@ -13,6 +15,7 @@ ShopPage::ShopPage(Player *player, QWidget *parent)
     player(player),
     shopLogic(new Shop())
 {
+    player->gainGold(500);
     shopLogic->generateStock();
 
     mainLayout = new QVBoxLayout(this);
@@ -466,45 +469,104 @@ void ShopPage::populateInventory()
     removalLayout->setSpacing(5);
     removalLayout->setAlignment(Qt::AlignCenter);
 
+
     QPushButton *remBtn = new QPushButton(removalWidget);
     remBtn->setFixedSize(150, 190);
-    remBtn->setIcon(QIcon(":/cardRemoval.png"));
-    remBtn->setIconSize(QSize(130, 170));
-    remBtn->setStyleSheet(
-        "QPushButton {"
-        "   background: transparent;"
-        "   border: 2px dashed rgba(255,255,255,60);"
-        "   border-radius: 10px;"
-        "}"
-        "QPushButton:hover {"
-        "   border: 2px dashed rgba(255,215,0,100);"
-        "   background: rgba(255,255,255,10);"
-        "}"
-        );
 
-    QLabel *remPrice = new QLabel(
-        QString::number(player->getCardRemovalCost()) + " G",
-        removalWidget
-        );
+    // Check if the card removal service has already been purchased
+    if (cardRemovalSold)
+    {
+        // Apply "Sold Out" visual state
+        remBtn->setIcon(QIcon(":/sold_out.png"));
+        remBtn->setIconSize(QSize(130, 170));
+        remBtn->setEnabled(false);
+        remBtn->setStyleSheet("background: transparent; border: none;");
+    }
+    else
+    {
+        // Apply active state with hover effects
+        remBtn->setIcon(QIcon(":/cardRemoval.png"));
+        remBtn->setIconSize(QSize(130, 170));
+        remBtn->setStyleSheet(
+            "QPushButton {"
+            "   background: transparent;"
+            "   border: 2px dashed rgba(255,255,255,60);"
+            "   border-radius: 10px;"
+            "}"
+            "QPushButton:hover {"
+            "   border: 2px dashed rgba(255,215,0,100);"
+            "   background: rgba(255,255,255,10);"
+            "}"
+            );
+    }
+
+    QLabel *remPrice = new QLabel(removalWidget);
+
+    // Update price label based on availability
+    if (cardRemovalSold)
+    {
+        remPrice->setText("SOLD");
+        remPrice->setStyleSheet("color: #ff4500; font-size: 14px; font-weight: bold;");
+    }
+    else
+    {
+        remPrice->setText(QString::number(player->getCardRemovalCost()) + " G");
+        remPrice->setStyleSheet("color: #f5c518; font-size: 13px; font-weight: bold;");
+    }
 
     remPrice->setAlignment(Qt::AlignCenter);
-    remPrice->setStyleSheet(
-        "color: #f5c518;"
-        "font-size: 13px;"
-        "font-weight: bold;"
-        "background: transparent;"
-        );
 
-    removalLayout->addWidget(remBtn, 0, Qt::AlignCenter);
-    removalLayout->addWidget(remPrice, 0, Qt::AlignCenter);
+    removalLayout->addWidget(remBtn);
+    removalLayout->addWidget(remPrice);
 
     bottomRowLayout->addWidget(removalWidget);
-    //bottomRowLayout->addStretch();
+    bottomRowLayout->addStretch();
 
-    connect(remBtn, &QPushButton::clicked, this, []()
+    // Connect the button click signal
+    connect(remBtn, &QPushButton::clicked, this, [this]()
             {
-                qDebug() << "Opening Card Removal UI...";
+                // Safety check: do nothing if already sold
+                if (cardRemovalSold)
+                {
+                    return;
+                }
+
+                int cost = player->getCardRemovalCost();
+
+                // Check if player has sufficient gold
+                if (player->getGold() < cost)
+                {
+                    qDebug() << "Insufficient gold for card removal.";
+                    return;
+                }
+
+                // Open the modal removal dialog
+                CardRemovalDialog dialog(player, this);
+
+                if (dialog.exec() == QDialog::Accepted)
+                {
+                    Card* cardToRemove = dialog.getSelectedCard();
+
+                    if (cardToRemove)
+                    {
+                        // Execute the removal logic through the shop logic controller
+                        if (shopLogic->removeCard(player, cardToRemove))
+                        {
+                            qDebug() << "Card successfully removed from Master Deck.";
+
+                            // Set the flag to true so it shows "Sold Out" on next UI update
+                            cardRemovalSold = true;
+
+                            // Safely trigger UI refresh to avoid widget-in-use crashes
+                            QMetaObject::invokeMethod(this, [this]()
+                                                      {
+                                                          updateUI();
+                                                      }, Qt::QueuedConnection);
+                        }
+                    }
+                }
             });
+
 
     mainInvLayout->addLayout(bottomRowLayout);
 

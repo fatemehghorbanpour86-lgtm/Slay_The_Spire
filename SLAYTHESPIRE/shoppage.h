@@ -40,6 +40,8 @@ private:
     void positionGreetingActors();
     QString getPotionImagePath(const QString &potionName);
 
+    bool cardRemovalSold = false;
+
 private:
     ShopState currentState = ShopState::Greeting;
 
