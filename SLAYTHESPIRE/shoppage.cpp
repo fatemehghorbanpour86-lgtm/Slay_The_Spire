@@ -3,11 +3,11 @@
 #include "cardremovaldialog.h"
 #include "potion.h"
 #include "deckviewer.h"
+#include "PileViewerDialog.h"
 
 #include <QDebug>
 #include <QLayoutItem>
 #include <QSpacerItem>
-#include"Player.h"
 
 
 ShopPage::ShopPage(Player *player, QWidget *parent)
@@ -15,7 +15,6 @@ ShopPage::ShopPage(Player *player, QWidget *parent)
     player(player),
     shopLogic(new Shop())
 {
-    player->gainGold(500);
     shopLogic->generateStock();
 
     mainLayout = new QVBoxLayout(this);
@@ -181,16 +180,40 @@ void ShopPage::setupTopBar()
         ));
     mapIcon->setAlignment(Qt::AlignCenter);
 
-    QLabel *deckIcon = new QLabel(topBar);
-    deckIcon->setFixedSize(45, 45);
-    deckIcon->setStyleSheet("background: transparent;");
-    deckIcon->setPixmap(QPixmap(":/deckIcon.png").scaled(
-        45,
-        45,
+    QPushButton *deckBtn = new QPushButton(topBar);
+    deckBtn->setFixedSize(45, 45);
+    deckBtn->setCursor(Qt::PointingHandCursor);
+    deckBtn->setIcon(QIcon(QPixmap(":/deckIcon.png").scaled(
+        45, 45,
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
-        ));
-    deckIcon->setAlignment(Qt::AlignCenter);
+        )));
+    deckBtn->setIconSize(QSize(45, 45));
+    deckBtn->setStyleSheet(
+        "QPushButton {"
+        "   background: transparent;"
+        "   border: none;"
+        "}"
+        );
+
+    // Deck Count Label
+    deckCountLabel = new QLabel(topBar);
+    deckCountLabel->setStyleSheet(
+        "color: #f5c518;"
+        "font-size: 14px;"
+        "font-weight: bold;"
+        "background: transparent;"
+        "margin-left: -8px;"
+        );
+
+    if (player && player->getMasterDeck())
+    {
+        deckCountLabel->setText(QString::number(player->getMasterDeck()->getCards().size()));
+    }
+    else
+    {
+        deckCountLabel->setText("0");
+    }
 
     QLabel *settingsIcon = new QLabel(topBar);
     settingsIcon->setFixedSize(45, 45);
@@ -204,7 +227,8 @@ void ShopPage::setupTopBar()
     settingsIcon->setAlignment(Qt::AlignCenter);
 
     rightGroup->addWidget(mapIcon);
-    rightGroup->addWidget(deckIcon);
+    rightGroup->addWidget(deckBtn);
+    rightGroup->addWidget(deckCountLabel);
     rightGroup->addWidget(settingsIcon);
 
     // ===== Assemble =====
@@ -215,6 +239,15 @@ void ShopPage::setupTopBar()
     layout->addLayout(rightGroup);
 
     topBar->setLayout(layout);
+
+    connect(deckBtn, &QPushButton::clicked, this, [this]()
+            {
+                if (player)
+                {
+                    PileViewerDialog dialog(player, PileType::Deck, this);
+                    dialog.exec();
+                }
+            });
 }
 
 void ShopPage::setupShopField()
@@ -558,10 +591,7 @@ void ShopPage::populateInventory()
                             cardRemovalSold = true;
 
                             // Safely trigger UI refresh to avoid widget-in-use crashes
-                            QMetaObject::invokeMethod(this, [this]()
-                                                      {
-                                                          updateUI();
-                                                      }, Qt::QueuedConnection);
+                            this->updateUI();
                         }
                     }
                 }
@@ -616,6 +646,18 @@ void ShopPage::updateUI()
                 .arg(player->getCurrentHealth())
                 .arg(player->getMaxHealth())
             );
+    }
+
+    if (deckCountLabel)
+    {
+        if (player && player->getMasterDeck())
+        {
+            deckCountLabel->setText(QString::number(player->getMasterDeck()->getCards().size()));
+        }
+        else
+        {
+            deckCountLabel->setText("0");
+        }
     }
 }
 

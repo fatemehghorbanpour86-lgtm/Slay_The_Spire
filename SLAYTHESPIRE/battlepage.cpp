@@ -8,6 +8,8 @@
 #include "outlinedlabel.h"
 #include "qtimer.h"
 
+#include "PileViewerDialog.h"
+
 #include <QPropertyAnimation>
 #include <QGraphicsProxyWidget>
 #include <QGraphicsView>
@@ -197,15 +199,40 @@ void BattlePage::setupTopBar()
     mapIcon->setAlignment(Qt::AlignCenter);
 
 
-    QLabel *deckIcon = new QLabel(topBar);
-    deckIcon->setFixedSize(45, 45);
-    deckIcon->setStyleSheet("background: transparent;");
-    deckIcon->setPixmap(QPixmap(":/deckIcon.png").scaled(
-        45,45,
+    QPushButton *deckBtn = new QPushButton(topBar);
+    deckBtn->setFixedSize(45, 45);
+    deckBtn->setCursor(Qt::PointingHandCursor);
+    deckBtn->setIcon(QIcon(QPixmap(":/deckIcon.png").scaled(
+        45, 45,
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
-        ));
-    deckIcon->setAlignment(Qt::AlignCenter);
+        )));
+    deckBtn->setIconSize(QSize(45, 45));
+    deckBtn->setStyleSheet(
+        "QPushButton {"
+        "   background: transparent;"
+        "   border: none;"
+        "}"
+        );
+
+    // Deck Count Label
+    deckCountLabel = new QLabel(topBar);
+    deckCountLabel->setStyleSheet(
+        "color: #f5c518;"
+        "font-size: 14px;"
+        "font-weight: bold;"
+        "background: transparent;"
+        "margin-left: -8px;"
+        );
+    if (player && player->getMasterDeck())
+    {
+        deckCountLabel->setText(QString::number(player->getMasterDeck()->getCards().size()));
+    }
+    else
+    {
+        deckCountLabel->setText("0");
+    }
+
 
     QLabel *settingsIcon = new QLabel(topBar);
     settingsIcon->setFixedSize(45, 45);
@@ -218,7 +245,7 @@ void BattlePage::setupTopBar()
     settingsIcon->setAlignment(Qt::AlignCenter);
 
     rightGroup->addWidget(mapIcon);
-    rightGroup->addWidget(deckIcon);
+    rightGroup->addWidget(deckBtn);
     rightGroup->addWidget(settingsIcon);
 
     // ===== Assemble =====
@@ -227,6 +254,12 @@ void BattlePage::setupTopBar()
     layout->addLayout(centerGroup);
     layout->addStretch();
     layout->addLayout(rightGroup);
+
+    connect(deckBtn, &QPushButton::clicked, this, [this]()
+            {
+                PileViewerDialog dialog(player, PileType::Deck, this);
+                dialog.exec();
+            });
 }
 
 
@@ -634,6 +667,7 @@ void BattlePage::setupBottomBar()
 
 
 }
+
 bool BattlePage::eventFilter(QObject* obj, QEvent* event)
 {
     // --- Enemy widget clicked as target ---
@@ -937,6 +971,18 @@ void BattlePage::updateStats()
             discardPileCountLabel->setText("0");
     }
 
+    if (deckCountLabel)
+    {
+        if (player && player->getMasterDeck())
+        {
+            deckCountLabel->setText(QString::number(player->getMasterDeck()->getCards().size()));
+        }
+        else
+        {
+            deckCountLabel->setText("0");
+        }
+    }
+
     updateEffectsUI();
 }
 
@@ -1126,12 +1172,14 @@ void BattlePage::onBattleLost()
 
 void BattlePage::onDrawPileClicked()
 {
-    // TODO: نمایش کارت‌های draw pile
+    PileViewerDialog dialog(player, PileType::Draw, this);
+    dialog.exec();
 }
 
 void BattlePage::onDiscardPileClicked()
 {
-    // TODO: نمایش کارت‌های discard pile
+    PileViewerDialog dialog(player, PileType::Discard, this);
+    dialog.exec();
 }
 
 

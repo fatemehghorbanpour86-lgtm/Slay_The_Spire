@@ -65,6 +65,7 @@ private:
 
     // Top bar labels
     QLabel *playerHpLabel;
+    QLabel *deckCountLabel = nullptr;
     QLabel *goldValueLabel;
     QLabel *bg;
 

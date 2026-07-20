@@ -43,6 +43,7 @@ SOURCES += \
     masterdeck.cpp \
     normalenemies.cpp \
     normalrelics.cpp \
+    pileviewerdialog.cpp \
     player.cpp \
     potion.cpp \
     powercard.cpp \
@@ -99,6 +100,7 @@ HEADERS += \
     normalenemies.h \
     normalrelics.h \
     outlinedlabel.h \
+    pileviewerdialog.h \
     player.h \
     potion.h \
     powercard.h \

@@ -84,6 +84,7 @@ private:
     QLabel* playerHpLabel = nullptr;
     QLabel* playerBlockLabel = nullptr;
     QLabel* goldValueLabel = nullptr;
+    QLabel* deckCountLabel = nullptr;
     OutlinedLabel* energyValueLabel = nullptr;
     QProgressBar* playerHPBar = nullptr;
 

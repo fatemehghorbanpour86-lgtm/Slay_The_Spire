@@ -24,6 +24,7 @@ constexpr bool FORCE_SHOP_FOR_DEBUG = true;
 }
 
 
+
 GameManager::GameManager(QStackedWidget* stackedWidget, QObject* parent)
     : QObject(parent), stackedWidget(stackedWidget)
 {
@@ -509,6 +510,7 @@ void GameManager::onSettingsRequested()
 
 void GameManager::onMapNodeEntered(NodeType type)
 {
+
     if (FORCE_SHOP_FOR_DEBUG)
     {
         Q_UNUSED(type);
@@ -516,6 +518,7 @@ void GameManager::onMapNodeEntered(NodeType type)
         showShopPage();
         return;
     }
+
 
     switch (type)
     {
