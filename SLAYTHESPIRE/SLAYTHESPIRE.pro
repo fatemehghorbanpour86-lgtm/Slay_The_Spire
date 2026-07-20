@@ -28,6 +28,7 @@ SOURCES += \
     enemy.cpp \
     enemyfactory.cpp \
     event.cpp \
+    eventmanager.cpp \
     eventrelics.cpp \
     eventsystem.cpp \
     gamemanager.cpp \
@@ -88,6 +89,7 @@ HEADERS += \
     enemy.h \
     enemyfactory.h \
     event.h \
+    eventmanager.h \
     eventrelics.h \
     eventsystem.h \
     gamemanager.h \
