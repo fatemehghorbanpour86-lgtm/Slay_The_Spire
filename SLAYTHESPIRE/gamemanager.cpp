@@ -17,13 +17,6 @@
 
 #include <QRandomGenerator>
 #include <QMessageBox>
-/*
-namespace
-{
-constexpr bool FORCE_SHOP_FOR_DEBUG = true;
-}
-*/
-
 
 
 GameManager::GameManager(QStackedWidget* stackedWidget, QObject* parent)
@@ -511,16 +504,6 @@ void GameManager::onSettingsRequested()
 
 void GameManager::onMapNodeEntered(NodeType type)
 {
-  /*
-    if (FORCE_SHOP_FOR_DEBUG)
-    {
-        Q_UNUSED(type);
-
-        showShopPage();
-        return;
-    }
-*/
-
 
     switch (type)
     {

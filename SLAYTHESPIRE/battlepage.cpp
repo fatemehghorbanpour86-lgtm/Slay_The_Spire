@@ -216,22 +216,6 @@ void BattlePage::setupTopBar()
         );
 
     // Deck Count Label
-    deckCountLabel = new QLabel(topBar);
-    deckCountLabel->setStyleSheet(
-        "color: #f5c518;"
-        "font-size: 14px;"
-        "font-weight: bold;"
-        "background: transparent;"
-        "margin-left: -8px;"
-        );
-    if (player && player->getMasterDeck())
-    {
-        deckCountLabel->setText(QString::number(player->getMasterDeck()->getCards().size()));
-    }
-    else
-    {
-        deckCountLabel->setText("0");
-    }
 
 
     QLabel *settingsIcon = new QLabel(topBar);
@@ -969,18 +953,6 @@ void BattlePage::updateStats()
 
         if (discardPileCountLabel)
             discardPileCountLabel->setText("0");
-    }
-
-    if (deckCountLabel)
-    {
-        if (player && player->getMasterDeck())
-        {
-            deckCountLabel->setText(QString::number(player->getMasterDeck()->getCards().size()));
-        }
-        else
-        {
-            deckCountLabel->setText("0");
-        }
     }
 
     updateEffectsUI();

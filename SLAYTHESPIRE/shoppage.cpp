@@ -197,23 +197,6 @@ void ShopPage::setupTopBar()
         );
 
     // Deck Count Label
-    deckCountLabel = new QLabel(topBar);
-    deckCountLabel->setStyleSheet(
-        "color: #f5c518;"
-        "font-size: 14px;"
-        "font-weight: bold;"
-        "background: transparent;"
-        "margin-left: -8px;"
-        );
-
-    if (player && player->getMasterDeck())
-    {
-        deckCountLabel->setText(QString::number(player->getMasterDeck()->getCards().size()));
-    }
-    else
-    {
-        deckCountLabel->setText("0");
-    }
 
     QLabel *settingsIcon = new QLabel(topBar);
     settingsIcon->setFixedSize(45, 45);
@@ -648,17 +631,6 @@ void ShopPage::updateUI()
             );
     }
 
-    if (deckCountLabel)
-    {
-        if (player && player->getMasterDeck())
-        {
-            deckCountLabel->setText(QString::number(player->getMasterDeck()->getCards().size()));
-        }
-        else
-        {
-            deckCountLabel->setText("0");
-        }
-    }
 }
 
 void ShopPage::onBuyCard(int index)
