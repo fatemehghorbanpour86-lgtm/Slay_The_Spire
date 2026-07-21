@@ -18,6 +18,12 @@
 
 #include "cursecards.h"
 
+#include "campfire.h"
+
+#include "upgradecards.h"
+
+#include <QWidget>
+
 #include <QRandomGenerator>
 
 Event::Event(const QString& name, const QString& description)
@@ -68,52 +74,41 @@ OminousForge::OminousForge()
 }
 
 
-void OminousForge::chooseOption(Player* player, int optionIndex)
+bool OminousForge::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
     if (player == nullptr)
-        return;
+        return false;
 
     switch (optionIndex)
     {
     case 0:
-        handleForge(player);
-        break;
+        return handleForge(player, parentWidget);
     case 1:
         handleRummage(player);
-        break;
+        return true;
     case 2:
         // [Leave]: Nothing happens.
-        break;
+        return true;
     default:
-        break;
+        return false;
     }
 }
 
 
-void OminousForge::handleForge(Player* player)
+bool OminousForge::handleForge(Player* player, QWidget* parentWidget)
 {
     MasterDeck* deck = player->getMasterDeck();
     if (deck == nullptr || deck->getCardCount() == 0)
-        return;
+        return true;
 
-    // TODO (UI): Let the player pick a specific card to upgrade.
-    // The UI should display all upgradeable cards from MasterDeck,
-    // wait for selection, then call card->upgrade().
-    // For now, pick a random upgradeable card.
+    Campfire campfireLogic;
 
-    QVector<Card*> upgradeable;
+    UpgradeCardsDialog dialog(player, &campfireLogic, parentWidget);
 
-    for (Card* card : deck->getCards())
-    {
-        if (card != nullptr && !card->getIsUpgraded())
-            upgradeable.append(card);
-    }
+    if (dialog.exec() != QDialog::Accepted)
+        return false;
 
-    if (upgradeable.isEmpty())
-        return;
-
-    int index = QRandomGenerator::global()->bounded(upgradeable.size());
-    upgradeable[index]->upgrade();
+    return true;
 }
 
 void OminousForge::handleRummage(Player* player)
@@ -140,21 +135,23 @@ GoldenIdol::GoldenIdol()
 }
 
 
-void GoldenIdol::chooseOption(Player* player, int optionIndex)
+bool GoldenIdol::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
+    Q_UNUSED(parentWidget)
+
     if (player == nullptr)
-        return;
+        return false;
 
     switch (optionIndex)
     {
     case 0:
         handleSteal(player);
-        break;
+        return true;
     case 1:
         // [Leave]: Nothing happens.
-        break;
+        return true;
     default:
-        break;
+        return false;
     }
 }
 
@@ -182,24 +179,26 @@ Augmenter::Augmenter()
 }
 
 
-void Augmenter::chooseOption(Player* player, int optionIndex)
+bool Augmenter::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
+    Q_UNUSED(parentWidget)
+
     if (player == nullptr)
-        return;
+        return false;
 
     switch (optionIndex)
     {
     case 0:
         handleTestJAX(player);
-        break;
+        return true;
     case 1:
         handleBecomeTestSubject(player);
-        break;
+        return true;
     case 2:
         handleIngestMutagens(player);
-        break;
+        return true;
     default:
-        break;
+        return false;
     }
 }
 
@@ -261,27 +260,29 @@ FaceTrader::FaceTrader()
 }
 
 
-void FaceTrader::chooseOption(Player* player, int optionIndex)
+bool FaceTrader::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
+    Q_UNUSED(parentWidget)
+
     if (player == nullptr)
-        return;
+        return false;
 
     switch (optionIndex)
     {
     case 0:
         handleTouch(player);
-        break;
+        return true;
 
     case 1:
         handleTrade(player);
-        break;
+        return true;
 
     case 2:
         // [Leave]: Nothing happens.
-        break;
+        return true;
 
     default:
-        break;
+        return false;
     }
 }
 
@@ -332,28 +333,30 @@ TheCleric::TheCleric()
 }
 
 
-void TheCleric::chooseOption(Player* player, int optionIndex)
+bool TheCleric::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
+    Q_UNUSED(parentWidget)
+
     if (player == nullptr)
-        return;
+        return false;
 
     switch (optionIndex)
     {
     case 0:
 
         handleHeal(player);
-        break;
+        return true;
     case 1:
 
         handlePurify(player);
-        break;
+        return true;
     case 2:
 
         // [Leave]: Nothing happens.
-        break;
+        return true;
 
     default:
-        break;
+        return false;
     }
 }
 
@@ -409,21 +412,23 @@ GoldenShrine::GoldenShrine()
 }
 
 
-void GoldenShrine::chooseOption(Player* player, int optionIndex)
+bool GoldenShrine::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
+    Q_UNUSED(parentWidget)
+
     if (player == nullptr)
-        return;
+        return false;
 
     switch (optionIndex)
     {
     case 0:
         handlePray(player);
-        break;
+        return true;
     case 1:
         // [Leave]: Nothing happens.
-        break;
+        return true;
     default:
-        break;
+        return false;
     }
 }
 
@@ -448,25 +453,27 @@ TheJoust::TheJoust()
 }
 
 
-void TheJoust::chooseOption(Player* player, int optionIndex)
+bool TheJoust::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
+    Q_UNUSED(parentWidget)
+
     if (player == nullptr)
-        return;
+        return false;
 
     switch (optionIndex)
     {
     case 0:
 
         handleMurderer(player);
-        break;
+        return true;
 
     case 1:
 
         handleOwner(player);
-        break;
+        return true;
 
     default:
-        break;
+        return false;
     }
 }
 
@@ -512,24 +519,26 @@ PleadingVagrant::PleadingVagrant()
 }
 
 
-void PleadingVagrant::chooseOption(Player* player, int optionIndex)
+bool PleadingVagrant::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
+    Q_UNUSED(parentWidget)
+
     if (player == nullptr)
-        return;
+        return false;
 
     switch (optionIndex)
     {
     case 0:
         handleGiveGold(player);
-        break;
+        return true;
     case 1:
         handleRob(player);
-        break;
+        return true;
     case 2:
         // [Leave]: Nothing happens.
-        break;
+        return true;
     default:
-        break;
+        return false;
     }
 }
 
@@ -599,19 +608,21 @@ Colosseum::Colosseum(QObject* parent)
 }
 
 
-void Colosseum::chooseOption(Player* player, int optionIndex)
+bool Colosseum::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
+    Q_UNUSED(parentWidget)
+
     if (player == nullptr)
-        return;
+        return false;
 
     switch (optionIndex)
     {
     case 0:
         handleFight(player);
-        break;
+        return true;
 
     default:
-        break;
+        return false;
     }
 }
 

@@ -4,7 +4,7 @@
 #include <QString>
 #include <QVector>
 #include <QObject>
-
+#include <QWidget>
 
 class Player;
 class Enemy;
@@ -42,7 +42,7 @@ public:
 
     virtual void start(Player* player);
 
-    virtual void chooseOption(Player* player, int optionIndex) = 0;
+    virtual bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) = 0;
 
     //----------------------------------
     // Getters
@@ -60,11 +60,11 @@ class OminousForge : public Event
 {
 public:
     OminousForge();
-    void chooseOption(Player* player, int optionIndex) override;
+    bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) override;
 
 private:
     // [Forge]: Upgrade a card from MasterDeck
-    void handleForge(Player* player);
+    bool handleForge(Player* player, QWidget* parentWidget);
 
     // [Rummage]: Gain WarpedTongs relic + receive a Curse card
     void handleRummage(Player* player);
@@ -77,7 +77,7 @@ public:
 
     GoldenIdol();
 
-    void chooseOption(Player* player, int optionIndex) override;
+    bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) override;
 
 private:
 
@@ -89,7 +89,7 @@ class Augmenter : public Event
 {
 public:
     Augmenter();
-    void chooseOption(Player* player, int optionIndex) override;
+    bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) override;
 
 private:
 
@@ -105,7 +105,7 @@ class FaceTrader : public Event
 {
 public:
     FaceTrader();
-    void chooseOption(Player* player, int optionIndex) override;
+    bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) override;
 
 private:
 
@@ -118,7 +118,7 @@ class TheCleric : public Event
 {
 public:
     TheCleric();
-    void chooseOption(Player* player, int optionIndex) override;
+    bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) override;
 
 private:
 
@@ -133,7 +133,7 @@ class GoldenShrine : public Event
 {
 public:
     GoldenShrine();
-    void chooseOption(Player* player, int optionIndex) override;
+    bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) override;
 
 private:
 
@@ -145,7 +145,7 @@ class TheJoust : public Event
 {
 public:
     TheJoust();
-    void chooseOption(Player* player, int optionIndex) override;
+    bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) override;
 
 private:
 
@@ -159,7 +159,7 @@ class PleadingVagrant : public Event
 {
 public:
     PleadingVagrant();
-    void chooseOption(Player* player, int optionIndex) override;
+    bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) override;
 
 private:
 
@@ -177,7 +177,7 @@ class Colosseum : public QObject, public Event
 
 public:
     explicit Colosseum(QObject* parent = nullptr);
-    void chooseOption(Player* player, int optionIndex) override;
+    bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) override;
 
 signals:
 
