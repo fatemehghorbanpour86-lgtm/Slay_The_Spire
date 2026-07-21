@@ -208,4 +208,15 @@
         <file>ChestOpen.png</file>
         <file>ProceedBtn.png</file>
     </qresource>
+    <qresource prefix="/Event">
+        <file>FaceTrader.jpg</file>
+        <file>GoldenIdol.jpg</file>
+        <file>GoldenShrine.jpg</file>
+        <file>Augmenter.jpg</file>
+        <file>PleadingVagrant.jpg</file>
+        <file>EventOption.png</file>
+        <file>TheCleric.jpg</file>
+        <file>TheJoust.jpg</file>
+        <file>OminousForge.png</file>
+    </qresource>
 </RCC>

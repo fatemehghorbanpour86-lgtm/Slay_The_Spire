@@ -77,6 +77,7 @@ signals:
     // refreshed). GameManager listens to this to close the Event,
     // autosave, and return to the Map.
     void eventResolved();
+    void settingsRequested();
 
 private slots:
     void onOptionClicked(int optionIndex);

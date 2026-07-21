@@ -10,6 +10,7 @@
 #include "audiomanager.h"
 #include "masterdeck.h"
 #include "card.h"
+#include "pauseviewer.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
@@ -183,14 +184,17 @@ EventPage::EventPage(Player* playerPtr, Map* mapPtr, Event* eventPtr, QWidget* p
 QString EventPage::eventBackgroundPath() const
 {
     if (!event)
-        return QString(":/Event/EventDefault.png");
+        return QString(":/Treasure/TreasureBackground.png");
 
     QString cleanName = event->getName();
     cleanName.remove(' ');
     cleanName.remove('\'');
     cleanName.remove('.');
 
-    return QString(":/Event/%1.png").arg(cleanName);
+    if(cleanName == "OminousForge")
+        return QString(":/Event/%1.png").arg(cleanName);
+    else
+        return QString(":/Event/%1.jpg").arg(cleanName);
 }
 
 void EventPage::setupUI()
@@ -199,10 +203,9 @@ void EventPage::setupUI()
     setStyleSheet(
         QString(
             "#EventPage {"
-            "background-image: url(%1);"
-            "background-repeat: no-repeat;"
-            "background-position: center;"
-            "background-color: #1a1410;"
+            "border-image: url(%1);"
+            "border: none;"
+            "background: transparent;"
             "}"
             "QToolTip { color: #facc15; background-color: #1f2937; border: 1px solid #b91c1c;"
             "border-radius: 4px; padding: 6px; font-weight: bold; font-family: Tahoma;"
@@ -229,9 +232,10 @@ void EventPage::setupUI()
                 dialog.exec();
             });
 
-    // Settings hook left as a no-op, matching CampfirePage's current
-    // placeholder behavior (its Settings dialog isn't wired up yet either).
-    connect(topBar, &TopBarWidget::settingsClicked, this, []() {});
+
+    connect(topBar, &TopBarWidget::settingsClicked, this, [&]() {
+        emit settingsRequested();
+    });
 
     mainLayout->addWidget(topBar);
 
@@ -242,12 +246,19 @@ void EventPage::setupUI()
     contentLayout->addStretch(1); // left side reserved for the background artwork
 
     QWidget* rightContainer = new QWidget(this);
-    rightContainer->setFixedWidth(480);
-    rightContainer->setStyleSheet("background: transparent;");
+    rightContainer->setFixedWidth(600);
+    rightContainer->setObjectName("RightContainer");
+    rightContainer->setStyleSheet(
+        "#RightContainer {"
+        "background-color: rgba(15, 15, 20, 170);"
+        "border-radius: 15px;"
+        "}"
+        );
 
     QVBoxLayout* rightLayout = new QVBoxLayout(rightContainer);
     rightLayout->setSpacing(20);
     rightLayout->setAlignment(Qt::AlignTop);
+    rightLayout->setContentsMargins(30, 30, 30, 30);
 
     nameLabel = new QLabel(event ? event->getName() : QString(), this);
     nameLabel->setAlignment(Qt::AlignCenter);
@@ -293,12 +304,10 @@ void EventPage::populateOptions()
         btn->setMinimumHeight(52);
         btn->setCursor(Qt::PointingHandCursor);
         btn->setStyleSheet(
-            "QPushButton { background-color: rgba(31,41,55,0.85); color: #facc15;"
-            "border: 1px solid #b91c1c; border-radius: 8px; font-weight: bold;"
+            "QPushButton { border-image: url(:/Event/EventOption); color: #facc15;"
+            "border: none; font-weight: bold;"
             "font-size: 14px; padding: 8px 16px; }"
-            "QPushButton:hover { background-color: rgba(60,60,80,0.9); }"
             "QPushButton:pressed { margin: 3px 3px 3px 3px; }"
-            "QPushButton:disabled { color: #6b7280; border-color: #4b5563; }"
             );
 
         connect(btn, &QPushButton::pressed, this, []()

@@ -4,6 +4,8 @@
 
 #include "effect.h"
 
+#include "audiomanager.h"
+
 #include <QDebug>
 
 //======================================================
@@ -90,9 +92,7 @@ void CultistHeadpiece::onCombatStart(Player* player)
 
     qDebug() << "CAW! CAAAW!";
 
-    // TODO (UI / Audio System)
-    // TODO (AudioManager)
-    // AudioManager::playCultistCaw();
+    AudioManager::instance().play(AudioManager::Sound::Raven);
 }
 
 //======================================================

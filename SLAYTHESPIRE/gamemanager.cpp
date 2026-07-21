@@ -258,6 +258,7 @@ void GameManager::showEventPage()
     stackedWidget->addWidget(eventPage);
 
     connect(eventPage, &EventPage::eventResolved, this, &GameManager::onEventResolved);
+    connect(eventPage, &EventPage::settingsRequested, this, &GameManager::onMapPauseRequested);
 
     stackedWidget->setCurrentWidget(eventPage);
 }
