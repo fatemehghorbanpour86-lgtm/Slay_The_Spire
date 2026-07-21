@@ -16,6 +16,9 @@
 #include "treasurepage.h"
 #include "ShopPage.h"
 #include "shop.h"
+#include "eventmanager.h"
+#include "eventpage.h"
+#include "event.h"
 
 #include <QRandomGenerator>
 #include <QMessageBox>
@@ -26,11 +29,13 @@ GameManager::GameManager(QStackedWidget* stackedWidget, QObject* parent)
 {
     createStaticPages();
     connectStaticPages();
+    eventManager = new EventManager();
 }
 
 GameManager::~GameManager()
 {
     cleanupRun();
+    delete eventManager;
 }
 
 void GameManager::start()
@@ -192,6 +197,13 @@ void GameManager::cleanupTransientPages()
         shopPage->deleteLater();
         shopPage = nullptr;
     }
+
+    if (eventPage)
+    {
+        stackedWidget->removeWidget(eventPage);
+        eventPage->deleteLater();
+        eventPage = nullptr;
+    }
 }
 
 // ============================================================
@@ -218,11 +230,36 @@ void GameManager::showShopPage()
 
 void GameManager::showEventPage()
 {
-    // TODO: once EventPage exists:
-    //   - use EventSystem::getRandomEvent()/startRandomEvent(player) to pick an Event
-    //   - display its EventOption list, call Event::chooseOption() on selection
-    //   - connect(eventPage, &EventPage::eventResolved, this, &GameManager::returnToMapAndAutosave);
-    returnToMapAndAutosave();
+    if (!eventManager || !map || !player)
+    {
+        returnToMapAndAutosave();
+        return;
+    }
+
+    Event* selected = eventManager->selectEvent(map->getCurrentAct());
+
+    if (EventManager::isColosseum(selected))
+    {
+        delete selected;
+        startBattle(selectEliteEncounter(), EncounterKind::Elite);
+        return;
+    }
+
+    currentEvent = selected;
+
+    if (eventPage)
+    {
+        stackedWidget->removeWidget(eventPage);
+        eventPage->deleteLater();
+        eventPage = nullptr;
+    }
+
+    eventPage = new EventPage(player, map, currentEvent, nullptr);
+    stackedWidget->addWidget(eventPage);
+
+    connect(eventPage, &EventPage::eventResolved, this, &GameManager::onEventResolved);
+
+    stackedWidget->setCurrentWidget(eventPage);
 }
 
 void GameManager::showTreasurePage()
@@ -310,6 +347,9 @@ void GameManager::cleanupRun()
     }
 
     cleanupTransientPages();
+
+    delete currentEvent;
+    currentEvent = nullptr;
 
     delete player;
     player = nullptr;
@@ -699,6 +739,14 @@ void GameManager::onMapPauseRequested()
             });
 
     dialog.exec();
+}
+
+void GameManager::onEventResolved()
+{
+    delete currentEvent;
+    currentEvent = nullptr;
+
+    returnToMapAndAutosave();
 }
 
 void GameManager::onReturnToMainMenuRequested()

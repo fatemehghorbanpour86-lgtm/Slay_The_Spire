@@ -179,24 +179,24 @@ public:
     explicit Colosseum(QObject* parent = nullptr);
     bool chooseOption(Player* player, int optionIndex, QWidget* parentWidget = nullptr) override;
 
-signals:
+// signals:
 
-    // TODO (GameManager): Connect to this signal to create a CombatManager
-    // with the given enemies and call startCombat().
-    // After battleWon signal from CombatManager, call grantEliteReward(player).
-    void requestEliteCombat(Player* player, QVector<Enemy*> enemies);
+//     // TODO (GameManager): Connect to this signal to create a CombatManager
+//     // with the given enemies and call startCombat().
+//     // After battleWon signal from CombatManager, call grantEliteReward(player).
+//     void requestEliteCombat(Player* player, QVector<Enemy*> enemies);
 
-private:
+// private:
 
-    // [Fight]: Trigger a random Elite encounter
-    void handleFight(Player* player);
+//     // [Fight]: Trigger a random Elite encounter
+//     void handleFight(Player* player);
 
-    // Grants the standard Elite reward after combat is won.
-    // TODO (GameManager): Call this after battleWon signal is received.
-    void grantEliteReward(Player* player);
+//     // Grants the standard Elite reward after combat is won.
+//     // TODO (GameManager): Call this after battleWon signal is received.
+//     void grantEliteReward(Player* player);
 
-    // Builds a random Elite encounter from the available Elite enemies.
-    QVector<Enemy*> buildRandomEliteEncounter() const;
+//     // Builds a random Elite encounter from the available Elite enemies.
+//     QVector<Enemy*> buildRandomEliteEncounter() const;
 };
 
 #endif  // EVENT_H

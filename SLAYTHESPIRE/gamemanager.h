@@ -23,6 +23,9 @@ class Enemy;
 class PauseDialog;
 class TreasurePage;
 class ShopPage;
+class EventManager;
+class EventPage;
+class Event;
 
 
 class GameManager : public QObject
@@ -58,6 +61,7 @@ private:
     RewardPage*   rewardPage   = nullptr;
     TreasurePage* treasurePage = nullptr;
     ShopPage*     shopPage     = nullptr;
+    EventPage*    eventPage    = nullptr;
 
     // ---- Run state ----
     QString currentUsername;
@@ -65,6 +69,8 @@ private:
     Map*    map    = nullptr;
 
     RewardSystem* pendingRewardSystem = nullptr;
+    EventManager* eventManager = nullptr;
+    Event*        currentEvent = nullptr;
     EncounterKind currentEncounterKind = EncounterKind::Normal;
 
     // ---- Encounter selection bookkeeping (reset every Act) ----
@@ -123,6 +129,7 @@ private:
     void onCampfireLeft();
     void onTreasureFinished();
     void onMapPauseRequested();
+    void onEventResolved();
 
     // Hook: connect this to the (future) Defeat/Victory page's
     // "Return to Main Menu" button.
