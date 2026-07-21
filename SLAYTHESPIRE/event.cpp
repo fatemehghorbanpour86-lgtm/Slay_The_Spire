@@ -22,6 +22,8 @@
 
 #include "upgradecards.h"
 
+#include "eventpage.h"
+
 #include <QWidget>
 
 #include <QRandomGenerator>
@@ -181,8 +183,6 @@ Augmenter::Augmenter()
 
 bool Augmenter::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
-    Q_UNUSED(parentWidget)
-
     if (player == nullptr)
         return false;
 
@@ -192,8 +192,7 @@ bool Augmenter::chooseOption(Player* player, int optionIndex, QWidget* parentWid
         handleTestJAX(player);
         return true;
     case 1:
-        handleBecomeTestSubject(player);
-        return true;
+        return handleBecomeTestSubject(player, parentWidget);
     case 2:
         handleIngestMutagens(player);
         return true;
@@ -208,37 +207,18 @@ void Augmenter::handleTestJAX(Player* player)
     player->getMasterDeck()->addCard(new JAX());
 }
 
-void Augmenter::handleBecomeTestSubject(Player* player)
+bool Augmenter::handleBecomeTestSubject(Player* player, QWidget* parentWidget)
 {
     MasterDeck* deck = player->getMasterDeck();
     if (deck == nullptr)
-        return;
+        return false;
 
-    // TODO (UI): Let the player pick 2 specific cards to transform.
-    // For now, pick 2 random transformable cards.
+    TransformCardsDialog dialog(player, parentWidget);
 
-    // Build pool of transformable cards (isRemovable == true)
+    if (dialog.exec() != QDialog::Accepted)
+        return false;
 
-    QVector<Card*> pool;
-
-    for (Card* card : deck->getCards())
-    {
-        if (card != nullptr && card->isRemovable())
-            pool.append(card);
-    }
-
-    // Shuffle pool and transform up to 2 cards
-    for (int i = pool.size() - 1; i > 0; --i)
-    {
-        int j = QRandomGenerator::global()->bounded(i + 1);
-        pool.swapItemsAt(i, j);
-    }
-
-    int transformCount = qMin(2, pool.size());
-    for (int i = 0; i < transformCount; ++i)
-    {
-        deck->transformCard(pool[i]);
-    }
+    return true;
 }
 
 void Augmenter::handleIngestMutagens(Player* player)
@@ -335,8 +315,6 @@ TheCleric::TheCleric()
 
 bool TheCleric::chooseOption(Player* player, int optionIndex, QWidget* parentWidget)
 {
-    Q_UNUSED(parentWidget)
-
     if (player == nullptr)
         return false;
 
@@ -348,8 +326,7 @@ bool TheCleric::chooseOption(Player* player, int optionIndex, QWidget* parentWid
         return true;
     case 1:
 
-        handlePurify(player);
-        return true;
+        return handlePurify(player, parentWidget);
     case 2:
 
         // [Leave]: Nothing happens.
@@ -371,31 +348,22 @@ void TheCleric::handleHeal(Player* player)
     player->heal(healAmount);
 }
 
-void TheCleric::handlePurify(Player* player)
+bool TheCleric::handlePurify(Player* player, QWidget* parentWidget)
 {
-    if (!player->spendGold(50))
-        return;
+    if (player->getGold() < 50)
+        return false;
 
     MasterDeck* deck = player->getMasterDeck();
     if (deck == nullptr || deck->getCardCount() == 0)
-        return;
+        return true;
 
-    // TODO (UI): Let the player pick a specific card to remove.
-    // For now, pick a random removable card.
+    RemoveCardDialog dialog(player, parentWidget);
 
-    QVector<Card*> removable;
+    if (dialog.exec() != QDialog::Accepted)
+        return false;
 
-    for (Card* card : deck->getCards())
-    {
-        if (card != nullptr && card->isRemovable())
-            removable.append(card);
-    }
-
-    if (removable.isEmpty())
-        return;
-
-    int index = QRandomGenerator::global()->bounded(removable.size());
-    deck->removeCard(removable[index]);
+    player->spendGold(50);
+    return true;
 }
 
 

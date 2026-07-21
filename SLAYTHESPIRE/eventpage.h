@@ -7,11 +7,61 @@
 #include <QPushButton>
 #include <QStyleOption>
 #include <QPainter>
+#include <QDialog>
+#include <QScrollArea>
 
 class Player;
 class Map;
 class Event;
 class TopBarWidget;
+class Card;
+
+class RemoveCardDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    explicit RemoveCardDialog(Player* playerPtr, QWidget* parent = nullptr);
+
+private:
+    void setupUI();
+    void populateCards();
+
+    Player* player;
+    QScrollArea* scrollArea;
+    QWidget* gridContainer;
+    QGridLayout* gridLayout;
+
+    const int CARD_WIDTH = 162;
+    const int CARD_HEIGHT = 214;
+    const int COLUMNS = 4;
+};
+
+
+
+
+class TransformCardsDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    explicit TransformCardsDialog(Player* playerPtr, QWidget* parent = nullptr);
+
+private:
+    void setupUI();
+    void populateCards();
+
+    Player* player;
+    Card* firstSelectedCard;
+
+    QScrollArea* scrollArea;
+    QWidget* gridContainer;
+    QGridLayout* gridLayout;
+
+    const int CARD_WIDTH = 162;
+    const int CARD_HEIGHT = 214;
+    const int COLUMNS = 4;
+};
+
+
 
 
 class EventPage : public QWidget

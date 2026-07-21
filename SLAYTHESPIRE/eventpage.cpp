@@ -8,9 +8,164 @@
 #include "relicviewer.h"
 #include "deckviewer.h"
 #include "audiomanager.h"
-
+#include "masterdeck.h"
+#include "card.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+
+
+
+RemoveCardDialog::RemoveCardDialog(Player* playerPtr, QWidget* parent)
+    : QDialog(parent), player(playerPtr)
+{
+    setupUI();
+    populateCards();
+}
+
+void RemoveCardDialog::setupUI()
+{
+    setWindowTitle("Remove a Card");
+    setFixedSize(850, 620);
+    setStyleSheet("QDialog { border-image: url(:/card/CardViewer.png); }"
+                  "QScrollArea { border: none; background: transparent; }");
+
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(40, 45, 50, 50);
+    scrollArea = new QScrollArea(this);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    gridContainer = new QWidget();
+    gridContainer->setStyleSheet("background: transparent;");
+
+    gridLayout = new QGridLayout(gridContainer);
+    gridLayout->setSpacing(20);
+
+    scrollArea->setWidget(gridContainer);
+    mainLayout->addWidget(scrollArea);
+}
+
+void RemoveCardDialog::populateCards()
+{
+    if (!player || !player->getMasterDeck())
+        return;
+
+    int row = 0;
+    int col = 0;
+
+    for (Card* card : player->getMasterDeck()->getCards())
+    {
+        if (!card || !card->isRemovable())
+            continue;
+
+        QPushButton* cardBtn = new QPushButton();
+        cardBtn->setFixedSize(CARD_WIDTH, CARD_HEIGHT);
+        cardBtn->setIcon(QIcon(DeckViewerDialog::cardImagePath(card)));
+        cardBtn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
+        cardBtn->setFlat(true);
+        cardBtn->setCursor(Qt::PointingHandCursor);
+        cardBtn->setStyleSheet("QPushButton { border: none; background: transparent; }"
+                               "QPushButton:pressed { margin: 5px; }");
+
+        connect(cardBtn, &QPushButton::clicked, this, [this, card]() {
+            player->getMasterDeck()->removeCard(card);
+            accept();
+        });
+
+        gridLayout->addWidget(cardBtn, row, col);
+
+        col++;
+        if (col >= COLUMNS)
+        {
+            col = 0;
+            row++;
+        }
+    }
+}
+
+
+
+
+
+
+TransformCardsDialog::TransformCardsDialog(Player* playerPtr, QWidget* parent)
+    : QDialog(parent), player(playerPtr), firstSelectedCard(nullptr)
+{
+    setupUI();
+    populateCards();
+}
+
+void TransformCardsDialog::setupUI()
+{
+    setWindowTitle("Transform 2 Cards");
+    setFixedSize(850, 620);
+    setStyleSheet("QDialog { border-image: url(:/card/CardViewer.png); }"
+                  "QScrollArea { border: none; background: transparent; }");
+
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(40, 45, 50, 50);
+    scrollArea = new QScrollArea(this);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    gridContainer = new QWidget();
+    gridContainer->setStyleSheet("background: transparent;");
+
+    gridLayout = new QGridLayout(gridContainer);
+    gridLayout->setSpacing(20);
+
+    scrollArea->setWidget(gridContainer);
+    mainLayout->addWidget(scrollArea);
+}
+
+void TransformCardsDialog::populateCards()
+{
+    if (!player || !player->getMasterDeck())
+        return;
+
+    int row = 0;
+    int col = 0;
+
+    for (Card* card : player->getMasterDeck()->getCards())
+    {
+        if (!card || !card->isRemovable())
+            continue;
+
+        QPushButton* cardBtn = new QPushButton();
+        cardBtn->setFixedSize(CARD_WIDTH, CARD_HEIGHT);
+        cardBtn->setIcon(QIcon(DeckViewerDialog::cardImagePath(card)));
+        cardBtn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
+        cardBtn->setFlat(true);
+        cardBtn->setCursor(Qt::PointingHandCursor);
+        cardBtn->setStyleSheet("QPushButton { border: none; background: transparent; }");
+
+        connect(cardBtn, &QPushButton::clicked, this, [this, card, cardBtn]() {
+            if (firstSelectedCard == nullptr)
+            {
+                firstSelectedCard = card;
+                cardBtn->setStyleSheet("QPushButton { border: 4px solid #facc15; border-radius: 12px; background: transparent; }");
+                cardBtn->setEnabled(false);
+            }
+            else
+            {
+                MasterDeck* deck = player->getMasterDeck();
+                deck->transformCard(firstSelectedCard);
+                deck->transformCard(card);
+                accept();
+            }
+        });
+
+        gridLayout->addWidget(cardBtn, row, col);
+
+        col++;
+        if (col >= COLUMNS)
+        {
+            col = 0;
+            row++;
+        }
+    }
+}
+
+
+
 
 EventPage::EventPage(Player* playerPtr, Map* mapPtr, Event* eventPtr, QWidget* parent)
     : QWidget(parent), player(playerPtr), map(mapPtr), event(eventPtr)

@@ -95,7 +95,7 @@ private:
 
     void handleTestJAX(Player* player);
 
-    void handleBecomeTestSubject(Player* player);
+    bool handleBecomeTestSubject(Player* player, QWidget* parentWidget);
 
     void handleIngestMutagens(Player* player);
 };
@@ -124,7 +124,7 @@ private:
 
     void handleHeal(Player* player);
 
-    void handlePurify(Player* player);
+    bool handlePurify(Player* player, QWidget* parentWidget);
 };
 
 
