@@ -44,6 +44,7 @@ SOURCES += \
     mapwidget.cpp \
     masterdeck.cpp \
     memorygame.cpp \
+    memorygamecard.cpp \
     normalenemies.cpp \
     normalrelics.cpp \
     pauseviewer.cpp \
@@ -106,6 +107,7 @@ HEADERS += \
     mapwidget.h \
     masterdeck.h \
     memorygame.h \
+    memorygamecard.h \
     normalenemies.h \
     normalrelics.h \
     outlinedlabel.h \

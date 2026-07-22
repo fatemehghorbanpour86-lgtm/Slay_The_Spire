@@ -2,7 +2,7 @@
 #define MEMORYGAME_H
 
 #include <QVector>
-#include "memorycard.h"
+#include "memorygamecard.h"
 
 
 class MemoryGameModel
