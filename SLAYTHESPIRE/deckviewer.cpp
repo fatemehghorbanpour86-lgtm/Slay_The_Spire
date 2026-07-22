@@ -6,6 +6,9 @@
 #include <QScrollArea>
 #include <QLabel>
 #include <QWidget>
+#include <QPropertyAnimation>
+#include <QEvent>
+
 
 DeckViewerDialog::DeckViewerDialog(Player* player, QWidget* parent)
     : QDialog(parent), player(player)
@@ -76,10 +79,97 @@ void DeckViewerDialog::setupUI()
                     .arg(cardImagePath(card))
                 );
 
+            imageLabel->setAttribute(Qt::WA_Hover, true);
+            imageLabel->installEventFilter(this);
+
             gridLayout->addWidget(imageLabel, i / columns, i % columns);
         }
     }
 
     scrollArea->setWidget(container);
     mainLayout->addWidget(scrollArea);
+}
+
+bool DeckViewerDialog::eventFilter(QObject* watched, QEvent* event)
+{
+    QLabel* label = qobject_cast<QLabel*>(watched);
+
+    if (!label)
+        return QDialog::eventFilter(watched, event);
+
+    if (event->type() == QEvent::Enter)
+    {
+        // اولین باری که این لیبل هاور می‌شه، geometry اصلیش رو ذخیره کن
+        if (!originalGeometry.contains(label))
+            originalGeometry[label] = label->geometry();
+
+        const QRect base = originalGeometry[label];
+
+        // اندازه بزرگ‌تر (مثلاً ۱۵٪ بزرگ‌تر)، ولی مرکزش همون مرکز قبلی بمونه
+        const qreal scaleFactor = 1.15;
+        const int newW = static_cast<int>(base.width() * scaleFactor);
+        const int newH = static_cast<int>(base.height() * scaleFactor);
+
+        QRect grown(0, 0, newW, newH);
+        grown.moveCenter(base.center());
+
+        // اگه انیمیشن قبلی هنوز در حال اجراست، متوقفش کن
+        if (activeAnimations.contains(label))
+        {
+            activeAnimations[label]->stop();
+            activeAnimations[label]->deleteLater();
+        }
+
+        label->setMinimumSize(0, 0);
+        label->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+
+        label->raise(); // بیاد روی لیبل‌های کناری تا موقع بزرگ شدن بریده نشه
+
+        QPropertyAnimation* anim = new QPropertyAnimation(label, "geometry", label);
+        anim->setDuration(100);
+        anim->setStartValue(label->geometry());
+        anim->setEndValue(grown);
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+
+        activeAnimations[label] = anim;
+        anim->start(QAbstractAnimation::DeleteWhenStopped);
+
+        connect(anim, &QPropertyAnimation::destroyed, this, [this, label]() {
+            activeAnimations.remove(label);
+        });
+    }
+    else if (event->type() == QEvent::Leave)
+    {
+        if (!originalGeometry.contains(label))
+            return QDialog::eventFilter(watched, event);
+
+        const QRect base = originalGeometry[label];
+
+        if (activeAnimations.contains(label))
+        {
+            activeAnimations[label]->stop();
+            activeAnimations[label]->deleteLater();
+        }
+
+        QPropertyAnimation* anim = new QPropertyAnimation(label, "geometry", label);
+        anim->setDuration(100);
+        anim->setStartValue(label->geometry());
+        anim->setEndValue(base);
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+
+        activeAnimations[label] = anim;
+        anim->start(QAbstractAnimation::DeleteWhenStopped);
+
+        connect(anim, &QPropertyAnimation::finished, this, [label, base]() {
+            label->setFixedSize(base.size());
+        });
+
+        activeAnimations[label] = anim;
+
+        connect(anim, &QPropertyAnimation::destroyed, this, [this, label]() {
+            activeAnimations.remove(label);
+        });
+    }
+
+    return QDialog::eventFilter(watched, event);
 }
