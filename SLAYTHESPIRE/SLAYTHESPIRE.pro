@@ -70,6 +70,7 @@ SOURCES += \
     statuscards.cpp \
     treasure.cpp \
     treasureguess.cpp \
+    treasureguesspage.cpp \
     treasurepage.cpp \
     upgradecards.cpp
 
@@ -136,6 +137,7 @@ HEADERS += \
     statuscards.h \
     treasure.h \
     treasureguess.h \
+    treasureguesspage.h \
     treasurepage.h \
     upgradecards.h
 
