@@ -49,10 +49,7 @@ class Player : public Character
     MasterDeck* masterDeck;
     CombatDeck* combatDeck;
 
-    // QVector<Card*> hand;
-    // QVector<Card*> drawPile;
-    // QVector<Card*> discardPile;
-    // QVector<Card*> exhaustPile;
+
     QVector<Potion*> potions;
     RelicSystem relicSystem;
 
