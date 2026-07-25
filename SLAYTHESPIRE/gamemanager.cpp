@@ -20,6 +20,8 @@
 #include "eventpage.h"
 #include "event.h"
 #include "leaderboardmanager.h"
+#include "leaderboardpage.h"
+
 
 #include <QRandomGenerator>
 #include <QMessageBox>
@@ -68,6 +70,9 @@ void GameManager::connectStaticPages()
 
     connect(mainMenuPage, &mainpage::startGame, this, &GameManager::onStartGameRequested);
     connect(mainMenuPage, &mainpage::settingsRequested, this, &GameManager::onSettingsRequested);
+
+    connect(mainMenuPage, &mainpage::leaderboardRequested, this, &GameManager::showLeaderboardPage);
+
 }
 
 // ============================================================
@@ -349,6 +354,13 @@ void GameManager::cleanupRun()
         stackedWidget->removeWidget(mapPage);
         mapPage->deleteLater();
         mapPage = nullptr;
+    }
+
+    if (leaderboardPage)
+    {
+        stackedWidget->removeWidget(leaderboardPage);
+        leaderboardPage->deleteLater();
+        leaderboardPage = nullptr;
     }
 
     cleanupTransientPages();
@@ -766,3 +778,22 @@ void GameManager::onReturnToMainMenuRequested()
 
     showMainMenuPage();
 }
+
+void GameManager::showLeaderboardPage()
+{
+    if (leaderboardPage)
+    {
+        stackedWidget->removeWidget(leaderboardPage);
+        leaderboardPage->deleteLater();
+        leaderboardPage = nullptr;
+    }
+
+    leaderboardPage = new LeaderboardPage(currentUsername, nullptr);
+    stackedWidget->addWidget(leaderboardPage);
+
+    connect(leaderboardPage, &LeaderboardPage::backRequested,
+            this, &GameManager::showMainMenuPage);
+
+    stackedWidget->setCurrentWidget(leaderboardPage);
+}
+

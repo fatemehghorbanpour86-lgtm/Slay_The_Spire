@@ -129,8 +129,11 @@ mainpage::mainpage(QWidget *parent)
                 AudioManager::instance().play(AudioManager::Sound::ButtonClick);
             });
 
+
     connect(singlePlayerBtn, &QPushButton::clicked, this, &mainpage::singlePlayerClicked);
     connect(settingBtn, &QPushButton::clicked, this, &mainpage::settingClicked);
+    connect(leaderBoardBtn, &QPushButton::clicked, this, &mainpage::leaderBoardClicked);
+
 
     connect(exitBtn, &QPushButton::clicked, this, [](){
 
@@ -150,4 +153,10 @@ void mainpage::settingClicked()
 {
     emit settingsRequested();
 }
+
+void mainpage::leaderBoardClicked()
+{
+    emit leaderboardRequested();
+}
+
 

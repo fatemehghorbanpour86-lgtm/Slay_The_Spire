@@ -15,10 +15,11 @@ public:
 signals:
     void startGame();
     void settingsRequested();
+    void leaderboardRequested();
 private slots:
     void singlePlayerClicked();
     // void multiPlayerClicked();
-    // void leaderBoardClicked();
+    void leaderBoardClicked();
     void settingClicked();
     // void exitClicked();
 private:

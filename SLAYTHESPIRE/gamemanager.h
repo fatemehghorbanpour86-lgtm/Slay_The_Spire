@@ -26,6 +26,8 @@ class ShopPage;
 class EventManager;
 class EventPage;
 class Event;
+class LeaderboardPage;
+
 
 
 class GameManager : public QObject
@@ -62,6 +64,8 @@ private:
     TreasurePage* treasurePage = nullptr;
     ShopPage*     shopPage     = nullptr;
     EventPage*    eventPage    = nullptr;
+    LeaderboardPage* leaderboardPage = nullptr;
+
 
     // ---- Run state ----
     QString currentUsername;
@@ -130,6 +134,7 @@ private:
     void onTreasureFinished();
     void onMapPauseRequested();
     void onEventResolved();
+    void showLeaderboardPage();
 
     // Hook: connect this to the (future) Defeat/Victory page's
     // "Return to Main Menu" button.
