@@ -219,4 +219,13 @@
         <file>TheJoust.jpg</file>
         <file>OminousForge.png</file>
     </qresource>
+    <qresource prefix="/leaderboard">
+        <file>victoryBonus.png</file>
+        <file>collector.png</file>
+        <file>deckBuilder.png</file>
+        <file>LeaderBackground.png</file>
+        <file>survivor.png</file>
+        <file>treasureHunter.png</file>
+        <file>Explorer.png</file>
+    </qresource>
 </RCC>
