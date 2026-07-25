@@ -9,11 +9,17 @@
 #include <QTimer>
 #include <QCoreApplication>
 #include <QDir>
+#include <QDebug>
 
 mainpage::mainpage(QWidget *parent)
     : QWidget{parent}
 {
     setObjectName("MainMenuPage");
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
 
     QLabel *bg = new QLabel(this);
     bg->setGeometry(0, 0, 1280, 720);
@@ -48,6 +54,13 @@ mainpage::mainpage(QWidget *parent)
         "}"
         );
     singlePlayerBtn->setToolTip("Start Battle!");
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath); // مثلاً شکل دست جنگی
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+    singlePlayerBtn->setCursor(buttonHoverCursor);
 
     multiPlayerBtn = new QPushButton(this);
     multiPlayerBtn->setCursor(Qt::PointingHandCursor);
