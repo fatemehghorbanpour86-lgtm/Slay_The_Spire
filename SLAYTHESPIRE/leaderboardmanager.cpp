@@ -11,7 +11,7 @@
 const QString LeaderboardManager::filepath =
     QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/leaderboard.json";
 
-ScoreBreakdown LeaderboardManager::calculateScore(Player* player, Map* map, bool won)
+ScoreBreakdown LeaderboardManager::calculateScore(Player* player, Map* map, RunStatus status)
 {
     ScoreBreakdown sb;
     if (player == nullptr || map == nullptr)
@@ -44,10 +44,15 @@ ScoreBreakdown LeaderboardManager::calculateScore(Player* player, Map* map, bool
     }
 
     // 6. Victory Bonus
-    if (won)
+    if (status == RunStatus::Victory)
     {
         sb.victoryBonus = 1000;
     }
+    else
+    {
+        sb.victoryBonus = 0;
+    }
+
 
     // Total Calculation
     sb.totalScore = sb.explorer + sb.survivor + sb.treasureHunter +
@@ -56,14 +61,15 @@ ScoreBreakdown LeaderboardManager::calculateScore(Player* player, Map* map, bool
     return sb;
 }
 
-void LeaderboardManager::updatePlayerScore(const QString& username, Player* player, Map* map, bool won)
+void LeaderboardManager::updatePlayerScore(const QString& username, Player* player, Map* map, RunStatus status)
 {
     if (username.trimmed().isEmpty() || player == nullptr || map == nullptr)
     {
         return;
     }
 
-    const ScoreBreakdown currentScore = calculateScore(player, map, won);
+    const ScoreBreakdown currentScore = calculateScore(player, map, status);
+
     QVector<LeaderboardEntry> entries = loadLeaderboard();
 
     bool found = false;
@@ -74,15 +80,30 @@ void LeaderboardManager::updatePlayerScore(const QString& username, Player* play
         {
             found = true;
 
-            // Update only if the new score is better than the stored best score
-            if (currentScore.totalScore > entry.breakdown.totalScore)
+            bool shouldUpdate = false;
+
+            if (status == RunStatus::Victory && entry.status != RunStatus::Victory)
+            {
+                shouldUpdate = true;
+            }
+
+            else if (status == entry.status && currentScore.totalScore > entry.breakdown.totalScore)
+            {
+                shouldUpdate = true;
+            }
+
+            else if (status == RunStatus::InProgress && entry.status == RunStatus::Defeat)
+            {
+                shouldUpdate = true;
+            }
+
+            if (shouldUpdate)
             {
                 entry.characterName = player->getName();
                 entry.breakdown = currentScore;
-                entry.victory = won;
+                entry.status = status;
                 entry.dateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
             }
-
             break;
         }
     }
@@ -93,7 +114,7 @@ void LeaderboardManager::updatePlayerScore(const QString& username, Player* play
         newEntry.username = username;
         newEntry.characterName = player->getName();
         newEntry.breakdown = currentScore;
-        newEntry.victory = won;
+        newEntry.status = status;
         newEntry.dateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
 
         entries.push_back(newEntry);
@@ -104,12 +125,17 @@ void LeaderboardManager::updatePlayerScore(const QString& username, Player* play
         entries.end(),
         [](const LeaderboardEntry& a, const LeaderboardEntry& b)
         {
+            //  (Victory > InProgress > Defeat)
+            if (a.status != b.status)
+            {
+                return static_cast<int>(a.status) > static_cast<int>(b.status);
+            }
+
             if (a.breakdown.totalScore != b.breakdown.totalScore)
             {
                 return a.breakdown.totalScore > b.breakdown.totalScore;
             }
-
-            return a.dateTime < b.dateTime;
+            return a.dateTime <  b.dateTime;
         }
         );
 
@@ -181,12 +207,18 @@ QVector<LeaderboardEntry> LeaderboardManager::loadLeaderboard()
         entries.end(),
         [](const LeaderboardEntry& a, const LeaderboardEntry& b)
         {
+            //  (Victory > InProgress > Defeat)
+            if (a.status != b.status)
+            {
+                return static_cast<int>(a.status) > static_cast<int>(b.status);
+            }
+
             if (a.breakdown.totalScore != b.breakdown.totalScore)
             {
                 return a.breakdown.totalScore > b.breakdown.totalScore;
             }
 
-            return a.dateTime < b.dateTime;
+            return a.dateTime <  b.dateTime;
         }
         );
 
@@ -259,7 +291,7 @@ QJsonObject LeaderboardManager::serializeEntry(const LeaderboardEntry& entry)
     json["username"] = entry.username;
     json["characterName"] = entry.characterName;
     json["breakdown"] = serializeBreakdown(entry.breakdown);
-    json["victory"] = entry.victory;
+    json["status"] = static_cast<int>(entry.status);
     json["dateTime"] = entry.dateTime;
     return json;
 }
@@ -270,7 +302,7 @@ LeaderboardEntry LeaderboardManager::deserializeEntry(const QJsonObject& json)
     LeaderboardEntry entry;
     entry.username = json["username"].toString();
     entry.characterName = json["characterName"].toString();
-    entry.victory = json["victory"].toBool(false);
+    entry.status = static_cast<RunStatus>(json["status"].toInt(0));
     entry.dateTime = json["dateTime"].toString();
 
     if (json.contains("breakdown") && json["breakdown"].isObject())

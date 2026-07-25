@@ -1,23 +1,28 @@
 #include "leaderboardpage.h"
 
-#include <QPushButton>
-#include <QLabel>
-#include <QTableWidget>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QGridLayout>
-#include <QFrame>
-#include <QPainter>
-#include <QTableWidgetItem>
 #include <QAbstractItemView>
 #include <QBrush>
 #include <QColor>
 #include <QDateTime>
-#include<utility>
+#include <QDialog>
+#include <QFrame>
+#include <QGraphicsDropShadowEffect>
+#include <QGridLayout>
+#include <QHeaderView>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPainter>
+#include <QPushButton>
+#include <QScrollBar>
+#include <QTableWidget>
+#include <QTableWidgetItem>
+#include <QVBoxLayout>
+
+#include <utility>
 
 LeaderboardPage::LeaderboardPage(const QString& currentUsername, QWidget* parent)
-    : QWidget(parent), currentUsername(currentUsername)
+    : QWidget(parent),
+    currentUsername(currentUsername)
 {
     setFixedSize(1280, 720);
 
@@ -38,12 +43,12 @@ void LeaderboardPage::setupUi()
     mainPanel->setGeometry(55, 35, 1170, 650);
 
     QVBoxLayout* rootLayout = new QVBoxLayout(mainPanel);
-    rootLayout->setContentsMargins(24, 20, 24, 20);
-    rootLayout->setSpacing(16);
+    rootLayout->setContentsMargins(30, 25, 30, 25);
+    rootLayout->setSpacing(20);
 
-    // =========================
-    // Top Bar
-    // =========================
+    // =========================================================
+    // Top bar
+    // =========================================================
     QHBoxLayout* topBarLayout = new QHBoxLayout();
 
     backButton = new QPushButton("Back", this);
@@ -52,6 +57,13 @@ void LeaderboardPage::setupUi()
 
     titleLabel = new QLabel("GLOBAL RANKING", this);
     titleLabel->setAlignment(Qt::AlignCenter);
+
+    // Add a subtle shadow to make the title more readable and premium-looking.
+    QGraphicsDropShadowEffect* titleShadow = new QGraphicsDropShadowEffect(this);
+    titleShadow->setBlurRadius(12);
+    titleShadow->setColor(QColor(0, 0, 0, 200));
+    titleShadow->setOffset(2, 3);
+    titleLabel->setGraphicsEffect(titleShadow);
 
     playerSummaryFrame = new QFrame(this);
     playerSummaryFrame->setFixedWidth(270);
@@ -76,117 +88,117 @@ void LeaderboardPage::setupUi()
 
     rootLayout->addLayout(topBarLayout);
 
-    // =========================
-    // Table
-    // =========================
+    // =========================================================
+    // Leaderboard table
+    // =========================================================
     leaderboardTable = new QTableWidget(this);
-    leaderboardTable->setColumnCount(6);
+    leaderboardTable->setColumnCount(7);
     leaderboardTable->setHorizontalHeaderLabels(
-        QStringList() << "Rank" << "Player" << "Character" << "Score" << "Result" << "Date"
+        QStringList() << "Rank"
+                      << "Player"
+                      << "Character"
+                      << "Score"
+                      << "Result"
+                      << "Date"
+                      << "Details"
         );
 
     leaderboardTable->verticalHeader()->setVisible(false);
-    leaderboardTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    leaderboardTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    leaderboardTable->setSelectionMode(QAbstractItemView::NoSelection);
     leaderboardTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     leaderboardTable->setFocusPolicy(Qt::NoFocus);
     leaderboardTable->setShowGrid(false);
     leaderboardTable->setAlternatingRowColors(true);
-    leaderboardTable->horizontalHeader()->setStretchLastSection(true);
+
+    leaderboardTable->horizontalHeader()->setStretchLastSection(false);
     leaderboardTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     leaderboardTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     leaderboardTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
     leaderboardTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
-    leaderboardTable->setMinimumHeight(290);
+    leaderboardTable->horizontalHeader()->setSectionResizeMode(6, QHeaderView::ResizeToContents);
 
-    connect(leaderboardTable, &QTableWidget::itemSelectionChanged,
-            this, &LeaderboardPage::onTableSelectionChanged);
+    leaderboardTable->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    leaderboardTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    leaderboardTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    leaderboardTable->setMinimumHeight(480);
 
     rootLayout->addWidget(leaderboardTable, 1);
-
-    // =========================
-    // Details
-    // =========================
-    detailsFrame = new QFrame(this);
-
-    QVBoxLayout* detailsLayout = new QVBoxLayout(detailsFrame);
-    detailsLayout->setContentsMargins(16, 14, 16, 14);
-    detailsLayout->setSpacing(10);
-
-    QHBoxLayout* detailsHeaderLayout = new QHBoxLayout();
-
-    selectedPlayerLabel = new QLabel("Selected: -", this);
-    selectedMetaLabel = new QLabel("-", this);
-    selectedTotalScoreLabel = new QLabel("Total Score: -", this);
-
-    detailsHeaderLayout->addWidget(selectedPlayerLabel);
-    detailsHeaderLayout->addStretch();
-    detailsHeaderLayout->addWidget(selectedMetaLabel);
-    detailsHeaderLayout->addStretch();
-    detailsHeaderLayout->addWidget(selectedTotalScoreLabel);
-
-    detailsLayout->addLayout(detailsHeaderLayout);
-
-    QGridLayout* cardsLayout = new QGridLayout();
-    cardsLayout->setHorizontalSpacing(12);
-    cardsLayout->setVerticalSpacing(12);
-
-    cardsLayout->addWidget(createBreakdownCard("Explorer",        ":/leaderboard/Explorer.png",       explorerValueLabel),    0, 0);
-    cardsLayout->addWidget(createBreakdownCard("Survivor",        ":/leaderboard/survivor.png",       survivorValueLabel),    0, 1);
-    cardsLayout->addWidget(createBreakdownCard("Treasure Hunter", ":/leaderboard/treasureHunter.png", treasureValueLabel),    0, 2);
-    cardsLayout->addWidget(createBreakdownCard("Collector",       ":/leaderboard/collector.png",      collectorValueLabel),   1, 0);
-    cardsLayout->addWidget(createBreakdownCard("Deck Builder",    ":/leaderboard/deckBuilder.png",    deckBuilderValueLabel), 1, 1);
-    cardsLayout->addWidget(createBreakdownCard("Victory Bonus",   ":/leaderboard/victoryBonus.png",   victoryBonusValueLabel),1, 2);
-
-    detailsLayout->addLayout(cardsLayout);
-
-    rootLayout->addWidget(detailsFrame);
 }
 
 QWidget* LeaderboardPage::createBreakdownCard(const QString& title,
                                               const QString& iconPath,
-                                              QLabel*& valueLabel)
+                                              int value,
+                                              const QString& formula)
 {
-    QFrame* card = new QFrame(this);
-    card->setMinimumHeight(105);
+    QFrame* card = new QFrame;
+    card->setMinimumSize(360, 120);
+    card->setToolTip(formula);
+
+    // Golden fantasy card style with brighter highlight and cleaner contrast.
+    card->setStyleSheet(
+        "QFrame {"
+        "  background-color: rgba(42, 32, 20, 215);"
+        "  border: 1px solid rgba(255, 215, 120, 170);"
+        "  border-radius: 14px;"
+        "}"
+        "QFrame:hover {"
+        "  background-color: rgba(58, 44, 26, 235);"
+        "  border: 1px solid rgba(255, 235, 160, 255);"
+        "}"
+        "QToolTip {"
+        "  background-color: rgba(32, 24, 16, 245);"
+        "  color: rgb(255, 232, 170);"
+        "  border: 1px solid rgb(255, 215, 120);"
+        "  padding: 8px;"
+        "  font-size: 13px;"
+        "  border-radius: 6px;"
+        "}"
+        );
 
     QHBoxLayout* layout = new QHBoxLayout(card);
-    layout->setContentsMargins(10, 10, 10, 10);
-    layout->setSpacing(10);
+    layout->setContentsMargins(12, 10, 15, 10);
+    layout->setSpacing(15);
 
-    QLabel* iconLabel = new QLabel(this);
-    iconLabel->setFixedSize(72, 72);
+    // Icon area
+    QLabel* iconLabel = new QLabel(card);
+    iconLabel->setFixedSize(100, 100);
+    iconLabel->setStyleSheet("border: none; background: transparent;");
 
     QPixmap pix(iconPath);
-    if (!pix.isNull())
-    {
-        iconLabel->setPixmap(pix.scaled(72, 72, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    if (!pix.isNull()) {
+        iconLabel->setPixmap(pix.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
 
+    // Text area
     QVBoxLayout* textLayout = new QVBoxLayout();
-    textLayout->setSpacing(4);
+    textLayout->setSpacing(2);
+    textLayout->setContentsMargins(0, 0, 0, 0);
 
-    QLabel* localTitleLabel = new QLabel(title, this);
-    valueLabel = new QLabel("0", this);
+    QLabel* titleLabel = new QLabel(title, card);
+    QLabel* valueLabel = new QLabel(QString::number(value), card);
 
-    localTitleLabel->setStyleSheet(
+    titleLabel->setStyleSheet(
         "font-size: 15px;"
-        "font-weight: 700;"
-        "color: rgb(232, 216, 188);"
+        "font-weight: bold;"
+        "color: rgb(250, 232, 190);"
+        "border: none;"
+        "background: transparent;"
         );
 
     valueLabel->setStyleSheet(
-        "font-size: 22px;"
+        "font-size: 30px;"
         "font-weight: bold;"
-        "color: rgb(255, 214, 120);"
+        "color: rgb(255, 226, 125);"
+        "border: none;"
+        "background: transparent;"
         );
 
     textLayout->addStretch();
-    textLayout->addWidget(localTitleLabel);
+    textLayout->addWidget(titleLabel);
     textLayout->addWidget(valueLabel);
     textLayout->addStretch();
 
-    layout->addWidget(iconLabel);
+    layout->addWidget(iconLabel, 0, Qt::AlignVCenter);
     layout->addLayout(textLayout, 1);
 
     return card;
@@ -196,94 +208,96 @@ void LeaderboardPage::setupStyles()
 {
     setAttribute(Qt::WA_StyledBackground, true);
 
+    // Main title style
     titleLabel->setStyleSheet(
-        "QLabel {"
-        " color: rgb(245, 214, 140);"
-        " font-size: 30px;"
-        " font-weight: bold;"
-        " letter-spacing: 1px;"
-        "}"
+        "color: rgb(255, 225, 140);"
+        "font-size: 36px;"
+        "font-weight: bold;"
+        "letter-spacing: 2px;"
         );
 
+    // Back button style
     backButton->setStyleSheet(
         "QPushButton {"
-        " background-color: rgba(65, 38, 18, 210);"
-        " color: rgb(241, 220, 170);"
-        " border: 2px solid rgb(156, 113, 58);"
-        " border-radius: 10px;"
-        " font-size: 18px;"
-        " font-weight: bold;"
+        "  background-color: rgba(110, 78, 28, 210);"
+        "  color: rgb(255, 239, 190);"
+        "  border: 2px solid rgb(255, 210, 110);"
+        "  border-radius: 10px;"
+        "  font-size: 16px;"
+        "  font-weight: bold;"
         "}"
         "QPushButton:hover {"
-        " background-color: rgba(92, 54, 27, 220);"
+        "  background-color: rgba(145, 102, 34, 240);"
+        "  color: rgb(255, 248, 220);"
+        "  border-color: rgb(255, 232, 150);"
         "}"
         "QPushButton:pressed {"
-        " background-color: rgba(45, 26, 12, 220);"
+        "  background-color: rgba(88, 62, 21, 255);"
         "}"
         );
 
+    // Main panel style
     mainPanel->setStyleSheet(
         "QFrame {"
-        " background-color: rgba(10, 10, 12, 175);"
-        " border: 2px solid rgba(180, 135, 70, 180);"
-        " border-radius: 18px;"
+        "  background-color: rgba(18, 14, 10, 120);"
+        "  border: 2px solid rgba(255, 210, 110, 160);"
+        "  border-radius: 18px;"
         "}"
         );
 
+    // Current player summary box style
     playerSummaryFrame->setStyleSheet(
         "QFrame {"
-        " background-color: rgba(25, 18, 16, 180);"
-        " border: 1px solid rgba(190, 150, 90, 160);"
-        " border-radius: 12px;"
+        "  background-color: rgba(45, 34, 20, 190);"
+        "  border: 1px solid rgba(255, 214, 120, 180);"
+        "  border-radius: 12px;"
         "}"
         "QLabel {"
-        " color: rgb(238, 226, 200);"
-        " font-size: 15px;"
-        " font-weight: 600;"
-        " background: transparent;"
-        " border: none;"
+        "  color: rgb(255, 236, 190);"
+        "  font-size: 14px;"
+        "  font-weight: 600;"
+        "  border: none;"
+        "  background: transparent;"
         "}"
         );
 
+    // Table style
     leaderboardTable->setStyleSheet(
         "QTableWidget {"
-        " background-color: rgba(18, 15, 14, 185);"
-        " alternate-background-color: rgba(34, 28, 25, 190);"
-        " color: rgb(235, 225, 205);"
-        " border: 1px solid rgba(170, 130, 75, 140);"
-        " border-radius: 12px;"
-        " font-size: 16px;"
-        " selection-background-color: rgba(176, 119, 47, 140);"
-        " selection-color: white;"
-        " gridline-color: transparent;"
+        "  background-color: rgba(26, 20, 14, 70);"
+        "  alternate-background-color: rgba(40, 30, 20, 90);"
+        "  color: rgb(248, 235, 205);"
+        "  border: 1px solid rgba(255, 210, 120, 110);"
+        "  border-radius: 12px;"
+        "  font-size: 15px;"
+        "  gridline-color: transparent;"
         "}"
         "QHeaderView::section {"
-        " background-color: rgba(84, 54, 29, 230);"
-        " color: rgb(247, 226, 178);"
-        " border: none;"
-        " border-bottom: 1px solid rgba(200, 160, 90, 180);"
-        " padding: 8px;"
-        " font-size: 16px;"
-        " font-weight: bold;"
+        "  background-color: rgba(120, 84, 30, 230);"
+        "  color: rgb(255, 240, 190);"
+        "  border: none;"
+        "  border-bottom: 2px solid rgba(255, 220, 130, 220);"
+        "  padding: 12px;"
+        "  font-weight: bold;"
+        "  font-size: 15px;"
+        "}"
+        "QScrollBar:vertical {"
+        "  background: rgba(35, 28, 20, 120);"
+        "  width: 10px;"
+        "  border-radius: 5px;"
+        "}"
+        "QScrollBar::handle:vertical {"
+        "  background: rgba(255, 196, 85, 190);"
+        "  border-radius: 5px;"
+        "  min-height: 24px;"
+        "}"
+        "QScrollBar::handle:vertical:hover {"
+        "  background: rgba(255, 220, 120, 230);"
+        "}"
+        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {"
+        "  height: 0px;"
         "}"
         );
-
-    detailsFrame->setStyleSheet(
-        "QFrame {"
-        " background-color: rgba(20, 16, 15, 190);"
-        " border: 1px solid rgba(180, 140, 80, 150);"
-        " border-radius: 14px;"
-        "}"
-        "QLabel {"
-        " color: rgb(236, 225, 204);"
-        " background: transparent;"
-        " border: none;"
-        "}"
-        );
-
-    selectedPlayerLabel->setStyleSheet("font-size: 18px; font-weight: bold;");
-    selectedMetaLabel->setStyleSheet("font-size: 14px; color: rgb(200, 190, 175);");
-    selectedTotalScoreLabel->setStyleSheet("font-size: 20px; font-weight: bold; color: rgb(255, 218, 130);");
 }
 
 void LeaderboardPage::refreshData()
@@ -291,194 +305,309 @@ void LeaderboardPage::refreshData()
     entries = LeaderboardManager::loadLeaderboard();
     populateTable();
     updateCurrentPlayerPanel();
-
-    if (!entries.isEmpty() && leaderboardTable->rowCount() > 0)
-    {
-        leaderboardTable->selectRow(0);
-        showEntryDetails(entries[0]);
-    }
-    else
-    {
-        clearDetails();
-    }
 }
 
 void LeaderboardPage::populateTable()
 {
     leaderboardTable->clearContents();
+    leaderboardTable->setRowCount(entries.size());
 
-    const int topCount = qMin(10, entries.size());
-    leaderboardTable->setRowCount(topCount);
-
-    for (int row = 0; row < topCount; ++row)
-    {
+    for (int row = 0; row < entries.size(); ++row) {
         const LeaderboardEntry& entry = entries[row];
 
-        QTableWidgetItem* rankItem   = new QTableWidgetItem(QString::number(row + 1));
-        QTableWidgetItem* userItem   = new QTableWidgetItem(entry.username);
-        QTableWidgetItem* charItem   = new QTableWidgetItem(entry.characterName);
-        QTableWidgetItem* scoreItem  = new QTableWidgetItem(QString::number(entry.breakdown.totalScore));
-        QTableWidgetItem* resultItem = new QTableWidgetItem(formatResultText(entry.victory));
-        QTableWidgetItem* dateItem   = new QTableWidgetItem(formatDateText(entry.dateTime));
-
-        rankItem->setTextAlignment(Qt::AlignCenter);
-        scoreItem->setTextAlignment(Qt::AlignCenter);
-        resultItem->setTextAlignment(Qt::AlignCenter);
-
-        QString tooltip =
-            "Explorer: " + QString::number(entry.breakdown.explorer) + "\n" +
-            "Survivor: " + QString::number(entry.breakdown.survivor) + "\n" +
-            "Treasure Hunter: " + QString::number(entry.breakdown.treasureHunter) + "\n" +
-            "Collector: " + QString::number(entry.breakdown.collector) + "\n" +
-            "Deck Builder: " + QString::number(entry.breakdown.deckBuilder) + "\n" +
-            "Victory Bonus: " + QString::number(entry.breakdown.victoryBonus) + "\n\n" +
-            "Total: " + QString::number(entry.breakdown.totalScore);
-
-        rankItem->setToolTip(tooltip);
-        userItem->setToolTip(tooltip);
-        charItem->setToolTip(tooltip);
-        scoreItem->setToolTip(tooltip);
-        resultItem->setToolTip(tooltip);
-
-        if (row == 0)
-        {
-            const QBrush goldBrush(QColor(255, 215, 90));
-            rankItem->setForeground(goldBrush);
-            userItem->setForeground(goldBrush);
-            charItem->setForeground(goldBrush);
-            scoreItem->setForeground(goldBrush);
-            resultItem->setForeground(goldBrush);
-            dateItem->setForeground(goldBrush);
-        }
-        else if (row == 1)
-        {
-            const QBrush silverBrush(QColor(220, 220, 230));
-            rankItem->setForeground(silverBrush);
-            userItem->setForeground(silverBrush);
-            charItem->setForeground(silverBrush);
-            scoreItem->setForeground(silverBrush);
-            resultItem->setForeground(silverBrush);
-            dateItem->setForeground(silverBrush);
-        }
-        else if (row == 2)
-        {
-            const QBrush bronzeBrush(QColor(205, 145, 85));
-            rankItem->setForeground(bronzeBrush);
-            userItem->setForeground(bronzeBrush);
-            charItem->setForeground(bronzeBrush);
-            scoreItem->setForeground(bronzeBrush);
-            resultItem->setForeground(bronzeBrush);
-            dateItem->setForeground(bronzeBrush);
+        // Show special symbols for top 3 ranks.
+        QString rankText;
+        if (row == 0) {
+            rankText = "🏆 1";
+        } else if (row == 1) {
+            rankText = "🥈 2";
+        } else if (row == 2) {
+            rankText = "🥉 3";
+        } else {
+            rankText = QString::number(row + 1);
         }
 
-        leaderboardTable->setItem(row, 0, rankItem);
-        leaderboardTable->setItem(row, 1, userItem);
-        leaderboardTable->setItem(row, 2, charItem);
-        leaderboardTable->setItem(row, 3, scoreItem);
-        leaderboardTable->setItem(row, 4, resultItem);
-        leaderboardTable->setItem(row, 5, dateItem);
+        leaderboardTable->setItem(row, 0, new QTableWidgetItem(rankText));
+        leaderboardTable->setItem(row, 1, new QTableWidgetItem(entry.username));
+        leaderboardTable->setItem(row, 2, new QTableWidgetItem(entry.characterName));
+        leaderboardTable->setItem(row, 3, new QTableWidgetItem(QString::number(entry.breakdown.totalScore)));
+        leaderboardTable->setItem(row, 4, new QTableWidgetItem(formatResultText(entry.status)));
+        leaderboardTable->setItem(row, 5, new QTableWidgetItem(formatDateText(entry.dateTime)));
+
+        const bool isCurrentUser =
+            (entry.username == currentUsername && !currentUsername.isEmpty());
+
+        for (int col = 0; col < 6; ++col) {
+            QTableWidgetItem* item = leaderboardTable->item(row, col);
+            if (!item) {
+                continue;
+            }
+
+            item->setTextAlignment(Qt::AlignCenter);
+
+            // Rank-based coloring
+            if (row == 0) {
+                item->setForeground(QColor(255, 232, 130));   // Gold
+            } else if (row == 1) {
+                item->setForeground(QColor(230, 235, 245));   // Silver
+            } else if (row == 2) {
+                item->setForeground(QColor(212, 165, 110));   // Bronze
+            } else {
+                item->setForeground(QColor(245, 232, 205));   // Regular row text
+            }
+
+            // Highlight the current player's row
+            if (isCurrentUser) {
+                item->setBackground(QBrush(QColor(255, 215, 110, 55)));
+                item->setFont(QFont("Arial", -1, QFont::Bold));
+            }
+        }
+
+        // Details button
+        QPushButton* detailsButton = new QPushButton("Details");
+        detailsButton->setFixedSize(90, 30);
+        detailsButton->setCursor(Qt::PointingHandCursor);
+        detailsButton->setStyleSheet(
+            "QPushButton {"
+            "  background-color: rgba(125, 88, 28, 220);"
+            "  color: rgb(255, 241, 200);"
+            "  border: 1px solid rgb(255, 210, 110);"
+            "  border-radius: 7px;"
+            "  font-weight: bold;"
+            "  font-size: 13px;"
+            "  padding: 4px 10px;"
+            "}"
+            "QPushButton:hover {"
+            "  background-color: rgba(160, 112, 36, 245);"
+            "  color: rgb(255, 250, 230);"
+            "  border-color: rgb(255, 232, 155);"
+            "}"
+            "QPushButton:pressed {"
+            "  background-color: rgba(102, 72, 22, 255);"
+            "}"
+            );
+
+        connect(detailsButton, &QPushButton::clicked, this, [this, row]() {
+            openEntryDetailsDialog(row);
+        });
+
+        QWidget* container = new QWidget();
+        QHBoxLayout* containerLayout = new QHBoxLayout(container);
+        containerLayout->addWidget(detailsButton);
+        containerLayout->setContentsMargins(0, 0, 0, 0);
+        containerLayout->setAlignment(Qt::AlignCenter);
+
+        if (isCurrentUser) {
+            container->setStyleSheet("background-color: rgba(255, 215, 110, 55);");
+        }
+
+        leaderboardTable->setCellWidget(row, 6, container);
+        leaderboardTable->setRowHeight(row, 48);
     }
-
-    leaderboardTable->resizeRowsToContents();
 }
 
 void LeaderboardPage::updateCurrentPlayerPanel()
 {
-    currentUserLabel->setText("Player: " + (currentUsername.isEmpty() ? "-" : currentUsername));
-
-    const int rank = LeaderboardManager::getPlayerRank(currentUsername);
-    if (rank == -1)
-    {
-        currentRankLabel->setText("Rank: Unranked");
-        currentBestScoreLabel->setText("Best Score: -");
-        return;
-    }
-
-    currentRankLabel->setText("Rank: #" + QString::number(rank));
-
-    for (const LeaderboardEntry& entry : std::as_const(entries))
-    {
-        if (entry.username == currentUsername)
-        {
-            currentBestScoreLabel->setText("Best Score: " + QString::number(entry.breakdown.totalScore));
-            return;
-        }
-    }
-
-    currentBestScoreLabel->setText("Best Score: -");
-}
-
-void LeaderboardPage::showEntryDetails(const LeaderboardEntry& entry)
-{
-    selectedPlayerLabel->setText("Selected: " + entry.username);
-    selectedMetaLabel->setText(
-        entry.characterName + " | " +
-        formatResultText(entry.victory) + " | " +
-        formatDateText(entry.dateTime)
+    currentUserLabel->setText(
+        "Player: " + (currentUsername.isEmpty() ? "-" : currentUsername)
         );
 
-    selectedTotalScoreLabel->setText("Total Score: " + QString::number(entry.breakdown.totalScore));
+    const int rank = LeaderboardManager::getPlayerRank(currentUsername);
+    currentRankLabel->setText(
+        "Rank: " + (rank == -1 ? "Unranked" : "#" + QString::number(rank))
+        );
 
-    explorerValueLabel->setText(QString::number(entry.breakdown.explorer));
-    survivorValueLabel->setText(QString::number(entry.breakdown.survivor));
-    treasureValueLabel->setText(QString::number(entry.breakdown.treasureHunter));
-    collectorValueLabel->setText(QString::number(entry.breakdown.collector));
-    deckBuilderValueLabel->setText(QString::number(entry.breakdown.deckBuilder));
-    victoryBonusValueLabel->setText(QString::number(entry.breakdown.victoryBonus));
+    currentBestScoreLabel->setText("Best Score: -");
+
+    for (const auto& entry : std::as_const(entries)) {
+        if (entry.username == currentUsername) {
+            currentBestScoreLabel->setText(
+                "Best Score: " + QString::number(entry.breakdown.totalScore)
+                );
+            break;
+        }
+    }
 }
 
-void LeaderboardPage::clearDetails()
+void LeaderboardPage::openEntryDetailsDialog(int row)
 {
-    selectedPlayerLabel->setText("Selected: -");
-    selectedMetaLabel->setText("-");
-    selectedTotalScoreLabel->setText("Total Score: -");
-
-    explorerValueLabel->setText("0");
-    survivorValueLabel->setText("0");
-    treasureValueLabel->setText("0");
-    collectorValueLabel->setText("0");
-    deckBuilderValueLabel->setText("0");
-    victoryBonusValueLabel->setText("0");
-}
-
-void LeaderboardPage::onTableSelectionChanged()
-{
-    const int row = leaderboardTable->currentRow();
-
-    if (row < 0 || row >= leaderboardTable->rowCount() || row >= entries.size())
-    {
-        clearDetails();
+    if (row < 0 || row >= entries.size()) {
         return;
     }
 
-    showEntryDetails(entries[row]);
+    QDialog dialog(this);
+    dialog.setWindowTitle("Score Details");
+    dialog.setFixedSize(900, 620);
+    dialog.setStyleSheet(
+        "background-color: rgb(24, 18, 12);"
+        "border: 2px solid rgb(255, 210, 110);"
+        "border-radius: 14px;"
+        );
+
+    QVBoxLayout* layout = new QVBoxLayout(&dialog);
+    layout->setContentsMargins(30, 25, 30, 25);
+    layout->setSpacing(15);
+
+    // =========================================================
+    // Dialog header
+    // =========================================================
+    QHBoxLayout* headerLayout = new QHBoxLayout();
+
+    QLabel* playerNameLabel = new QLabel("Player: " + entries[row].username, &dialog);
+    playerNameLabel->setStyleSheet(
+        "font-size: 26px;"
+        "font-weight: bold;"
+        "color: rgb(255, 229, 155);"
+        "border: none;"
+        "background: transparent;"
+        );
+
+    QPushButton* closeButton = new QPushButton("Close", &dialog);
+    closeButton->setFixedSize(90, 36);
+    closeButton->setCursor(Qt::PointingHandCursor);
+    closeButton->setStyleSheet(
+        "QPushButton {"
+        "  background-color: rgba(120, 84, 28, 220);"
+        "  color: rgb(255, 239, 195);"
+        "  border: 1px solid rgb(255, 210, 110);"
+        "  border-radius: 7px;"
+        "  font-weight: bold;"
+        "}"
+        "QPushButton:hover {"
+        "  background-color: rgba(155, 108, 36, 245);"
+        "  border-color: rgb(255, 232, 150);"
+        "}"
+        );
+    connect(closeButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+
+    headerLayout->addWidget(playerNameLabel);
+    headerLayout->addStretch();
+    headerLayout->addWidget(closeButton);
+
+    layout->addLayout(headerLayout);
+
+    QLabel* totalScoreLabel = new QLabel(
+        "Total Score: " + QString::number(entries[row].breakdown.totalScore),
+        &dialog
+        );
+    totalScoreLabel->setStyleSheet(
+        "font-size: 34px;"
+        "font-weight: bold;"
+        "color: rgb(255, 223, 120);"
+        "border: none;"
+        "background: transparent;"
+        "margin-bottom: 5px;"
+        );
+
+    layout->addWidget(totalScoreLabel);
+
+    // =========================================================
+    // Score breakdown cards
+    // =========================================================
+    QGridLayout* grid = new QGridLayout();
+    grid->setSpacing(15);
+
+    const auto& b = entries[row].breakdown;
+
+    // Tooltip formulas
+    const QString explorerFormula =
+        QString("Explorer Score\n"
+                "Formula:\n"
+                "((Floor Index + 1) × 10) + ((Act - 1) × 500)\n\n"
+                "This entry: %1")
+            .arg(b.explorer);
+
+    const QString survivorFormula =
+        QString("Survivor Score\n"
+                "Formula:\n"
+                "Current Health × 2\n\n"
+                "This entry: %1")
+            .arg(b.survivor);
+
+    const QString treasureFormula =
+        QString("Treasure Hunter Score\n"
+                "Formula:\n"
+                "Gold / 5\n\n"
+                "This entry: %1")
+            .arg(b.treasureHunter);
+
+    const QString collectorFormula =
+        QString("Collector Score\n"
+                "Formula:\n"
+                "Number of Relics × 50\n\n"
+                "This entry: %1")
+            .arg(b.collector);
+
+    const QString deckFormula =
+        QString("Deck Builder Score\n"
+                "Formula:\n"
+                "Master Deck Card Count × 10\n\n"
+                "This entry: %1")
+            .arg(b.deckBuilder);
+
+    const QString victoryFormula =
+        QString("Victory Bonus\n"
+                "Formula:\n"
+                "1000 points if won\n\n"
+                "This entry: %1")
+            .arg(b.victoryBonus);
+
+    grid->addWidget(
+        createBreakdownCard("Explorer", ":/leaderboard/Explorer.png", b.explorer, explorerFormula),
+        0, 0
+        );
+    grid->addWidget(
+        createBreakdownCard("Survivor", ":/leaderboard/survivor.png", b.survivor, survivorFormula),
+        0, 1
+        );
+    grid->addWidget(
+        createBreakdownCard("Treasure Hunter", ":/leaderboard/treasureHunter.png", b.treasureHunter, treasureFormula),
+        1, 0
+        );
+    grid->addWidget(
+        createBreakdownCard("Collector", ":/leaderboard/collector.png", b.collector, collectorFormula),
+        1, 1
+        );
+    grid->addWidget(
+        createBreakdownCard("Deck Builder", ":/leaderboard/deckBuilder.png", b.deckBuilder, deckFormula),
+        2, 0
+        );
+    grid->addWidget(
+        createBreakdownCard("Victory Bonus", ":/leaderboard/victoryBonus.png", b.victoryBonus, victoryFormula),
+        2, 1
+        );
+
+    layout->addLayout(grid);
+    layout->addStretch();
+
+    dialog.exec();
 }
 
-QString LeaderboardPage::formatResultText(bool victory) const
+QString LeaderboardPage::formatResultText(RunStatus status) const
 {
-    return victory ? "Victory" : "Defeat";
+    switch (status)
+    {
+    case RunStatus::Victory:
+        return "Victory";
+    case RunStatus::InProgress:
+        return "In Progress";
+    case RunStatus::Defeat:
+        return "Defeat";
+    }
+
+    return "Unknown";
 }
+
 
 QString LeaderboardPage::formatDateText(const QString& rawDate) const
 {
     return rawDate;
 }
 
-void LeaderboardPage::paintEvent(QPaintEvent* event)
+void LeaderboardPage::paintEvent(QPaintEvent*)
 {
-    Q_UNUSED(event);
-
     QPainter painter(this);
-    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-
-    if (!backgroundPixmap.isNull())
-    {
-        painter.drawPixmap(rect(), backgroundPixmap);
-    }
-    else
-    {
-        painter.fillRect(rect(), QColor(18, 18, 24));
-    }
+    painter.drawPixmap(rect(), backgroundPixmap);
 }
 
 void LeaderboardPage::resizeEvent(QResizeEvent* event)
@@ -487,8 +616,6 @@ void LeaderboardPage::resizeEvent(QResizeEvent* event)
 
     if (mainPanel)
     {
-        const int panelW = qMin(width() - 60, 1170);
-        const int panelH = qMin(height() - 50, 650);
-        mainPanel->setGeometry((width() - panelW) / 2, (height() - panelH) / 2, panelW, panelH);
+        mainPanel->setGeometry((width() - 1170) / 2, (height() - 650) / 2, 1170, 650);
     }
 }

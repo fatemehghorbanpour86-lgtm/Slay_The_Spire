@@ -11,6 +11,7 @@ class QPushButton;
 class QLabel;
 class QTableWidget;
 class QFrame;
+class QDialog;
 
 class LeaderboardPage : public QWidget
 {
@@ -29,7 +30,7 @@ protected:
     void resizeEvent(QResizeEvent* event) override;
 
 private slots:
-    void onTableSelectionChanged();
+    void openEntryDetailsDialog(int row);
 
 private:
     void setupUi();
@@ -37,14 +38,13 @@ private:
     void loadAssets();
     void populateTable();
     void updateCurrentPlayerPanel();
-    void showEntryDetails(const LeaderboardEntry& entry);
-    void clearDetails();
 
+    QDialog* createDetailsDialog(const LeaderboardEntry& entry, QWidget* parent = nullptr);
     QWidget* createBreakdownCard(const QString& title,
                                  const QString& iconPath,
-                                 QLabel*& valueLabel);
+                                 int value,const QString& formula);
 
-    QString formatResultText(bool victory) const;
+    QString formatResultText(RunStatus status) const;
     QString formatDateText(const QString& rawDate) const;
 
 private:
@@ -63,18 +63,6 @@ private:
     QLabel* currentBestScoreLabel = nullptr;
 
     QTableWidget* leaderboardTable = nullptr;
-
-    QFrame* detailsFrame = nullptr;
-    QLabel* selectedPlayerLabel = nullptr;
-    QLabel* selectedMetaLabel = nullptr;
-    QLabel* selectedTotalScoreLabel = nullptr;
-
-    QLabel* explorerValueLabel = nullptr;
-    QLabel* survivorValueLabel = nullptr;
-    QLabel* treasureValueLabel = nullptr;
-    QLabel* collectorValueLabel = nullptr;
-    QLabel* deckBuilderValueLabel = nullptr;
-    QLabel* victoryBonusValueLabel = nullptr;
 };
 
 #endif // LEADERBOARDPAGE_H

@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QString>
 
+#include "leaderboardmanager.h"
 #include "mapnode.h"        // NodeType
 #include "enemyfactory.h"   // EnemyFactory::EncounterId
 
@@ -103,7 +104,7 @@ private:
     void showEventPage();
     void showVictoryPage();
     void showDefeatPage();
-    void updateLeaderboard(bool won);
+    void updateLeaderboard(RunStatus status);
 
     // ---- Run lifecycle ----
     void createNewRun(const QString& username);

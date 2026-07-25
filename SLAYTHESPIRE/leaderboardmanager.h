@@ -14,6 +14,12 @@
 class Player;
 class Map;
 
+enum class RunStatus
+{
+    InProgress,
+    Defeat,
+    Victory
+};
 /**
  * @struct ScoreBreakdown
  * @brief Holds detailed scoring metrics for a single run.
@@ -38,8 +44,8 @@ struct LeaderboardEntry
     QString username;
     QString characterName;
     ScoreBreakdown breakdown;
-    bool victory = false;
-    QString dateTime; // ISO 8601 formatted string
+    RunStatus status = RunStatus::InProgress;
+    QString dateTime;
 };
 
 /**
@@ -54,14 +60,16 @@ public:
     /**
      * @brief Calculates the real-time score based on current player/map state.
      */
-    static ScoreBreakdown calculateScore(Player* player, Map* map, bool won);
+    static ScoreBreakdown calculateScore(Player* player, Map* map, RunStatus status);
+
 
     // --- Persistence & Data Management ---
 
     /**
      * @brief Updates player score using "Upsert" logic (Only keeps the best personal record).
      */
-    static void updatePlayerScore(const QString& username, Player* player, Map* map, bool won);
+    static void updatePlayerScore(const QString& username, Player* player, Map* map, RunStatus status);
+
 
     /**
      * @brief Loads the entire leaderboard from the local JSON file.
