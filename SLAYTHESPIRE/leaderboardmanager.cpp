@@ -1,4 +1,4 @@
-#include "LeaderboardManager.h"
+#include "leaderboardmanager.h"
 
 #include <QDir>
 #include <QStandardPaths>
@@ -109,8 +109,7 @@ void LeaderboardManager::updatePlayerScore(const QString& username, Player* play
                 return a.breakdown.totalScore > b.breakdown.totalScore;
             }
 
-            // If scores are equal, more recent entry comes first
-            return a.dateTime > b.dateTime;
+            return a.dateTime < b.dateTime;
         }
         );
 

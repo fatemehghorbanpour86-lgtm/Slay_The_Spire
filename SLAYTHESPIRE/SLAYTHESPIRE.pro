@@ -34,6 +34,7 @@ SOURCES += \
     eventsystem.cpp \
     gamemanager.cpp \
     leaderboardmanager.cpp \
+    leaderboardpage.cpp \
     loginpage.cpp \
     main.cpp \
     mainpage.cpp \
@@ -97,6 +98,7 @@ HEADERS += \
     eventsystem.h \
     gamemanager.h \
     leaderboardmanager.h \
+    leaderboardpage.h \
     loginpage.h \
     mainpage.h \
     mainwindow.h \
