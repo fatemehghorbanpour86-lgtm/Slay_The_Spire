@@ -99,7 +99,7 @@ private:
     void showEventPage();
     void showVictoryPage();
     void showDefeatPage();
-    void updateLeaderboard();
+    void updateLeaderboard(bool won);
 
     // ---- Run lifecycle ----
     void createNewRun(const QString& username);

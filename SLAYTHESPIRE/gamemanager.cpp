@@ -19,6 +19,7 @@
 #include "eventmanager.h"
 #include "eventpage.h"
 #include "event.h"
+#include "leaderboardmanager.h"
 
 #include <QRandomGenerator>
 #include <QMessageBox>
@@ -296,11 +297,14 @@ void GameManager::showDefeatPage()
     onReturnToMainMenuRequested();
 }
 
-void GameManager::updateLeaderboard()
+void GameManager::updateLeaderboard(bool won)
 {
-    // TODO: hook point for writing this run's final score once the
-    // Leaderboard storage/UI exists.
+    if (currentUsername.isEmpty() || !player || !map)
+        return;
+
+    LeaderboardManager::updatePlayerScore(currentUsername, player, map, won);
 }
+
 
 // ============================================================
 //  Run lifecycle
@@ -443,6 +447,7 @@ void GameManager::startBattle(const QVector<Enemy*>& enemies, EncounterKind kind
 void GameManager::returnToMapAndAutosave()
 {
     autoSave();
+    updateLeaderboard(false);
     showMapPage();
 }
 
@@ -630,6 +635,8 @@ void GameManager::onCombatResult(bool playerWon)
 void GameManager::handlePlayerDefeat()
 {
     // Battle lost: no reward is shown, straight to Defeat.
+    updateLeaderboard(false);
+
     showDefeatPage();
 }
 
@@ -654,9 +661,9 @@ void GameManager::onBossDefeated()
 
     if (map->isFinalAct())
     {
-        showVictoryPage();
-        updateLeaderboard();
+        updateLeaderboard(true);
 
+        showVictoryPage();
         // Run complete - keep the save file, just clear in-memory state so
         // a fresh "Start Game" begins a brand new run.
         cleanupRun();
