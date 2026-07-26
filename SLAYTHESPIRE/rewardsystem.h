@@ -31,6 +31,11 @@ public:
     // Boss: 80 Gold and a choice of 1 out of 3 Boss Relics.
     void generateBossReward(Player* player);
 
+    // Mini Game (Memory Game win): exactly one random Normal-tier Relic.
+    // No gold, no card choice, no potion - reuses the same RewardPage as
+    // every other reward, just with a single Relic entry.
+    void generateMiniGameReward(Player* player);
+
     // ---- Access for RewardPage ----
 
     const QVector<Reward*>& getRewards() const;

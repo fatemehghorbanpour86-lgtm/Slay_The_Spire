@@ -19,9 +19,14 @@
 #include "eventmanager.h"
 #include "eventpage.h"
 #include "event.h"
+#include "memorygamepage.h"
+#include "treasureguesspage.h"
+
 
 #include <QRandomGenerator>
 #include <QMessageBox>
+#include <QDialog>
+#include <QVBoxLayout>
 
 
 GameManager::GameManager(QStackedWidget* stackedWidget, QObject* parent)
@@ -129,19 +134,30 @@ void GameManager::showRewardPage(RewardSystem* rewardSystem)
 {
     pendingRewardSystem = rewardSystem;
 
-    if (rewardPage)
+    if (rewardDialog)
     {
-        stackedWidget->removeWidget(rewardPage);
-        rewardPage->deleteLater();
+        rewardDialog->deleteLater();
+        rewardDialog = nullptr;
         rewardPage = nullptr;
     }
 
-    rewardPage = new RewardPage(player, rewardSystem, nullptr);
-    stackedWidget->addWidget(rewardPage);
+    rewardDialog = new QDialog(stackedWidget->window());
+    rewardDialog->setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
+    rewardDialog->setModal(true);
+    rewardDialog->setAttribute(Qt::WA_TranslucentBackground);
+    rewardDialog->setStyleSheet("background: transparent;");
 
-    connect(rewardPage, &RewardPage::continueClicked, this, &GameManager::onRewardContinue);
+    QVBoxLayout* layout = new QVBoxLayout(rewardDialog);
+    layout->setContentsMargins(0, 0, 0, 0);
 
-    stackedWidget->setCurrentWidget(rewardPage);
+    rewardPage = new RewardPage(player, rewardSystem, rewardDialog);
+    layout->addWidget(rewardPage);
+    rewardDialog->setFixedSize(rewardPage->size());
+
+    connect(rewardPage, &RewardPage::continueClicked, rewardDialog, &QDialog::accept);
+    connect(rewardDialog, &QDialog::finished, this, &GameManager::onRewardContinue);
+
+    rewardDialog->show();
 }
 
 void GameManager::showBattlePage(const QVector<Enemy*>& enemies)
@@ -170,13 +186,6 @@ void GameManager::cleanupTransientPages()
         battlePage = nullptr;
     }
 
-    if (rewardPage)
-    {
-        stackedWidget->removeWidget(rewardPage);
-        rewardPage->deleteLater();
-        rewardPage = nullptr;
-    }
-
     if (campfirePage)
     {
         stackedWidget->removeWidget(campfirePage);
@@ -203,6 +212,20 @@ void GameManager::cleanupTransientPages()
         stackedWidget->removeWidget(eventPage);
         eventPage->deleteLater();
         eventPage = nullptr;
+    }
+
+    if (memoryGamePage)
+    {
+        stackedWidget->removeWidget(memoryGamePage);
+        memoryGamePage->deleteLater();
+        memoryGamePage = nullptr;
+    }
+
+    if (treasureGuessPage)
+    {
+        stackedWidget->removeWidget(treasureGuessPage);
+        treasureGuessPage->deleteLater();
+        treasureGuessPage = nullptr;
     }
 }
 
@@ -303,6 +326,76 @@ void GameManager::updateLeaderboard()
 }
 
 // ============================================================
+//  Mini Games (Floor 9)
+// ============================================================
+
+void GameManager::showMiniGamePage()
+{
+    if (QRandomGenerator::global()->bounded(100) < 50)
+        showMemoryGamePage();
+    else
+        showTreasureGuessPage();
+}
+
+void GameManager::showMemoryGamePage()
+{
+    if (memoryGamePage)
+    {
+        stackedWidget->removeWidget(memoryGamePage);
+        memoryGamePage->deleteLater();
+        memoryGamePage = nullptr;
+    }
+
+    memoryGamePage = new MemoryGameWidget(player, map, nullptr);
+    stackedWidget->addWidget(memoryGamePage);
+
+    connect(memoryGamePage, &MemoryGameWidget::requestReward, this, &GameManager::onMemoryGameWon);
+    connect(memoryGamePage, &MemoryGameWidget::memoryGameLost, this, &GameManager::onMemoryGameLost);
+    connect(memoryGamePage, &MemoryGameWidget::settingsRequested, this, &GameManager::onMapPauseRequested);
+
+    stackedWidget->setCurrentWidget(memoryGamePage);
+}
+
+void GameManager::showTreasureGuessPage()
+{
+    if (treasureGuessPage)
+    {
+        stackedWidget->removeWidget(treasureGuessPage);
+        treasureGuessPage->deleteLater();
+        treasureGuessPage = nullptr;
+    }
+
+    treasureGuessPage = new TreasureGuessPage(player, map, nullptr);
+    stackedWidget->addWidget(treasureGuessPage);
+
+    connect(treasureGuessPage, &TreasureGuessPage::proceedRequested, this, &GameManager::onTreasureGuessProceed);
+    connect(treasureGuessPage, &TreasureGuessPage::settingsRequested, this, &GameManager::onMapPauseRequested);
+
+    stackedWidget->setCurrentWidget(treasureGuessPage);
+}
+
+void GameManager::onMemoryGameWon()
+{
+    RewardSystem* rewardSystem = new RewardSystem();
+    rewardSystem->generateMiniGameReward(player);
+
+    currentEncounterKind = EncounterKind::Normal;
+
+    showRewardPage(rewardSystem);
+}
+
+void GameManager::onMemoryGameLost()
+{
+    returnToMapAndAutosave();
+}
+
+void GameManager::onTreasureGuessProceed()
+{
+    returnToMapAndAutosave();
+}
+
+
+// ============================================================
 //  Run lifecycle
 // ============================================================
 
@@ -348,6 +441,13 @@ void GameManager::cleanupRun()
     }
 
     cleanupTransientPages();
+
+    if (rewardDialog)
+    {
+        rewardDialog->deleteLater();
+        rewardDialog = nullptr;
+        rewardPage = nullptr;
+    }
 
     delete currentEvent;
     currentEvent = nullptr;
@@ -598,6 +698,10 @@ void GameManager::onMapNodeEntered(NodeType type)
     case NodeType::Treasure:
         showTreasurePage();
         break;
+
+    case NodeType::MiniGame:
+        showMiniGamePage();
+        break;
     }
 }
 
@@ -637,6 +741,14 @@ void GameManager::onRewardContinue()
 {
     delete pendingRewardSystem;
     pendingRewardSystem = nullptr;
+
+    rewardPage = nullptr;
+
+    if (rewardDialog)
+    {
+        rewardDialog->deleteLater();
+        rewardDialog = nullptr;
+    }
 
     if (currentEncounterKind == EncounterKind::Boss)
     {

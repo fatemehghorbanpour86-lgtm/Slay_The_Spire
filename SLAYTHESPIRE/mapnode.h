@@ -10,7 +10,8 @@ enum class NodeType
     Event,
     Treasure,
     Shop,
-    Boss
+    Boss,
+    MiniGame
 };
 
 /*

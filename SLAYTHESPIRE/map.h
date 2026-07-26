@@ -162,11 +162,12 @@ private:
     // Campfire/Treasure rooms back-to-back along any path.
     bool violatesAdjacencyRule(MapNode* node, NodeType candidate) const;
 
-    static const int FLOORS_PER_ACT = 10;
+    static const int FLOORS_PER_ACT = 13;
     static const int TOTAL_ACTS = 2;
     static const int MIN_NODES_PER_FLOOR = 2;
     static const int MAX_NODES_PER_FLOOR = 4;
-    static const int TREASURE_FLOOR_INDEX = 5; // 0-indexed => "Floor 6" in the doc.
+    static const int TREASURE_FLOOR_INDEX = 5;    // 0-indexed => "Floor 6"
+    static const int MINIGAME_FLOOR_INDEX = 8;    // 0-indexed => "Floor 9"
 
     QVector<MapFloor> floors;
     QVector<MapNode*> allNodes;

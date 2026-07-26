@@ -20,17 +20,13 @@ void MapWidget::createNodeButtons() {
 
     int mapHeight = ((totalFloors - 1) * VERTICAL_SPACING) + 150 + VERTICAL_SPACING_BOSS;
 
-    // setFixedSize به‌جای setMinimumSize: عرض همین الان قطعی می‌شه
-    // و دیگه لازم نیست منتظر layout بمونیم تا width() درست برگرده
+
     setFixedSize(MAP_CONTENT_WIDTH, mapHeight);
 
     for (int i = 0; i < totalFloors; ++i) {
         const QVector<MapNode*>& nodes = floors[i].getNodes();
         int nodeCount = nodes.size();
 
-        // همیشه بر اساس عرض ثابت مپ سنتر می‌کنیم، نه this->width() لحظه‌ای
-        // int rowWidth = nodeCount * HORIZONTAL_SPACING;
-        // int startX = (MAP_CONTENT_WIDTH - rowWidth) / 2 + (HORIZONTAL_SPACING - NODE_SIZE) / 2;
         int startX = 0;
         if(nodeCount == 1)
         {
@@ -138,6 +134,7 @@ QString MapWidget::getNodeStyleSheet(MapNode* node) {
     case NodeType::Treasure: typeStr = "treasure"; break;
     case NodeType::Shop: typeStr = "shop"; break;
     case NodeType::Boss: typeStr = "boss"; break;
+    case NodeType::MiniGame: typeStr = "minigame"; break;
     }
 
     QString imagePath = QString(":/map/%1_%2.png").arg(typeStr, stateStr);
@@ -163,6 +160,7 @@ QString MapWidget::getTooltipText(NodeType type) {
     case NodeType::Treasure: return "Treasure";
     case NodeType::Shop: return "Merchant";
     case NodeType::Boss: return "Boss";
+    case NodeType::MiniGame: return "Mini Game";
     }
     return "";
 }

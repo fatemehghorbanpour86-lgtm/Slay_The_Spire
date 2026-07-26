@@ -26,6 +26,9 @@ class ShopPage;
 class EventManager;
 class EventPage;
 class Event;
+class MemoryGameWidget;
+class TreasureGuessPage;
+class QDialog;
 
 
 class GameManager : public QObject
@@ -63,6 +66,14 @@ private:
     ShopPage*     shopPage     = nullptr;
     EventPage*    eventPage    = nullptr;
 
+    // ---- Mini Games (Floor 9) ----
+    MemoryGameWidget*  memoryGamePage    = nullptr;
+    TreasureGuessPage* treasureGuessPage = nullptr;
+
+    // ---- Reward Dialog ----
+    // RewardPage is hosted inside this modal QDialog instead of being
+    QDialog* rewardDialog = nullptr;
+
     // ---- Run state ----
     QString currentUsername;
     Player* player = nullptr;
@@ -90,7 +101,7 @@ private:
     void showRewardPage(RewardSystem* rewardSystem);
     void showBattlePage(const QVector<Enemy*>& enemies);
 
-    void cleanupTransientPages(); // battlePage / rewardPage / campfirePage / TreasurePage
+    void cleanupTransientPages(); // battlePage / rewardPage / campfirePage / TreasurePage / ShopPage / EventPage / Mini Games
 
     // ---- Hooks for pages that don't exist yet ----
     // (Not implemented on purpose - wire the real UI to these once it exists.)
@@ -100,6 +111,11 @@ private:
     void showVictoryPage();
     void showDefeatPage();
     void updateLeaderboard();
+
+    // ---- Mini Games (Floor 9) ----
+    void showMiniGamePage();
+    void showMemoryGamePage();
+    void showTreasureGuessPage();
 
     // ---- Run lifecycle ----
     void createNewRun(const QString& username);
@@ -130,6 +146,11 @@ private:
     void onTreasureFinished();
     void onMapPauseRequested();
     void onEventResolved();
+
+    // ---- Mini Game result slots ----
+    void onMemoryGameWon();
+    void onMemoryGameLost();
+    void onTreasureGuessProceed();
 
     // Hook: connect this to the (future) Defeat/Victory page's
     // "Return to Main Menu" button.

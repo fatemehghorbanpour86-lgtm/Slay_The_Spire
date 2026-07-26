@@ -126,6 +126,16 @@ void RewardSystem::generateBossReward(Player* player)
         rewards.append(new Reward(bossChoices, true));
 }
 
+void RewardSystem::generateMiniGameReward(Player* player)
+{
+    // Doc: winning the Memory Game grants exactly one random Normal
+    // relic - no gold, no card choice, no potion.
+    Relic* relic = RelicSystem::createRandomRelic(player, Relic::Tier::Normal);
+
+    if (relic)
+        rewards.append(new Reward(relic));
+}
+
 const QVector<Reward*>& RewardSystem::getRewards() const
 {
     return rewards;

@@ -210,10 +210,10 @@ void TreasureGuessPage::onRewardClicked()
     if (!reward)
         return;
 
-    // NOTE: not wired to the Player's potion inventory / Potion System
-    // yet, per the request. Once connected, replace the delete below
-    // with something like: player->addPotion(reward);
-    delete reward;
+    if (player)
+        player->addPotion(reward);
+    else
+        delete reward;
 
     AudioManager::instance().play(AudioManager::Sound::Reward);
 

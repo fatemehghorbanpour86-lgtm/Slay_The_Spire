@@ -301,7 +301,7 @@ void Map::assignNodeTypes()
     QVector<int> restFloorCandidates;
     for (int i = 2; i < bossFloorIndex - 2; ++i)
     {
-        if (i != TREASURE_FLOOR_INDEX)
+        if (i != TREASURE_FLOOR_INDEX && i != MINIGAME_FLOOR_INDEX)
             restFloorCandidates.append(i);
     }
 
@@ -334,6 +334,10 @@ void Map::assignNodeTypes()
             else if (i == TREASURE_FLOOR_INDEX)
             {
                 node->setType(NodeType::Treasure); // Doc: Floor 6 is always Treasure.
+            }
+            else if (i == MINIGAME_FLOOR_INDEX)
+            {
+                node->setType(NodeType::MiniGame);
             }
             else if (guaranteedCampfireFloors.contains(i))
             {

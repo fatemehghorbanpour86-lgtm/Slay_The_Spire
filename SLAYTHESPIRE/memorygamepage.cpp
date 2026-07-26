@@ -466,9 +466,9 @@ void MemoryGameWidget::checkGameEndState()
     {
         inputLocked = true;
 
-        emit memoryGameLost();
-
         MemoryLoseDialog dialog(this);
         dialog.exec();
+
+        emit memoryGameLost();
     }
 }
