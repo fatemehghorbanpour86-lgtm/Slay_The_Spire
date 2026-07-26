@@ -9,6 +9,8 @@
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QDir>
+#include <QCoreApplication>
 
 TreasureGuessPage::TreasureGuessPage(Player* playerPtr, Map* mapPtr, QWidget* parent)
     : QWidget(parent), player(playerPtr), map(mapPtr)
@@ -38,6 +40,17 @@ void TreasureGuessPage::setupUI()
         "border-radius: 4px; padding: 6px; font-weight: bold; font-family: Tahoma;"
         "}"
         );
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -77,7 +90,7 @@ void TreasureGuessPage::setupUI()
     {
         QPushButton* chestBtn = new QPushButton(this);
         chestBtn->setFixedSize(350, 250);
-        chestBtn->setCursor(Qt::PointingHandCursor);
+        chestBtn->setCursor(buttonHoverCursor);
         chestBtn->setStyleSheet(
             "QPushButton { border-image: url(:/Treasure/ChestClose.png); border: none; background: transparent; }"
             "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
@@ -102,7 +115,7 @@ void TreasureGuessPage::setupUI()
     //     Same visual role/pattern as TreasurePage's rewardBtn. ---
     rewardBtn = new QPushButton(this);
     rewardBtn->setFixedSize(110, 110);
-    rewardBtn->setCursor(Qt::PointingHandCursor);
+    rewardBtn->setCursor(buttonHoverCursor);
     rewardBtn->hide();
     connect(rewardBtn, &QPushButton::pressed, this, []() {
         AudioManager::instance().play(AudioManager::Sound::ButtonClick);
@@ -112,7 +125,7 @@ void TreasureGuessPage::setupUI()
     // --- Proceed: bottom-right, hidden until the round is resolved ---
     proceedBtn = new QPushButton(this);
     proceedBtn->setFixedSize(180, 80);
-    proceedBtn->setCursor(Qt::PointingHandCursor);
+    proceedBtn->setCursor(buttonHoverCursor);
     proceedBtn->hide();
     proceedBtn->setStyleSheet(
         "QPushButton { border-image: url(:/Treasure/ProceedBtn.png); border: none; background: transparent; }"

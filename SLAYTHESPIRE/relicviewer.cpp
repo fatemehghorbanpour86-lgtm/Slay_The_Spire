@@ -24,6 +24,11 @@ RelicViewerDialog::RelicViewerDialog(Player* player, QWidget* parent)
         "}"
         );
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
     setupUI();
 }
 

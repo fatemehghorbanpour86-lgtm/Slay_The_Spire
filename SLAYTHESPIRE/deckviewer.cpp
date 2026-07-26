@@ -17,6 +17,11 @@ DeckViewerDialog::DeckViewerDialog(Player* player, QWidget* parent)
     setFixedSize(770, 620);
     setStyleSheet("QDialog { border-image: url(:/card/CardViewer.png); }");
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
     setupUI();
 }
 

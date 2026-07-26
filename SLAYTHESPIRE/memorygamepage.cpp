@@ -32,6 +32,17 @@ void MemoryRewardDialog::setupUI()
         );
     setFixedSize(400, 300);
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(30, 30, 30, 30);
     mainLayout->setAlignment(Qt::AlignCenter);
@@ -47,7 +58,7 @@ void MemoryRewardDialog::setupUI()
 
     rewardBtn = new QPushButton(this);
     rewardBtn->setFixedSize(220, 60);
-    rewardBtn->setCursor(Qt::PointingHandCursor);
+    rewardBtn->setCursor(buttonHoverCursor);
     rewardBtn->setText("Random Relic");
     rewardBtn->setStyleSheet(
         "QPushButton { border-image: url(:/Reward/RelicReward.png); font-size: 15px;"
@@ -89,6 +100,17 @@ void MemoryLoseDialog::setupUI()
         );
     setFixedSize(420, 260);
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(30, 30, 30, 30);
     mainLayout->setAlignment(Qt::AlignCenter);
@@ -104,7 +126,7 @@ void MemoryLoseDialog::setupUI()
 
     continueBtn = new QPushButton("Continue", this);
     continueBtn->setFixedSize(160, 50);
-    continueBtn->setCursor(Qt::PointingHandCursor);
+    continueBtn->setCursor(buttonHoverCursor);
     continueBtn->setStyleSheet(
         "QPushButton { border-image: url(:/SettingPushButton.png); font-size: 15px;"
         "font-weight: bold; border: 1px solid rgba(255,255,255,40); }"
@@ -148,6 +170,11 @@ void MemoryGameWidget::setupUI()
                 "}").arg(BackgroundPath)
         );
     setFixedSize(1280, 720);
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -213,6 +240,12 @@ void MemoryGameWidget::createCardButtons()
     cardButtons.clear();
     cardButtons.resize(MemoryGameModel::TOTAL_CARDS);
 
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     for (int i = 0; i < MemoryGameModel::TOTAL_CARDS; ++i)
     {
         const int row = i / COLUMNS;
@@ -223,7 +256,7 @@ void MemoryGameWidget::createCardButtons()
 
         QPushButton* btn = new QPushButton(cardsContainer);
         btn->setGeometry(x, y, CARD_WIDTH, CARD_HEIGHT);
-        btn->setCursor(Qt::PointingHandCursor);
+        btn->setCursor(buttonHoverCursor);
         btn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
         btn->setStyleSheet(
             "QPushButton { border: 1px solid #5a5a54; border-radius: 8px; background: #2b2b28; }"

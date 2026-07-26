@@ -2,6 +2,8 @@
 #include "mapnode.h"
 #include "audiomanager.h"
 #include <QPen>
+#include <QDir>
+#include <QCoreApplication>
 
 MapWidget::MapWidget(Map* gameMap, QWidget *parent)
     : QWidget(parent), map(gameMap)
@@ -91,6 +93,18 @@ void MapWidget::createNodeButtons() {
 }
 
 void MapWidget::refreshUI() {
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     for (auto it = nodeButtons.begin(); it != nodeButtons.end(); ++it) {
         MapNode* node = it.key();
         QPushButton* btn = it.value();
@@ -99,10 +113,10 @@ void MapWidget::refreshUI() {
 
         if (node->isAvailable()) {
             btn->setEnabled(true);
-            btn->setCursor(Qt::PointingHandCursor);
+            btn->setCursor(buttonHoverCursor);
         } else {
             btn->setEnabled(false);
-            btn->setCursor(Qt::ArrowCursor);
+            btn->setCursor(customCursor);
         }
     }
     update();

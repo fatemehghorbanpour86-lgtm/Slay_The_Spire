@@ -9,6 +9,8 @@
 #include "deckviewer.h"
 #include "rewardpage.h"
 #include "rewardsystem.h"
+#include <QDir>
+#include <QCoreApplication>
 
 MapPage* MapPage::instance = nullptr;
 
@@ -40,6 +42,13 @@ void MapPage::setupUI() {
         "border-radius: 4px; padding: 6px; font-weight: bold; font-family: Tahoma;"
         "}"
         );
+
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -78,9 +87,13 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
         "background-color: #2C444F ;"
         "}"
         );
-    // QWidget خام بدون این attribute، background-color رو رندر نمی‌کنه
-    // (برخلاف QFrame/QLabel که خودشون استایل‌شیت رو پشتیبانی می‌کنن)
     topBarWidget->setAttribute(Qt::WA_StyledBackground, true);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
     QHBoxLayout* topBarLayout = new QHBoxLayout(topBarWidget);
     topBarLayout->setContentsMargins(20, 5, 20, 5);
@@ -100,7 +113,7 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
 
     relicBtn = new QPushButton();
     relicBtn->setFixedSize(30, 25);
-    relicBtn->setCursor(Qt::PointingHandCursor);
+    relicBtn->setCursor(buttonHoverCursor);
     relicBtn->setStyleSheet(
         "QPushButton {"
         "border: none;"
@@ -179,7 +192,7 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
     // --- قسمت راست: Deck و Settings ---
     deckBtn = new QPushButton();
     deckBtn->setFixedSize(40, 40);
-    deckBtn->setCursor(Qt::PointingHandCursor);
+    deckBtn->setCursor(buttonHoverCursor);
     deckBtn->setStyleSheet(
         "QPushButton {"
         "border: none;"
@@ -203,7 +216,7 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
 
     settingsBtn = new QPushButton();
     settingsBtn->setFixedSize(45, 45);
-    settingsBtn->setCursor(Qt::PointingHandCursor);
+    settingsBtn->setCursor(buttonHoverCursor);
     settingsBtn->setStyleSheet(
         "QPushButton { border-image: url(:/map/settingBtnMap.png); }"
         "QPushButton:pressed { "

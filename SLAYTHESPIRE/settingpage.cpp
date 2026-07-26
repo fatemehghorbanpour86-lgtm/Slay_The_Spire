@@ -6,6 +6,8 @@
 #include <QLineEdit>
 #include <QDialogButtonBox>
 #include <QMessageBox>
+#include <QCoreApplication>
+#include <QDir>
 
 SettingsDialog::SettingsDialog(const QString& currentUsername, QWidget* parent)
     : QDialog(parent), username(currentUsername)
@@ -21,6 +23,17 @@ void SettingsDialog::setupUI()
         "#SettingPage { border-image: url(:/Reward/SelectionViewer.png); }");
     setFixedSize(500, 450);
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(140, 30, 140, 30);
     mainLayout->setSpacing(20);
@@ -33,7 +46,7 @@ void SettingsDialog::setupUI()
 
 
     toggleSoundBtn = new QPushButton(this);
-    toggleSoundBtn->setCursor(Qt::PointingHandCursor);
+    toggleSoundBtn->setCursor(buttonHoverCursor);
     toggleSoundBtn->setStyleSheet(
         "QPushButton { border-image: url(:/SettingPushButton.png); font-size: 15px;"
         "font-weight: bold; border: 1px solid rgba(255,255,255,40); }"
@@ -48,7 +61,7 @@ void SettingsDialog::setupUI()
 
 
     changeUsernameBtn = new QPushButton("Change Username", this);
-    changeUsernameBtn->setCursor(Qt::PointingHandCursor);
+    changeUsernameBtn->setCursor(buttonHoverCursor);
     changeUsernameBtn->setStyleSheet(
         "QPushButton { border-image: url(:/SettingPushButton.png); font-size: 15px;"
         "font-weight: bold; border: 1px solid rgba(255,255,255,40); }"
@@ -61,7 +74,7 @@ void SettingsDialog::setupUI()
     connect(changeUsernameBtn, &QPushButton::clicked, this, &SettingsDialog::onChangeUsernameClicked);
 
     closeBtn = new QPushButton(this);
-    closeBtn->setCursor(Qt::PointingHandCursor);
+    closeBtn->setCursor(buttonHoverCursor);
     closeBtn->setStyleSheet(
         "QPushButton { border-image: url(:/RestSite/BackBtn.png); border: none; background: transparent; }"
         "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
@@ -100,6 +113,17 @@ void SettingsDialog::onChangeUsernameClicked()
         "#ChangeUsername { border-image: url(:/ChangeUsernameViewer.png); }");
     dialog.setFixedSize(450, 400);
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    dialog.setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QVBoxLayout* layout = new QVBoxLayout(&dialog);
     layout->setContentsMargins(20, 40, 20, 140);
     layout->setAlignment(Qt::AlignCenter);
@@ -126,14 +150,14 @@ void SettingsDialog::onChangeUsernameClicked()
     cancelBtn->setFixedSize(150, 100);
     cancelBtn->setStyleSheet("QPushButton { border-image: url(:/RestSite/NoBtn.png); }"
                              "QPushButton:pressed { margin: 5px 5px 5px 5px; }");
-    cancelBtn->setCursor(Qt::PointingHandCursor);
+    cancelBtn->setCursor(buttonHoverCursor);
     cancelBtn->move(0,270);
 
     QPushButton* confirmBtn = new QPushButton(&dialog);
     confirmBtn->setFixedSize(150, 100);
     confirmBtn->setStyleSheet("QPushButton { border-image: url(:/RestSite/YesBtn.png); }"
                               "QPushButton:pressed { margin: 5px 5px 5px 5px; }");
-    confirmBtn->setCursor(Qt::PointingHandCursor);
+    confirmBtn->setCursor(buttonHoverCursor);
     confirmBtn->move(300,270);
 
 

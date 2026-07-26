@@ -10,6 +10,8 @@
 #include "deckviewer.h"
 #include "relicviewer.h"
 #include <QVBoxLayout>
+#include <QDir>
+#include <QCoreApplication>
 
 TreasurePage::TreasurePage(Player* playerPtr, Map* mapPtr, QWidget* parent)
     : QWidget(parent), player(playerPtr), map(mapPtr), chestOpened(false)
@@ -35,6 +37,17 @@ void TreasurePage::setupUI()
         );
     setFixedSize(1280, 720);
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
@@ -51,7 +64,7 @@ void TreasurePage::setupUI()
     // --- Reward button: hidden until the chest is opened ---
     rewardBtn = new QPushButton(this);
     rewardBtn->setFixedSize(110, 110);
-    rewardBtn->setCursor(Qt::PointingHandCursor);
+    rewardBtn->setCursor(buttonHoverCursor);
     rewardBtn->hide();
     rewardBtn->move(560, 220);
     connect(rewardBtn, &QPushButton::pressed, this, []() {
@@ -62,7 +75,7 @@ void TreasurePage::setupUI()
     // --- Chest ---
     chestBtn = new QPushButton(this);
     chestBtn->setFixedSize(730, 450);
-    chestBtn->setCursor(Qt::PointingHandCursor);
+    chestBtn->setCursor(buttonHoverCursor);
     connect(chestBtn, &QPushButton::pressed, this, []() {
         AudioManager::instance().play(AudioManager::Sound::ButtonClick);
     });
@@ -71,7 +84,7 @@ void TreasurePage::setupUI()
     // --- Back ---
     backBtn = new QPushButton(this);
     backBtn->setFixedSize(180, 80);
-    backBtn->setCursor(Qt::PointingHandCursor);
+    backBtn->setCursor(buttonHoverCursor);
     backBtn->setStyleSheet(
         "QPushButton { border-image: url(:/Treasure/ProceedBtn.png); border: none; background: transparent; }"
         "QPushButton:pressed { margin: 5px 5px 5px 5px; }"

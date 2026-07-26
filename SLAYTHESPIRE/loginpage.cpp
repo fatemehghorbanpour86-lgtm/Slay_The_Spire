@@ -12,6 +12,19 @@ loginpage::loginpage(QWidget *parent)
 {
     setObjectName("loginPage");
 
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
+
     QLabel *bg = new QLabel(this);
     bg->setGeometry(0, 0, 1280, 720);
     bg->setScaledContents(true);
@@ -65,7 +78,7 @@ loginpage::loginpage(QWidget *parent)
     buttonsLayout->setAlignment(Qt::AlignCenter);
 
     loginBtn = new QPushButton(this);
-    loginBtn->setCursor(Qt::PointingHandCursor);
+    loginBtn->setCursor(buttonHoverCursor);
     loginBtn->setFixedSize(100, 100);
     loginBtn->setToolTip("If you have an account, Press this.");
     loginBtn->setStyleSheet(
@@ -75,7 +88,7 @@ loginpage::loginpage(QWidget *parent)
         "}");
 
     registerBtn = new QPushButton(this);
-    registerBtn->setCursor(Qt::PointingHandCursor);
+    registerBtn->setCursor(buttonHoverCursor);
     registerBtn->setFixedSize(100, 100);
     registerBtn->setToolTip("If you dont have account, Press this.");
     registerBtn->setStyleSheet(

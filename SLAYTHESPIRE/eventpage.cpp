@@ -13,7 +13,8 @@
 #include "pauseviewer.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-
+#include <QDir>
+#include <QCoreApplication>
 
 
 RemoveCardDialog::RemoveCardDialog(Player* playerPtr, QWidget* parent)
@@ -29,6 +30,11 @@ void RemoveCardDialog::setupUI()
     setFixedSize(850, 620);
     setStyleSheet("QDialog { border-image: url(:/card/CardViewer.png); }"
                   "QScrollArea { border: none; background: transparent; }");
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(40, 45, 50, 50);
@@ -50,6 +56,13 @@ void RemoveCardDialog::populateCards()
     if (!player || !player->getMasterDeck())
         return;
 
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
+
     int row = 0;
     int col = 0;
 
@@ -63,7 +76,7 @@ void RemoveCardDialog::populateCards()
         cardBtn->setIcon(QIcon(DeckViewerDialog::cardImagePath(card)));
         cardBtn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
         cardBtn->setFlat(true);
-        cardBtn->setCursor(Qt::PointingHandCursor);
+        cardBtn->setCursor(buttonHoverCursor);
         cardBtn->setStyleSheet("QPushButton { border: none; background: transparent; }"
                                "QPushButton:pressed { margin: 5px; }");
 
@@ -102,6 +115,11 @@ void TransformCardsDialog::setupUI()
     setStyleSheet("QDialog { border-image: url(:/card/CardViewer.png); }"
                   "QScrollArea { border: none; background: transparent; }");
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(40, 45, 50, 50);
     scrollArea = new QScrollArea(this);
@@ -122,6 +140,14 @@ void TransformCardsDialog::populateCards()
     if (!player || !player->getMasterDeck())
         return;
 
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
+
     int row = 0;
     int col = 0;
 
@@ -135,7 +161,7 @@ void TransformCardsDialog::populateCards()
         cardBtn->setIcon(QIcon(DeckViewerDialog::cardImagePath(card)));
         cardBtn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
         cardBtn->setFlat(true);
-        cardBtn->setCursor(Qt::PointingHandCursor);
+        cardBtn->setCursor(buttonHoverCursor);
         cardBtn->setStyleSheet("QPushButton { border: none; background: transparent; }");
 
         connect(cardBtn, &QPushButton::clicked, this, [this, card, cardBtn]() {
@@ -212,6 +238,11 @@ void EventPage::setupUI()
             "}"
             ).arg(eventBackgroundPath())
         );
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -291,6 +322,12 @@ void EventPage::populateOptions()
     if (!event || !optionsLayout)
         return;
 
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     const QVector<EventOption>& options = event->getOptions();
 
     // Fully dynamic: however many options this Event defines is exactly
@@ -302,7 +339,7 @@ void EventPage::populateOptions()
         QPushButton* btn = new QPushButton(option.text, this);
         btn->setEnabled(option.enabled);
         btn->setMinimumHeight(52);
-        btn->setCursor(Qt::PointingHandCursor);
+        btn->setCursor(buttonHoverCursor);
         btn->setStyleSheet(
             "QPushButton { border-image: url(:/Event/EventOption); color: #facc15;"
             "border: none; font-weight: bold;"

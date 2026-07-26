@@ -10,6 +10,8 @@
 #include <QVBoxLayout>
 #include "relicviewer.h"
 #include "deckviewer.h"
+#include <QDir>
+#include <QCoreApplication>
 
 static const QString BONE_COLOR = "#E8DCC0";
 
@@ -30,6 +32,17 @@ void TopBarWidget::setupUI()
         );
     setAttribute(Qt::WA_StyledBackground, true);
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QHBoxLayout* topBarLayout = new QHBoxLayout(this);
     topBarLayout->setContentsMargins(20, 5, 20, 5);
 
@@ -48,7 +61,7 @@ void TopBarWidget::setupUI()
 
     relicBtn = new QPushButton();
     relicBtn->setFixedSize(30, 25);
-    relicBtn->setCursor(Qt::PointingHandCursor);
+    relicBtn->setCursor(buttonHoverCursor);
     relicBtn->setStyleSheet(
         "QPushButton {"
         "border: none;"
@@ -126,7 +139,7 @@ void TopBarWidget::setupUI()
     // --- Right: Deck and Settings ---
     deckBtn = new QPushButton();
     deckBtn->setFixedSize(40, 40);
-    deckBtn->setCursor(Qt::PointingHandCursor);
+    deckBtn->setCursor(buttonHoverCursor);
     deckBtn->setStyleSheet(
         "QPushButton {"
         "border: none;"
@@ -151,7 +164,7 @@ void TopBarWidget::setupUI()
 
     settingsBtn = new QPushButton();
     settingsBtn->setFixedSize(45, 45);
-    settingsBtn->setCursor(Qt::PointingHandCursor);
+    settingsBtn->setCursor(buttonHoverCursor);
     settingsBtn->setStyleSheet(
         "QPushButton { border-image: url(:/map/settingBtnMap.png); }"
         "QPushButton:pressed { "
@@ -272,6 +285,17 @@ void CampfirePage::setupUI()
         "}"
         );
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
@@ -289,11 +313,11 @@ void CampfirePage::setupUI()
     buttonsLayout->setSpacing(70);
     buttonsLayout->setAlignment(Qt::AlignCenter);
 
-    auto makeButton = [this](const QString& objectName) {
+    auto makeButton = [&](const QString& objectName) {
         QPushButton* btn = new QPushButton(this);
         //btn->setObjectName(objectName);
         btn->setFixedSize(180, 130);
-        btn->setCursor(Qt::PointingHandCursor);
+        btn->setCursor(buttonHoverCursor);
         btn->setStyleSheet(
             QString("QPushButton { border-image: url(:/RestSite/%1.png); border: none; background: transparent; }"
             "QPushButton:disabled { border-image: url(:/RestSite/%1Dis.png); border: none; background: transparent; }"
@@ -313,7 +337,7 @@ void CampfirePage::setupUI()
     leaveBtn = new QPushButton(this);
     leaveBtn->setFixedSize(140, 80);
     leaveBtn->move(0, 450);
-    leaveBtn->setCursor(Qt::PointingHandCursor);
+    leaveBtn->setCursor(buttonHoverCursor);
     leaveBtn->setStyleSheet(
         "QPushButton { border-image: url(:/RestSite/BackBtn.png); border: none; background: transparent; }"
         "QPushButton:pressed { margin: 5px 5px 5px 5px; }"

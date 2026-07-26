@@ -21,6 +21,12 @@ mainpage::mainpage(QWidget *parent)
     QCursor customCursor(scaledPixmap, 0, 0);
     this->setCursor(customCursor);
 
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QLabel *bg = new QLabel(this);
     bg->setGeometry(0, 0, 1280, 720);
     bg->setScaledContents(true);
@@ -45,7 +51,6 @@ mainpage::mainpage(QWidget *parent)
     buttonsLayout->setAlignment(Qt::AlignCenter);
 
     singlePlayerBtn = new QPushButton(this);
-    singlePlayerBtn->setCursor(Qt::PointingHandCursor);
     singlePlayerBtn->setFixedSize(100, 75);
     singlePlayerBtn->setStyleSheet(
         "QPushButton { border-image: url(:/singlePlayerBtn.png); }"
@@ -54,16 +59,10 @@ mainpage::mainpage(QWidget *parent)
         "}"
         );
     singlePlayerBtn->setToolTip("Start Battle!");
-
-    QString baseDir = QCoreApplication::applicationDirPath();
-    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
-    QPixmap buttonHoverPixmap(BtnPath); // مثلاً شکل دست جنگی
-    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
     singlePlayerBtn->setCursor(buttonHoverCursor);
 
     multiPlayerBtn = new QPushButton(this);
-    multiPlayerBtn->setCursor(Qt::PointingHandCursor);
+    multiPlayerBtn->setCursor(buttonHoverCursor);
     multiPlayerBtn->setFixedSize(100, 75);
     multiPlayerBtn->setStyleSheet(
         "QPushButton { border-image: url(:/multiPalyerBtn.png); }"
@@ -73,7 +72,7 @@ mainpage::mainpage(QWidget *parent)
     multiPlayerBtn->setToolTip("Battle in the Tower with Friends!");
 
     leaderBoardBtn = new QPushButton(this);
-    leaderBoardBtn->setCursor(Qt::PointingHandCursor);
+    leaderBoardBtn->setCursor(buttonHoverCursor);
     leaderBoardBtn->setFixedSize(100, 75);
     leaderBoardBtn->setStyleSheet(
         "QPushButton { border-image: url(:/leaderBoardBtn.png); }"
@@ -83,7 +82,7 @@ mainpage::mainpage(QWidget *parent)
     leaderBoardBtn->setToolTip("Top Tower Slayers!");
 
     settingBtn = new QPushButton(this);
-    settingBtn->setCursor(Qt::PointingHandCursor);
+    settingBtn->setCursor(buttonHoverCursor);
     settingBtn->setFixedSize(100, 75);
     settingBtn->setStyleSheet(
         "QPushButton { border-image: url(:/settingBtn.png); }"
@@ -93,7 +92,7 @@ mainpage::mainpage(QWidget *parent)
     settingBtn->setToolTip("Game Settings");
 
     exitBtn = new QPushButton(this);
-    exitBtn->setCursor(Qt::PointingHandCursor);
+    exitBtn->setCursor(buttonHoverCursor);
     exitBtn->setFixedSize(100, 75);
     exitBtn->setStyleSheet(
         "QPushButton { border-image: url(:/ExitBtn.png); }"

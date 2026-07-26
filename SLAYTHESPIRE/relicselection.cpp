@@ -6,6 +6,8 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QDir>
+#include <QCoreApplication>
 
 RelicSelectionDialog::RelicSelectionDialog(const QVector<Relic*>& relicChoices, QWidget* parent)
     : QDialog(parent), relicChoices(relicChoices), chosenRelic(nullptr)
@@ -23,6 +25,17 @@ void RelicSelectionDialog::setupUI()
     setWindowTitle("Choose a Relic");
     setStyleSheet("QDialog { border-image: url(:/Reward/SelectionViewer.png); border: none; background: transparent; }");
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(30, 30, 30, 30);
 
@@ -39,7 +52,7 @@ void RelicSelectionDialog::setupUI()
 
         QPushButton* relicBtn = new QPushButton(this);
         relicBtn->setFixedSize(RELIC_SIZE, RELIC_SIZE);
-        relicBtn->setCursor(Qt::PointingHandCursor);
+        relicBtn->setCursor(buttonHoverCursor);
         relicBtn->setToolTip(relic->getDescription());
         relicBtn->setStyleSheet(
             QString("QPushButton { border-image: url(%1); border: none; background: transparent; }"

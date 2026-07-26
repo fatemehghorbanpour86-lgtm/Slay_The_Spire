@@ -11,6 +11,8 @@
 #include "mappage.h"
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QDir>
+#include <QCoreApplication>
 
 RewardPage::RewardPage(Player* playerPtr, RewardSystem* rewardSystemPtr, QWidget* parent)
     : QWidget(parent), player(playerPtr), rewardSystem(rewardSystemPtr)
@@ -29,6 +31,17 @@ void RewardPage::setupUI()
         "border-radius: 4px; padding: 6px; font-weight: bold; }"
         );
     setFixedSize(400, 550);
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(40, 40, 40, 30);
@@ -50,7 +63,7 @@ void RewardPage::setupUI()
 
     continueBtn = new QPushButton(this);
     continueBtn->setFixedSize(110, 50);
-    continueBtn->setCursor(Qt::PointingHandCursor);
+    continueBtn->setCursor(buttonHoverCursor);
     continueBtn->setStyleSheet(
         "QPushButton { border-image: url(:/RestSite/BackBtn.png); background: transparent; border: none; }"
         "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
@@ -92,9 +105,15 @@ QPushButton* RewardPage::createRewardButton(Reward* reward)
     if (!reward)
         return nullptr;
 
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QPushButton* btn = new QPushButton(this);
     btn->setFixedSize(220, 60);
-    btn->setCursor(Qt::PointingHandCursor);
+    btn->setCursor(buttonHoverCursor);
 
     switch (reward->getType())
     {

@@ -3,6 +3,8 @@
 
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QDir>
+#include <QCoreApplication>
 
 PauseDialog::PauseDialog(QWidget* parent)
     : QDialog(parent)
@@ -19,6 +21,16 @@ void PauseDialog::setupUI()
         );
     setFixedSize(400, 480);
     setModal(true);
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(60, 40, 60, 40);
@@ -31,10 +43,10 @@ void PauseDialog::setupUI()
     mainLayout->addWidget(titleLabel);
     mainLayout->addStretch(1);
 
-    auto makeButton = [this](const QString& text) {
+    auto makeButton = [&](const QString& text) {
         QPushButton* btn = new QPushButton(text, this);
         btn->setFixedSize(220, 55);
-        btn->setCursor(Qt::PointingHandCursor);
+        btn->setCursor(buttonHoverCursor);
         btn->setStyleSheet(
             "QPushButton { border-image: url(:/SettingPushButton.png); font-size: 15px;"
             "font-weight: bold; border: 1px solid rgba(255,255,255,40); }"
@@ -82,25 +94,22 @@ void PauseDialog::onSaveAndQuitClicked()
 
 void PauseDialog::onGiveUpClicked()
 {
-    // QMessageBox confirm(this);
-    // confirm.setWindowTitle("Give Up");
-    // confirm.setText("Are you sure you want to give up?\nAll current progress will be lost.");
-    // QPushButton* yesBtn = confirm.addButton("Yes", QMessageBox::YesRole);
-    // confirm.addButton("No", QMessageBox::NoRole);
-    // confirm.exec();
-
-    // if (confirm.clickedButton() == yesBtn)
-    // {
-    //     emit giveUpRequested();
-    // }
-
-
     QDialog dialog(this);
     dialog.setWindowTitle("Give Up");
     dialog.setObjectName("GiveUp");
     dialog.setStyleSheet(
         "#GiveUp { border-image: url(:/ChangeUsernameViewer.png); }");
     dialog.setFixedSize(600, 400);
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    dialog.setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
     QVBoxLayout* layout = new QVBoxLayout(&dialog);
     layout->setContentsMargins(20, 20, 20, 200);
@@ -115,14 +124,14 @@ void PauseDialog::onGiveUpClicked()
     cancelBtn->setFixedSize(150, 100);
     cancelBtn->setStyleSheet("QPushButton { border-image: url(:/RestSite/NoBtn.png); }"
                              "QPushButton:pressed { margin: 5px 5px 5px 5px; }");
-    cancelBtn->setCursor(Qt::PointingHandCursor);
+    cancelBtn->setCursor(buttonHoverCursor);
     cancelBtn->move(0,250);
 
     QPushButton* confirmBtn = new QPushButton(&dialog);
     confirmBtn->setFixedSize(150, 100);
     confirmBtn->setStyleSheet("QPushButton { border-image: url(:/RestSite/YesBtn.png); }"
                               "QPushButton:pressed { margin: 5px 5px 5px 5px; }");
-    confirmBtn->setCursor(Qt::PointingHandCursor);
+    confirmBtn->setCursor(buttonHoverCursor);
     confirmBtn->move(450,250);
 
 

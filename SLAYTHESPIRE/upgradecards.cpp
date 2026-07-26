@@ -11,6 +11,8 @@
 #include <QPixmap>
 #include <QIcon>
 #include <QSize>
+#include <QDir>
+#include <QCoreApplication>
 
 UpgradePreviewDialog::UpgradePreviewDialog(Card* cardPtr, Player* playerPtr, Campfire* campfirePtr, QWidget* parent)
     : QDialog(parent), card(cardPtr), player(playerPtr), campfire(campfirePtr)
@@ -40,6 +42,17 @@ void UpgradePreviewDialog::setupUI()
     setFixedSize(700, 500);
     setStyleSheet("QDialog { border-image: url(:/RestSite/UpgradeViewer.png); border: none; background: transparent; }"
                   );
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -83,7 +96,7 @@ void UpgradePreviewDialog::setupUI()
                               "QPushButton:pressed { "
                               "   margin: 5px 5px 5px 5px; "
                               "}");
-    upgradeBtn->setCursor(Qt::PointingHandCursor);
+    upgradeBtn->setCursor(buttonHoverCursor);
 
     QPushButton* cancelBtn = new QPushButton();
     cancelBtn->setObjectName("upgradeCancelBtn");
@@ -92,7 +105,7 @@ void UpgradePreviewDialog::setupUI()
                              "QPushButton:pressed { "
                              "   margin: 5px 5px 5px 5px; "
                              "}");
-    cancelBtn->setCursor(Qt::PointingHandCursor);
+    cancelBtn->setCursor(buttonHoverCursor);
 
     buttonsLayout->addWidget(cancelBtn);
     buttonsLayout->addWidget(upgradeBtn);
@@ -151,6 +164,17 @@ void UpgradeCardsDialog::populateCards()
     if (!player || !player->getMasterDeck())
         return;
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     int row = 0;
     int col = 0;
 
@@ -167,7 +191,7 @@ void UpgradeCardsDialog::populateCards()
                                "}");
         cardBtn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
         cardBtn->setFlat(true);
-        cardBtn->setCursor(Qt::PointingHandCursor);
+        cardBtn->setCursor(buttonHoverCursor);
         cardBtn->setStyleSheet("QPushButton { border: none; background: transparent; }");
 
         connect(cardBtn, &QPushButton::clicked, this, [this, card]() {
