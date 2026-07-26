@@ -212,7 +212,7 @@ void RewardPage::onRelicClicked(Reward* reward, QPushButton* button)
     AudioManager::instance().play(AudioManager::Sound::Reward);
 
     rewardsLayout->removeWidget(button);
-    button->deleteLater();
+    button->deleteLater();    
     MapPage::updateTopBarData();
 }
 

@@ -56,6 +56,9 @@
         <file>relicIcon.png</file>
         <file>treasure_locked.png</file>
         <file>shop_locked.png</file>
+        <file>minigame_available.png</file>
+        <file>minigame_locked.png</file>
+        <file>minigame_visited.png</file>
     </qresource>
     <qresource prefix="/Relic">
         <file>Anchor.png</file>

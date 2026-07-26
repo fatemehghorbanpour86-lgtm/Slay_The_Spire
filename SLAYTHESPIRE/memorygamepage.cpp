@@ -9,6 +9,10 @@
 #include <QPropertyAnimation>
 #include <QEasingCurve>
 #include <QAbstractAnimation>
+#include <QCoreApplication>
+#include <QDir>
+#include <QPainter>
+#include <QPainterPath>
 
 //======================================================
 //  MemoryRewardDialog
@@ -131,20 +135,17 @@ MemoryGameWidget::MemoryGameWidget(Player* playerPtr, Map* mapPtr, QWidget* pare
 void MemoryGameWidget::setupUI()
 {
     setObjectName("MemoryGamePage");
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BackgroundPath = QDir(baseDir).filePath("assets/image/MemoryGamePage.png");
 
-    // Background image intentionally left unset - only the styling hook
-    // exists so an image can be dropped in later, the same way
-    // CampfirePage/TreasurePage set "background-image" on their own
-    // page-level selector.
     setStyleSheet(
-        "#MemoryGamePage {"
-        "background-repeat: no-repeat;"
-        "background-position: center;"
-        "background-color: #1a1410;"
+        QString("#MemoryGamePage {"
+        "border-image: url(%1);"
+        "border: none; background: transparent;"
         "}"
         "QToolTip { color: #facc15; background-color: #1f2937; border: 1px solid #b91c1c;"
         "border-radius: 4px; padding: 6px; font-weight: bold; font-family: Tahoma;"
-        "}"
+                "}").arg(BackgroundPath)
         );
     setFixedSize(1280, 720);
 
@@ -186,11 +187,12 @@ void MemoryGameWidget::setupUI()
     instructionLabel = new QLabel(this);
     instructionLabel->setAlignment(Qt::AlignCenter);
     instructionLabel->setWordWrap(true);
+    instructionLabel->setMinimumHeight(60);
     instructionLabel->setStyleSheet(
         "color: #facc15; font-size: 22px; font-weight: bold; background: transparent;");
     mainLayout->addWidget(instructionLabel, 0, Qt::AlignHCenter);
 
-    mainLayout->addSpacing(30);
+    mainLayout->addSpacing(40);
 
     // --- Card grid container (2 rows x 4 columns, centered) ---
     cardsContainer = new QWidget(this);
@@ -200,7 +202,7 @@ void MemoryGameWidget::setupUI()
     cardsContainer->setStyleSheet("background: transparent;");
     mainLayout->addWidget(cardsContainer, 0, Qt::AlignHCenter);
 
-    mainLayout->addStretch(2);
+    mainLayout->addStretch(1);
 
     createCardButtons();
     refreshInstructionLabel();
@@ -224,8 +226,8 @@ void MemoryGameWidget::createCardButtons()
         btn->setCursor(Qt::PointingHandCursor);
         btn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
         btn->setStyleSheet(
-            "QPushButton { border: 2px solid #5a5a54; border-radius: 8px; background: #2b2b28; }"
-            "QPushButton:disabled { border: 2px solid #3a3a36; }"
+            "QPushButton { border: 1px solid #5a5a54; border-radius: 8px; background: #2b2b28; }"
+            "QPushButton:disabled { border: 1px solid #3a3a36; }"
             );
 
         cardButtons[i] = btn;
@@ -260,15 +262,16 @@ void MemoryGameWidget::refreshInstructionLabel()
 
 QString MemoryGameWidget::backImagePath() const
 {
-    // Placeholder path - drop the shared card-back image in under this
-    // resource prefix later (e.g. add a /MemoryGame qresource section).
-    return ":/MemoryGame/CardBack.png";
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString CardBackPath = QDir(baseDir).filePath("assets/image/CardBack.png");
+    return CardBackPath;
 }
 
 QString MemoryGameWidget::frontImagePath(int imageId) const
 {
-    // Placeholder path - drop the 4 front images in as Card0..Card3.
-    return QString(":/MemoryGame/Card%1.png").arg(imageId);
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString CardPath = QDir(baseDir).filePath(QString("assets/image/Card%1.png").arg(imageId));
+    return CardPath;
 }
 
 void MemoryGameWidget::refreshCardVisual(int index)
@@ -286,9 +289,14 @@ void MemoryGameWidget::refreshCardVisual(int index)
                                   ? frontImagePath(card.getImageId())
                                   : backImagePath();
 
-    const QPixmap pixmap(imagePath);
-    btn->setIcon(QIcon(pixmap.scaled(
-        CARD_WIDTH, CARD_HEIGHT, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+    QPixmap pixmap(imagePath);
+    QPixmap scaledPix = pixmap.scaled(CARD_WIDTH, CARD_HEIGHT, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    QIcon icon;
+    icon.addPixmap(scaledPix, QIcon::Normal, QIcon::On);
+    icon.addPixmap(scaledPix, QIcon::Disabled, QIcon::On);
+
+    btn->setIcon(icon);
     btn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
 
     if (card.isMatched())

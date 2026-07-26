@@ -5,6 +5,7 @@
 #include "audiomanager.h"
 #include "relicviewer.h"
 #include "deckviewer.h"
+#include "rewardsystem.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -54,7 +55,7 @@ void TreasureGuessPage::setupUI()
     titleLabel->setAlignment(Qt::AlignCenter);
     titleLabel->setStyleSheet(
         "color: #facc15; font-family: Tahoma; font-weight: bold; font-size: 24px; background: transparent;");
-    titleLabel->setFixedHeight(60);
+    titleLabel->setFixedHeight(100);
     mainLayout->addWidget(titleLabel);
 
     // --- Result message (empty until a wrong chest is opened) ---
@@ -65,7 +66,7 @@ void TreasureGuessPage::setupUI()
     messageLabel->setFixedHeight(30);
     mainLayout->addWidget(messageLabel);
 
-    mainLayout->addStretch();
+    mainLayout->addStretch(1);
 
     // --- Three chests, centered ---
     QHBoxLayout* chestsLayout = new QHBoxLayout();
@@ -75,7 +76,7 @@ void TreasureGuessPage::setupUI()
     for (int i = 0; i < TreasureGuessModel::CHEST_COUNT; ++i)
     {
         QPushButton* chestBtn = new QPushButton(this);
-        chestBtn->setFixedSize(200, 200);
+        chestBtn->setFixedSize(350, 250);
         chestBtn->setCursor(Qt::PointingHandCursor);
         chestBtn->setStyleSheet(
             "QPushButton { border-image: url(:/Treasure/ChestClose.png); border: none; background: transparent; }"
@@ -95,7 +96,7 @@ void TreasureGuessPage::setupUI()
     }
 
     mainLayout->addLayout(chestsLayout);
-    mainLayout->addStretch();
+    mainLayout->addStretch(2);
 
     // --- Reward button: hidden until the correct chest is opened.
     //     Same visual role/pattern as TreasurePage's rewardBtn. ---
@@ -121,7 +122,7 @@ void TreasureGuessPage::setupUI()
         AudioManager::instance().play(AudioManager::Sound::ButtonClick);
     });
     connect(proceedBtn, &QPushButton::clicked, this, &TreasureGuessPage::onProceedClicked);
-    proceedBtn->move(1050, 620);
+    proceedBtn->move(1050, 570);
 }
 
 void TreasureGuessPage::onChestClicked(int index)
@@ -205,9 +206,12 @@ void TreasureGuessPage::showProceedButton()
 
 void TreasureGuessPage::onRewardClicked()
 {
+    if (player->getPotionCount() >= RewardSystem::MAX_POTIONS)
+        return; // slots full: reward stays pending, not claimable
+
     Potion* reward = model.claimReward();
 
-    if (!reward)
+    if (!player || !reward)
         return;
 
     if (player)
@@ -218,6 +222,7 @@ void TreasureGuessPage::onRewardClicked()
     AudioManager::instance().play(AudioManager::Sound::Reward);
 
     rewardBtn->hide();
+    topBar->updateData(player, map);
 
     emit rewardClaimed();
 
