@@ -11,60 +11,53 @@
 
 int CombatCalculator::calculateDamage(Character* attacker, Character* defender, int baseDamage)
 {
-    if(attacker == nullptr || defender == nullptr)
+    if(defender == nullptr)
         return 0;
 
     int damage = baseDamage;
 
-    // Strength
-
-    if(Effect* strength = attacker->getEffect(Effect::Type::Strength))
+    if(attacker != nullptr)
     {
-        damage += strength->getAmount();
+        if(Effect* strength = attacker->getEffect(Effect::Type::Strength))
+        {
+            damage += strength->getAmount();
+        }
+
+        if(attacker->hasEffect(Effect::Type::Weak))
+        {
+            damage = static_cast<int>(damage * 0.75);
+        }
+
+        if(Player* pAttacker = dynamic_cast<Player*>(attacker))
+        {
+            damage = pAttacker->getRelicSystem().modifyDamageDealt(damage);
+        }
     }
-
-    // Weak
-
-    if(attacker->hasEffect(Effect::Type::Weak))
-    {
-        damage = static_cast<int>(damage * 0.75);
-    }
-
-    // Vulnerable
 
     if(defender->hasEffect(Effect::Type::Vulnerable))
     {
         damage = static_cast<int>(damage * 1.5);
     }
 
-    if (Player* pAttacker = dynamic_cast<Player*>(attacker))
-    {
-        damage = pAttacker->getRelicSystem().modifyDamageDealt(damage);
-    }
-
-    if (Player* pDefender = dynamic_cast<Player*>(defender))
+    if(Player* pDefender = dynamic_cast<Player*>(defender))
     {
         damage = pDefender->getRelicSystem().modifyDamageTaken(damage);
     }
 
-    damage = std::max(0, damage);
-
-    return damage;
+    return std::max(0, damage);
 }
 
 // Deal Damage
 
 int CombatCalculator::dealDamage(Character* attacker, Character* defender, int baseDamage)
 {
-    if(attacker == nullptr || defender == nullptr)
+    if(defender == nullptr)
         return 0;
 
     int finalDamage = calculateDamage(attacker, defender, baseDamage);
 
     int hpBefore = defender->getCurrentHealth();
-
     defender->takeDamage(finalDamage);
-
     int hpAfter = defender->getCurrentHealth();
 
     return hpBefore - hpAfter;
