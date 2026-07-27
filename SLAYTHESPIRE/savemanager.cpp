@@ -7,6 +7,7 @@
 #include "masterdeck.h"
 #include "relicsystem.h"
 #include "relic.h"
+#include "potion.h"
 
 #include <QFile>
 #include <QJsonDocument>
@@ -296,6 +297,42 @@ QVector<RelicSaveData> SaveManager::relicListFromJson(const QJsonArray& arr)
 }
 
 // ============================================================
+//  Potion <-> JSON
+// ============================================================
+
+QJsonObject SaveManager::potionToJson(const PotionSaveData& potion)
+{
+    QJsonObject obj;
+    obj["id"] = static_cast<int>(potion.id);
+    obj["counter"] = potion.counter;
+    return obj;
+}
+
+PotionSaveData SaveManager::potionFromJson(const QJsonObject& obj)
+{
+    PotionSaveData potion;
+    potion.id = static_cast<PotionId>(obj.value("id").toInt());
+    potion.counter = obj.value("counter").toInt(-1);
+    return potion;
+}
+
+QJsonArray SaveManager::potionListToJson(const QVector<PotionSaveData>& potions)
+{
+    QJsonArray arr;
+    for (const PotionSaveData& p : potions)
+        arr.append(potionToJson(p));
+    return arr;
+}
+
+QVector<PotionSaveData> SaveManager::potionListFromJson(const QJsonArray& arr)
+{
+    QVector<PotionSaveData> potions;
+    for (const QJsonValue& v : arr)
+        potions.append(potionFromJson(v.toObject()));
+    return potions;
+}
+
+// ============================================================
 //  Character / Player <-> JSON
 // ============================================================
 
@@ -334,6 +371,7 @@ QJsonObject SaveManager::playerToJson(const PlayerSaveData& data)
     obj["cardRemovalCost"] = data.cardRemovalCost;
     obj["relics"] = relicListToJson(data.relics);
     obj["masterDeck"] = masterDeckToJson(data.masterDeckData);
+    obj["potions"] = potionListToJson(data.potions);
     return obj;
 }
 
@@ -342,11 +380,11 @@ PlayerSaveData SaveManager::playerFromJson(const QJsonObject& obj)
     PlayerSaveData data;
     data.characterData = characterFromJson(obj.value("character").toObject());
     data.gold = obj.value("gold").toInt();
-//  data.currentEnergy = obj.value("currentEnergy").toInt();
     data.maxEnergy = obj.value("maxEnergy").toInt(3);
     data.cardRemovalCost = obj.value("cardRemovalCost").toInt(50);
     data.relics = relicListFromJson(obj.value("relics").toArray());
     data.masterDeckData = masterDeckFromJson(obj.value("masterDeck").toObject());
+    data.potions = potionListFromJson(obj.value("potions").toArray());
     return data;
 }
 

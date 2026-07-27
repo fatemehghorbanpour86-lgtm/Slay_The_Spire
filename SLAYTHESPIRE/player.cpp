@@ -351,6 +351,16 @@ PlayerSaveData Player::extractState() const
     if (masterDeck)
         data.masterDeckData = masterDeck->extractState();
 
+    for (Potion* potion : potions)
+    {
+        if (!potion)
+            continue;
+
+        PotionSaveData pd;
+        pd.id = potion->getId();
+        data.potions.append(pd);
+    }
+
     return data;
 }
 
@@ -377,4 +387,15 @@ void Player::restoreState(const PlayerSaveData& data)
 
     if (masterDeck)
         masterDeck->restoreState(data.masterDeckData);
+
+    qDeleteAll(potions);
+    potions.clear();
+
+    for (const PotionSaveData& pd : data.potions)
+    {
+        Potion* potion = Potion::createById(pd.id);
+
+        if (potion)
+            potions.append(potion);
+    }
 }

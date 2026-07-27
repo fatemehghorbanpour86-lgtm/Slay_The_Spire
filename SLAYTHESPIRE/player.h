@@ -4,6 +4,7 @@
 #include "character.h"
 #include "relicsystem.h"
 #include "masterdeck.h"
+#include "potion.h"
 
 /*
  *  Player Responsibilities:
@@ -31,6 +32,7 @@ struct PlayerSaveData
     int cardRemovalCost = 50;
 
     QVector<RelicSaveData> relics;
+    QVector<PotionSaveData> potions;
 
     MasterDeckSaveData masterDeckData;
 };

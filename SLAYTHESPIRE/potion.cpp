@@ -7,9 +7,14 @@
 #include "combatcalculator.h"
 
 
-Potion::Potion(const QString& name, const QString& description)
-    : name(name), description(description)
+Potion::Potion(PotionId id, const QString& name, const QString& description)
+    : id(id), name(name), description(description)
 {
+}
+
+PotionId Potion::getId() const
+{
+    return id;
 }
 
 QString Potion::getName() const
@@ -30,6 +35,19 @@ bool Potion::canUse(Player* user) const
 }
 
 
+Potion* Potion::createById(PotionId id)
+{
+    switch (id)
+    {
+    case PotionId::Block:          return new BlockPotion();
+    case PotionId::Fire:           return new FirePotion();
+    case PotionId::Energy:         return new EnergyPotion();
+    case PotionId::Swift:          return new SwiftPotion();
+    case PotionId::FairyInABottle: return new FairyInABottle();
+    }
+
+    return nullptr;
+}
 
 
 //======================================================
@@ -38,7 +56,7 @@ bool Potion::canUse(Player* user) const
 
 
 BlockPotion::BlockPotion()
-    : Potion("Block Potion","Gain 12 Block.")
+    : Potion(PotionId::Block, "Block Potion","Gain 12 Block.")
 {
     blockAmount = 12;
 }
@@ -59,7 +77,7 @@ void BlockPotion::use(Player* user, Enemy* target)
 
 
 FirePotion::FirePotion()
-    : Potion("Fire Potion", "Deal 20 damage.")
+    : Potion(PotionId::Fire, "Fire Potion", "Deal 20 damage.")
 {
 }
 
@@ -78,7 +96,7 @@ void FirePotion::use(Player* user, Enemy* target)
 //======================================================
 
 EnergyPotion::EnergyPotion()
-    : Potion("Energy Potion", "Gain 2 Energy.")
+    : Potion(PotionId::Energy, "Energy Potion", "Gain 2 Energy.")
 {
 }
 
@@ -97,7 +115,7 @@ void EnergyPotion::use(Player* user, Enemy* target)
 //======================================================
 
 SwiftPotion::SwiftPotion()
-    : Potion("Swift Potion", "Draw 3 cards.")
+    : Potion(PotionId::Swift, "Swift Potion", "Draw 3 cards.")
 {
 }
 
@@ -119,7 +137,8 @@ void SwiftPotion::use(Player* user, Enemy* target)
 //======================================================
 
 FairyInABottle::FairyInABottle()
-    : Potion("Fairy in a Bottle",
+    : Potion(PotionId::FairyInABottle,
+             "Fairy in a Bottle",
              "When you would die, heal to 30% of your Max HP instead.")
 {
 }

@@ -7,21 +7,38 @@
 class Player;
 class Enemy;
 
+enum class PotionId
+{
+    Block,
+    Fire,
+    Energy,
+    Swift,
+    FairyInABottle
+};
+
+struct PotionSaveData
+{
+    PotionId id = PotionId::Block;
+    int counter = -1;
+};
+
 class Potion
 {
 
 protected:
 
+    PotionId id;
     QString name;
     QString description;
 
 public:
 
-    Potion(const QString& name, const QString& description);
+    Potion(PotionId id, const QString& name, const QString& description);
 
     virtual ~Potion() = default;
 
 
+    PotionId getId() const;
     QString getName() const;
     QString getDescription() const;
 
@@ -30,6 +47,8 @@ public:
 
 
     virtual bool canUse(Player* user) const; //Default: true
+
+    static Potion* createById(PotionId id);
 };
 
 class BlockPotion : public Potion

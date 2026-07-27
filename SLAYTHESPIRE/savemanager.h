@@ -16,6 +16,7 @@ struct MasterDeckSaveData;
 struct CharacterSaveData;
 struct PlayerSaveData;
 struct RelicSaveData;
+struct PotionSaveData;
 
 class SaveManager
 {
@@ -67,6 +68,12 @@ private:
 
     static QJsonArray relicListToJson(const QVector<RelicSaveData>& relics);
     static QVector<RelicSaveData> relicListFromJson(const QJsonArray& arr);
+
+    static QJsonObject potionToJson(const PotionSaveData& potion);
+    static PotionSaveData potionFromJson(const QJsonObject& obj);
+
+    static QJsonArray potionListToJson(const QVector<PotionSaveData>& potions);
+    static QVector<PotionSaveData> potionListFromJson(const QJsonArray& arr);
 
     static QJsonObject characterToJson(const CharacterSaveData& data);
     static CharacterSaveData characterFromJson(const QJsonObject& obj);
