@@ -21,6 +21,8 @@
 #include "event.h"
 #include "memorygamepage.h"
 #include "treasureguesspage.h"
+#include "leaderboardmanager.h"
+#include "leaderboardpage.h"
 
 
 #include <QRandomGenerator>
@@ -72,6 +74,9 @@ void GameManager::connectStaticPages()
 
     connect(mainMenuPage, &mainpage::startGame, this, &GameManager::onStartGameRequested);
     connect(mainMenuPage, &mainpage::settingsRequested, this, &GameManager::onSettingsRequested);
+
+    connect(mainMenuPage, &mainpage::leaderboardRequested, this, &GameManager::showLeaderboardPage);
+
 }
 
 // ============================================================
@@ -319,10 +324,12 @@ void GameManager::showDefeatPage()
     onReturnToMainMenuRequested();
 }
 
-void GameManager::updateLeaderboard()
+void GameManager::updateLeaderboard(RunStatus status)
 {
-    // TODO: hook point for writing this run's final score once the
-    // Leaderboard storage/UI exists.
+    if (currentUsername.isEmpty() || !player || !map)
+        return;
+
+    LeaderboardManager::updatePlayerScore(currentUsername, player, map, status);
 }
 
 // ============================================================
@@ -440,6 +447,13 @@ void GameManager::cleanupRun()
         mapPage = nullptr;
     }
 
+    if (leaderboardPage)
+    {
+        stackedWidget->removeWidget(leaderboardPage);
+        leaderboardPage->deleteLater();
+        leaderboardPage = nullptr;
+    }
+
     cleanupTransientPages();
 
     if (rewardDialog)
@@ -543,6 +557,7 @@ void GameManager::startBattle(const QVector<Enemy*>& enemies, EncounterKind kind
 void GameManager::returnToMapAndAutosave()
 {
     autoSave();
+    updateLeaderboard(RunStatus::InProgress);
     showMapPage();
 }
 
@@ -733,6 +748,8 @@ void GameManager::onCombatResult(bool playerWon)
 void GameManager::handlePlayerDefeat()
 {
     // Battle lost: no reward is shown, straight to Defeat.
+    updateLeaderboard(RunStatus::Defeat);
+
     showDefeatPage();
 }
 
@@ -765,9 +782,9 @@ void GameManager::onBossDefeated()
 
     if (map->isFinalAct())
     {
-        showVictoryPage();
-        updateLeaderboard();
+        updateLeaderboard(RunStatus::Victory);
 
+        showVictoryPage();
         // Run complete - keep the save file, just clear in-memory state so
         // a fresh "Start Game" begins a brand new run.
         cleanupRun();
@@ -870,3 +887,22 @@ void GameManager::onReturnToMainMenuRequested()
 
     showMainMenuPage();
 }
+
+void GameManager::showLeaderboardPage()
+{
+    if (leaderboardPage)
+    {
+        stackedWidget->removeWidget(leaderboardPage);
+        leaderboardPage->deleteLater();
+        leaderboardPage = nullptr;
+    }
+
+    leaderboardPage = new LeaderboardPage(currentUsername, nullptr);
+    stackedWidget->addWidget(leaderboardPage);
+
+    connect(leaderboardPage, &LeaderboardPage::backRequested,
+            this, &GameManager::showMainMenuPage);
+
+    stackedWidget->setCurrentWidget(leaderboardPage);
+}
+

@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QString>
 
+#include "leaderboardmanager.h"
 #include "mapnode.h"        // NodeType
 #include "enemyfactory.h"   // EnemyFactory::EncounterId
 
@@ -29,6 +30,8 @@ class Event;
 class MemoryGameWidget;
 class TreasureGuessPage;
 class QDialog;
+class LeaderboardPage;
+
 
 
 class GameManager : public QObject
@@ -65,6 +68,8 @@ private:
     TreasurePage* treasurePage = nullptr;
     ShopPage*     shopPage     = nullptr;
     EventPage*    eventPage    = nullptr;
+    LeaderboardPage* leaderboardPage = nullptr;
+
 
     // ---- Mini Games (Floor 9) ----
     MemoryGameWidget*  memoryGamePage    = nullptr;
@@ -110,7 +115,7 @@ private:
     void showEventPage();
     void showVictoryPage();
     void showDefeatPage();
-    void updateLeaderboard();
+    void updateLeaderboard(RunStatus status);
 
     // ---- Mini Games (Floor 9) ----
     void showMiniGamePage();
@@ -146,6 +151,7 @@ private:
     void onTreasureFinished();
     void onMapPauseRequested();
     void onEventResolved();
+    void showLeaderboardPage();
 
     // ---- Mini Game result slots ----
     void onMemoryGameWon();

@@ -33,6 +33,8 @@ SOURCES += \
     eventrelics.cpp \
     eventsystem.cpp \
     gamemanager.cpp \
+    leaderboardmanager.cpp \
+    leaderboardpage.cpp \
     loginpage.cpp \
     main.cpp \
     mainpage.cpp \
@@ -100,6 +102,8 @@ HEADERS += \
     eventrelics.h \
     eventsystem.h \
     gamemanager.h \
+    leaderboardmanager.h \
+    leaderboardpage.h \
     loginpage.h \
     mainpage.h \
     mainwindow.h \
