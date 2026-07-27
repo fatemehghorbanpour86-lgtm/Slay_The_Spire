@@ -12,22 +12,17 @@
 #include <QDir>
 #include <QCoreApplication>
 
-MapPage* MapPage::instance = nullptr;
-
 static const QString BONE_COLOR = "#E8DCC0";
 
 MapPage::MapPage(Map* gameMap, Player* playerPtr, QWidget *parent)
     : QWidget(parent), map(gameMap), player(playerPtr)
 {
-    instance = this;
     setupUI();
     updateTopBarData();
 }
 
-MapPage::~MapPage() {
-    if (instance == this) {
-        instance = nullptr;
-    }
+MapPage::~MapPage()
+{
 }
 
 void MapPage::setupUI() {
@@ -239,14 +234,11 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
 
 void MapPage::updateTopBarData() {
 
-    if (!instance) return;
+    hpBar->setMaximum(player->getMaxHealth());
+    hpBar->setValue(player->getCurrentHealth());
+    hpBar->setFormat(QString("%1 / %2").arg(player->getCurrentHealth()).arg(player->getMaxHealth()));
 
-    instance->hpBar->setMaximum(instance->player->getMaxHealth());
-    instance->hpBar->setValue(instance->player->getCurrentHealth());
-    instance->hpBar->setFormat(QString("%1 / %2").arg(instance->player->getCurrentHealth()).arg(instance->player->getMaxHealth()));
-
-    double hpPercent = static_cast<double>(instance->player->getCurrentHealth()) /
-                       instance->player->getMaxHealth();
+    double hpPercent = static_cast<double>(player->getCurrentHealth()) / player->getMaxHealth();
 
     QString chunkColor;
     QString textColor;
@@ -264,7 +256,7 @@ void MapPage::updateTopBarData() {
         textColor = BONE_COLOR;
     }
 
-    instance->hpBar->setStyleSheet(QString(
+    hpBar->setStyleSheet(QString(
                              "QProgressBar { border: 1px solid #555; border-radius: 10px;"
                              "background-color: #222; color: %1;"
                              "font-weight: bold; text-align: center;"
@@ -276,23 +268,23 @@ void MapPage::updateTopBarData() {
                              "}"
                              ).arg(textColor, chunkColor));
 
-    instance->goldLabel->setText(QString("💰 %1").arg(instance->player->getGold()));
+    goldLabel->setText(QString("💰 %1").arg(player->getGold()));
 
-    instance->relicLabel->setText(QString("x%1").arg(instance->player->getAllRelics().size()));
+    relicLabel->setText(QString("x%1").arg(player->getAllRelics().size()));
 
-    instance->cardLabel->setText(QString("%1").arg(instance->player->getMasterDeck()->getCardCount()));
+    cardLabel->setText(QString("%1").arg(player->getMasterDeck()->getCardCount()));
 
-    instance->actLabel->setText(QString("Act %1").arg(instance->map->getCurrentAct()));
-    instance->floorNumberLabel->setText(QString::number(instance->map->getCurrentFloorIndex()));
+    actLabel->setText(QString("Act %1").arg(map->getCurrentAct()));
+    floorNumberLabel->setText(QString::number(map->getCurrentFloorIndex()));
 
     for(int i = 0; i < 3; ++i) {
-        if(i < instance->player->getPotionCount() && instance->player->getPotion(i) != nullptr) {
-            QString potionName = instance->player->getPotion(i)->getName().toLower().replace(" ", "_");
+        if(i < player->getPotionCount() && player->getPotion(i) != nullptr) {
+            QString potionName = player->getPotion(i)->getName().toLower().replace(" ", "_");
             QString iconPath = QString(":/Potion/%1.png").arg(potionName);
-            instance->potionSlots[i]->setStyleSheet(QString("border-image: url(%1); background: transparent;").arg(iconPath));
-            instance->potionSlots[i]->setFixedSize(42, 42);
+            potionSlots[i]->setStyleSheet(QString("border-image: url(%1); background: transparent;").arg(iconPath));
+            potionSlots[i]->setFixedSize(42, 42);
         } else {
-            instance->potionSlots[i]->setStyleSheet("border-image: url(:/Potion/potionEmpty.png); background: transparent;");
+            potionSlots[i]->setStyleSheet("border-image: url(:/Potion/potionEmpty.png); background: transparent;");
         }
     }
 }

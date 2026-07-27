@@ -208,7 +208,6 @@ void RewardPage::onGoldClicked(Reward* reward, QPushButton* button)
 
     rewardsLayout->removeWidget(button);
     button->deleteLater();
-    MapPage::updateTopBarData();
     emit playerStateChanged();
 }
 
@@ -221,7 +220,6 @@ void RewardPage::onPotionClicked(Reward* reward, QPushButton* button)
 
     rewardsLayout->removeWidget(button);
     button->deleteLater();
-    MapPage::updateTopBarData();
     emit playerStateChanged();
 }
 
@@ -234,7 +232,6 @@ void RewardPage::onRelicClicked(Reward* reward, QPushButton* button)
 
     rewardsLayout->removeWidget(button);
     button->deleteLater();    
-    MapPage::updateTopBarData();
     emit playerStateChanged();
 }
 
@@ -258,7 +255,6 @@ void RewardPage::onCardClicked(Reward* reward, QPushButton* button)
 
     rewardsLayout->removeWidget(button);
     button->deleteLater();
-    MapPage::updateTopBarData();
     emit playerStateChanged();
 }
 
@@ -285,7 +281,6 @@ void RewardPage::onBossRelicClicked(Reward* reward, QPushButton* button)
 
     rewardsLayout->removeWidget(button);
     button->deleteLater();
-    MapPage::updateTopBarData();
     emit playerStateChanged();
 }
 

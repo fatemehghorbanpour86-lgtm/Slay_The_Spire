@@ -18,7 +18,7 @@ class MapPage : public QWidget {
 public:
     explicit MapPage(Map* gameMap, Player* player, QWidget *parent = nullptr);
     ~MapPage();
-    static void updateTopBarData();
+    void updateTopBarData();
     Player* getPlayer() const;
     Map* getMap() const;
 
@@ -49,9 +49,6 @@ private:
 
     void setupUI();
     void createTopBar(QVBoxLayout* mainLayout);
-
-    static MapPage* instance;
-
 protected:
     void paintEvent(QPaintEvent *) override{
         QStyleOption opt;
