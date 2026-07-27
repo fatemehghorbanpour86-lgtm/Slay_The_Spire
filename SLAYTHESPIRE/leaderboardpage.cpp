@@ -17,6 +17,7 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QVBoxLayout>
+#include <QCoreApplication>
 
 #include <utility>
 
@@ -34,7 +35,10 @@ LeaderboardPage::LeaderboardPage(const QString& currentUsername, QWidget* parent
 
 void LeaderboardPage::loadAssets()
 {
-    backgroundPixmap.load(":/leaderboard/LeaderBackground.png");
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BackgroundPath = QDir(baseDir).filePath("assets/leaderboard/LeaderBackground.png");
+
+    backgroundPixmap.load(BackgroundPath);
 }
 
 void LeaderboardPage::setupUi()
@@ -552,28 +556,42 @@ void LeaderboardPage::openEntryDetailsDialog(int row)
                 "This entry: %1")
             .arg(b.victoryBonus);
 
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+
+    QString ExplorerPath = QDir(baseDir).filePath("assets/leaderboard/Explorer.png");
     grid->addWidget(
-        createBreakdownCard("Explorer", ":/leaderboard/Explorer.png", b.explorer, explorerFormula),
+        createBreakdownCard("Explorer", ExplorerPath, b.explorer, explorerFormula),
         0, 0
         );
+
+    QString SurvivorPath = QDir(baseDir).filePath("assets/leaderboard/survivor.png");
     grid->addWidget(
-        createBreakdownCard("Survivor", ":/leaderboard/survivor.png", b.survivor, survivorFormula),
+        createBreakdownCard("Survivor", SurvivorPath, b.survivor, survivorFormula),
         0, 1
         );
+
+    QString TreasureHunterPath = QDir(baseDir).filePath("assets/leaderboard/treasureHunter.png");
     grid->addWidget(
-        createBreakdownCard("Treasure Hunter", ":/leaderboard/treasureHunter.png", b.treasureHunter, treasureFormula),
+        createBreakdownCard("Treasure Hunter", TreasureHunterPath, b.treasureHunter, treasureFormula),
         1, 0
         );
+
+    QString CollectorPath = QDir(baseDir).filePath("assets/leaderboard/collector.png");
     grid->addWidget(
-        createBreakdownCard("Collector", ":/leaderboard/collector.png", b.collector, collectorFormula),
+        createBreakdownCard("Collector", CollectorPath, b.collector, collectorFormula),
         1, 1
         );
+
+    QString DeckBuilderPath = QDir(baseDir).filePath("assets/leaderboard/deckBuilder.png");
     grid->addWidget(
-        createBreakdownCard("Deck Builder", ":/leaderboard/deckBuilder.png", b.deckBuilder, deckFormula),
+        createBreakdownCard("Deck Builder", DeckBuilderPath, b.deckBuilder, deckFormula),
         2, 0
         );
+
+    QString VictoryBonusPath = QDir(baseDir).filePath("assets/leaderboard/victoryBonus.png");
     grid->addWidget(
-        createBreakdownCard("Victory Bonus", ":/leaderboard/victoryBonus.png", b.victoryBonus, victoryFormula),
+        createBreakdownCard("Victory Bonus", VictoryBonusPath, b.victoryBonus, victoryFormula),
         2, 1
         );
 
