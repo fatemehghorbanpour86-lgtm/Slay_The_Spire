@@ -43,13 +43,19 @@ public:
 
     int getAmount() const;
     int getDuration() const;
+    QString getTooltip() const;
     bool isExpired() const;
     bool isBuff() const;
     bool isDebuff() const;
     void stack(int value);
+    int getDisplayValue() const;
+    bool shouldShowNumber() const;
     void decreaseDuration();
     void onTurnStart(Character *target);
     void onTurnEnd(Character *target);
+    bool usesDuration() const;
+    bool isPermanent() const;
+
 
 private:
 

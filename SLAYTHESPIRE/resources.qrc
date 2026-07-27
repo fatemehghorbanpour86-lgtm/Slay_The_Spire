@@ -29,6 +29,7 @@
         <file>Merchant.png</file>
         <file>sold_out.png</file>
         <file>cursor.png</file>
+        <file>exhaustPile.png</file>
     </qresource>
     <qresource prefix="/map">
         <file>boss_champ.png</file>
@@ -181,6 +182,13 @@
         <file>BrutalityEff.png</file>
         <file>DemonFormEff.png</file>
         <file>VulnerableEff.png</file>
+        <file>BarricadeEff.png</file>
+        <file>DexterityEff.png</file>
+        <file>BerserkEff.png</file>
+        <file>EntangleEff.png</file>
+        <file>DarkEmbraceEff.png</file>
+        <file>MetallicizeEff.png</file>
+        <file>RageEff.png</file>
     </qresource>
     <qresource prefix="/RestSite">
         <file>BackBtn.png</file>

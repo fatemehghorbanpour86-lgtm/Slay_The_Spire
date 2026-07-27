@@ -169,12 +169,10 @@ void Character::onTurnEndEffects()
             e->onTurnEnd(this); // also calls decreaseDuration()
     }
 
-    removeExpiredEffects();
 
     // Explain:
     // Called by CombatManager at the end of this character's turn.
     // Loops through all active effects, triggers onTurnEnd logic
-    // (e.g. Metallicize), and then removes expired effects.
 
 }
 
@@ -239,14 +237,23 @@ void Character::addEffect(Effect::Type type, Effect::Category category, int amou
 {
     for (Effect* e : std::as_const(activeEffects))
     {
+        if (!e)
+            continue;
+
         if (e->getType() == type)
         {
-            e->stack(amount);
+            if (e->usesDuration())
+                e->stack(duration);
+            else
+                e->stack(amount);
+
             return;
         }
     }
+
     activeEffects.append(new Effect(type, category, amount, duration));
 }
+
 
 Effect* Character::getEffect(Effect::Type type) const
 {
@@ -294,6 +301,24 @@ CharacterSaveData Character::extractState() const
 
     return data;
 }
+
+void Character::clearNonPermanentEffects()
+{
+    for (int i = activeEffects.size() - 1; i >= 0; --i)
+    {
+        Effect* effect = activeEffects[i];
+        if (!effect)
+            continue;
+
+        if (!effect->isPermanent())
+        {
+            delete activeEffects[i];
+            activeEffects.removeAt(i);
+        }
+    }
+}
+
+
 
 void Character::restoreState(const CharacterSaveData& data)
 {

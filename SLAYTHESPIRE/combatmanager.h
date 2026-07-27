@@ -1,6 +1,7 @@
 #ifndef COMBATMANAGER_H
 #define COMBATMANAGER_H
 
+#include "character.h"
 #include "pileviewerdialog.h"
 #include <QObject>
 #include <QVector>
@@ -72,6 +73,16 @@ private:
     void beginExhumeSelection(Card* sourceCard);
     void finalizeExhumeResolution();
     void finalizeCardAfterUse(Card* card);
+
+    void decreaseTimedEffects(Character* character);
+    void triggerOnCardExhaust(Card* card);
+    void moveCardFromHandToExhaust(Card* card);
+    bool isBattleFinished() const;
+
+    void cleanupAfterCombat();
+    bool combatCleanedUp = false;
+
+
 
 private:
     CombatState currentState;

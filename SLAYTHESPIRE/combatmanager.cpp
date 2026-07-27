@@ -21,6 +21,7 @@ CombatManager::CombatManager(Player* p, QVector<Enemy*> e, QObject* parent)
     calculator(new CombatCalculator()),
     turnCount(0)
 {
+
     for (Enemy* enemy : std::as_const(enemies))
     {
         connectEnemy(enemy);
@@ -64,12 +65,15 @@ void CombatManager::changeState(CombatState newState)
         break;
 
     case CombatState::BattleWon:
+        cleanupAfterCombat();
         emit battleWon();
         break;
 
     case CombatState::BattleLost:
+        cleanupAfterCombat();
         emit battleLost();
         break;
+
     }
 }
 
@@ -95,20 +99,25 @@ void CombatManager::handleBattleStart()
 
 void CombatManager::handleTurnStart()
 {
+    if (!player)
+        return;
+
     turnCount++;
 
-    if (player->getEffect(Effect::Type::Barricade) == nullptr)
-    {
-        player->clearBlock();
-    }
+    player->startTurnBlockReset();
 
     player->resetEnergy();
     player->drawCards(5);
     player->getRelicSystem().onTurnStart(player);
+    player->onTurnStartEffects();
 
-    emit playerTurnStarted();
     emit statsUpdated();
 
+    checkWinLossCondition();
+    if (isBattleFinished())
+        return;
+
+    emit playerTurnStarted();
     changeState(CombatState::PlayerAction);
 }
 
@@ -117,8 +126,17 @@ bool CombatManager::playCard(Card* card, Enemy* target)
     if (currentState != CombatState::PlayerAction)
         return false;
 
+    if (waitingForExhumeSelection)
+        return false;
+
     if (!player || !card)
         return false;
+
+    if (card->getType() == CardType::Attack &&
+        player->hasEffect(Effect::Type::Entangle))
+    {
+        return false;
+    }
 
     if (!card->canPlay())
         return false;
@@ -126,12 +144,9 @@ bool CombatManager::playCard(Card* card, Enemy* target)
     if (!player->useEnergy(card->getEnergyCost()))
         return false;
 
-    // Common "on play" reactions that should still happen for Exhume
     if (card->getType() == CardType::Attack)
     {
-        Effect* rage = player->getEffect(Effect::Type::Rage);
-
-        if (rage)
+        if (Effect* rage = player->getEffect(Effect::Type::Rage))
         {
             CombatCalculator::grantBlock(player, rage->getAmount());
         }
@@ -152,7 +167,6 @@ bool CombatManager::playCard(Card* card, Enemy* target)
     emit cardPlayed(card, target);
     player->getRelicSystem().onCardPlayed(player, card);
 
-    // Special delayed resolution for Exhume
     if (card->getName() == "Exhume")
     {
         beginExhumeSelection(card);
@@ -161,7 +175,6 @@ bool CombatManager::playCard(Card* card, Enemy* target)
         return true;
     }
 
-    // Normal cards resolve immediately
     card->play(player, enemies, target);
 
     finalizeCardAfterUse(card);
@@ -175,6 +188,9 @@ bool CombatManager::playCard(Card* card, Enemy* target)
 bool CombatManager::usePotion(Potion* potion, Enemy* target)
 {
     if (currentState != CombatState::PlayerAction)
+        return false;
+
+    if (waitingForExhumeSelection)
         return false;
 
     if (!potion || !player)
@@ -194,22 +210,31 @@ bool CombatManager::usePotion(Potion* potion, Enemy* target)
     return true;
 }
 
+
 void CombatManager::endTurn()
 {
-    if (currentState == CombatState::PlayerAction)
-        changeState(CombatState::TurnEnd);
+    if (currentState != CombatState::PlayerAction)
+        return;
+
+    if (waitingForExhumeSelection)
+        return;
+
+    changeState(CombatState::TurnEnd);
 }
 
 void CombatManager::handleTurnEnd()
 {
+    if (!player)
+        return;
+
     CombatDeck* deck = player->getCombatDeck();
 
     if (deck)
     {
         QVector<Card*> handCards = deck->getHand();
 
-        // 1) End-of-turn effects for cards still in hand
-        for (Card* card : handCards)
+        // 1) End-of-turn card effects while still in hand
+        for (Card* card : std::as_const(handCards))
         {
             if (!card)
                 continue;
@@ -223,23 +248,34 @@ void CombatManager::handleTurnEnd()
 
             if (card->getName() == "Burn")
             {
-                Burn* burn = dynamic_cast<Burn*>(card);
-
-                if (burn)
+                if (Burn* burn = dynamic_cast<Burn*>(card))
                 {
                     CombatCalculator::dealDamage(nullptr, player, burn->getDamageAmount());
                 }
             }
         }
+    }
 
-        emit statsUpdated();
+    emit statsUpdated();
+    checkWinLossCondition();
+    if (isBattleFinished())
+        return;
 
-        checkWinLossCondition();
-        if (currentState == CombatState::BattleLost || currentState == CombatState::BattleWon)
-            return;
+    // 2) Character end-of-turn effects
+    player->onTurnEndEffects();
 
-        // 2) Move cards based on Ethereal / Retain / Normal
-        handCards = deck->getHand();
+    // 3) Timed debuffs/buffs tick down here
+    decreaseTimedEffects(player);
+
+    emit statsUpdated();
+    checkWinLossCondition();
+    if (isBattleFinished())
+        return;
+
+    // 4) Cleanup hand: Ethereal / Retain / normal discard
+    if (deck)
+    {
+        QVector<Card*> handCards = deck->getHand();
 
         for (Card* card : std::as_const(handCards))
         {
@@ -248,7 +284,7 @@ void CombatManager::handleTurnEnd()
 
             if (card->doesEthereal())
             {
-                deck->moveFromHandToExhaust(card);
+                moveCardFromHandToExhaust(card);
             }
             else if (card->doesRetain())
             {
@@ -261,12 +297,12 @@ void CombatManager::handleTurnEnd()
         }
     }
 
+    // 5) Relics
     player->getRelicSystem().onTurnEnd(player);
 
     emit statsUpdated();
-
     checkWinLossCondition();
-    if (currentState == CombatState::BattleLost || currentState == CombatState::BattleWon)
+    if (isBattleFinished())
         return;
 
     changeState(CombatState::EnemyTurn);
@@ -281,9 +317,31 @@ void CombatManager::handleEnemyTurn()
         if (!enemy || enemy->isDead())
             continue;
 
+        enemy->startTurnBlockReset();
+        enemy->onTurnStartEffects();
+
+        emit statsUpdated();
+        checkWinLossCondition();
+        if (isBattleFinished())
+            return;
+
+        if (enemy->isDead())
+            continue;
+
         emit enemyAttacking(enemy);
 
         enemy->executeMove(player);
+
+        emit statsUpdated();
+        checkWinLossCondition();
+        if (isBattleFinished())
+            return;
+
+        if (enemy->isDead())
+            continue;
+
+        enemy->onTurnEndEffects();
+        decreaseTimedEffects(enemy);
         enemy->finishTurn();
 
         if (!enemy->isDead() && player->getCurrentHealth() > 0)
@@ -293,10 +351,8 @@ void CombatManager::handleEnemyTurn()
         }
 
         emit statsUpdated();
-
         checkWinLossCondition();
-
-        if (currentState == CombatState::BattleLost || currentState == CombatState::BattleWon)
+        if (isBattleFinished())
             return;
     }
 
@@ -437,10 +493,11 @@ void CombatManager::finalizeCardAfterUse(Card* card)
         return;
 
     if (card->doesExhaust())
-        deck->moveFromHandToExhaust(card);
+        moveCardFromHandToExhaust(card);
     else
         deck->moveFromHandToDiscard(card);
 }
+
 
 CombatState CombatManager::getCurrentState() const
 {
@@ -451,3 +508,90 @@ const QVector<Enemy*>& CombatManager::getEnemies() const
 {
     return enemies;
 }
+
+bool CombatManager::isBattleFinished() const
+{
+    return currentState == CombatState::BattleWon ||
+           currentState == CombatState::BattleLost;
+}
+
+void CombatManager::decreaseTimedEffects(Character* character)
+{
+    if (!character)
+        return;
+
+    for (Effect* effect : character->getEffects())
+    {
+        if (!effect)
+            continue;
+
+        if (effect->usesDuration() && !effect->isPermanent())
+        {
+            effect->decreaseDuration();
+        }
+    }
+
+    character->removeExpiredEffects();
+}
+
+void CombatManager::triggerOnCardExhaust(Card* card)
+{
+    Q_UNUSED(card);
+
+    if (!player)
+        return;
+
+    if (Effect* feelNoPain = player->getEffect(Effect::Type::FeelNoPain))
+    {
+        CombatCalculator::grantBlock(player, feelNoPain->getAmount());
+    }
+
+    if (Effect* darkEmbrace = player->getEffect(Effect::Type::DarkEmbrace))
+    {
+        int drawAmount = darkEmbrace->getAmount();
+        if (drawAmount <= 0)
+            drawAmount = 1;
+
+        player->drawCards(drawAmount);
+    }
+}
+
+void CombatManager::moveCardFromHandToExhaust(Card* card)
+{
+    if (!player || !card)
+        return;
+
+    CombatDeck* deck = player->getCombatDeck();
+    if (!deck)
+        return;
+
+    deck->moveFromHandToExhaust(card);
+    triggerOnCardExhaust(card);
+}
+
+void CombatManager::cleanupAfterCombat()
+{
+    if (combatCleanedUp)
+        return;
+
+    combatCleanedUp = true;
+
+    if (player)
+    {
+        player->clearNonPermanentEffects();
+        player->clearBlock();
+    }
+
+    for (Enemy* enemy : std::as_const(enemies))
+    {
+        if (!enemy)
+            continue;
+
+        enemy->clearNonPermanentEffects();
+        enemy->clearBlock();
+    }
+
+    emit statsUpdated();
+}
+
+

@@ -9,7 +9,7 @@
 #include "outlinedlabel.h"
 #include "qtimer.h"
 
-#include "PileViewerDialog.h"
+#include "pileviewerdialog.h"
 #include "skillcards.h"
 #include "statuscards.h"
 
@@ -22,6 +22,55 @@
 #include <QPointer>
 #include <QPropertyAnimation>
 #include <QEasingCurve>
+#include <QApplication>
+#include <QToolTip>
+
+
+static QString makeEffectTooltipHtml(const Effect* effect)
+{
+    if (!effect) return {};
+
+    QString title = effect->getName().toHtmlEscaped();
+    QString desc  = effect->getTooltip().toHtmlEscaped();
+
+    desc.replace("\n", "<br>");
+
+    return QString(R"(
+        <div style="
+            min-width: 170px;
+            max-width: 240px;
+            color: #f3e7c2;
+            font-family: 'Segoe UI';
+            font-size: 12px;
+            line-height: 1.35;
+        ">
+            <div style="
+                color: #f0c674;
+                font-size: 13px;
+                font-weight: 700;
+                margin-bottom: 4px;
+            ">%1</div>
+            <div>%2</div>
+        </div>
+    )").arg(title, desc);
+}
+
+static void applyBattleTooltipStyleOnce()
+{
+    static bool applied = false;
+    if (applied) return;
+    applied = true;
+
+    qApp->setStyleSheet(qApp->styleSheet() + R"(
+        QToolTip {
+            background-color: rgba(22, 16, 12, 245);
+            color: #f3e7c2;
+            border: 1px solid #c89b3c;
+            border-radius: 8px;
+            padding: 6px 8px;
+        }
+    )");
+}
 
 
 
@@ -37,7 +86,7 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     if (this->enemies.isEmpty())
         this->enemies.append (new Cultist);
 
-    setupTestDeck();
+   // setupTestDeck();
 
 
     // -- Main vertical layout --
@@ -54,6 +103,8 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
         Qt::SmoothTransformation
         ));
     bg->lower(); // push behind all other widgets
+
+    applyBattleTooltipStyleOnce();
 
     // -- Create the three main sections --
     topBar      = new QWidget(this);
@@ -78,6 +129,7 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     setupBattleField();
     setupBottomBar();
     setupClickOverlays();
+    battleField->raise();
     QTimer::singleShot(0, this, &BattlePage::repositionOverlays);
 
 
@@ -1711,57 +1763,54 @@ QString BattlePage::effectImagePath(const Effect* effect)
     return QString(":/Effect/%1Eff.png").arg(cleanName);
 }
 
-
 void BattlePage::updateEffectsUI()
 {
-    // update player effects
-    if (playerEffectsLayout && player)
+    // =========================
+    // Update player effects
+    // =========================
+    if (playerEffectsLayout && playerEffectsWidget && player)
     {
         QLayoutItem* item;
         while ((item = playerEffectsLayout->takeAt(0)) != nullptr)
         {
             if (item->widget())
-            {
                 item->widget()->deleteLater();
-            }
             delete item;
         }
 
-        const auto& effects = player->getEffects();
-        for (Effect* effect : effects)
+        const auto& playerEffects = player->getEffects();
+        for (Effect* effect : playerEffects)
         {
             if (!effect || effect->isExpired())
                 continue;
 
             QWidget* iconContainer = new QWidget(playerEffectsWidget);
-            iconContainer->setFixedSize(26, 26);
+            iconContainer->setFixedSize(24, 24);
+            iconContainer->setToolTip(makeEffectTooltipHtml(effect));
+            iconContainer->setAttribute(Qt::WA_AlwaysShowToolTips, true);
+            iconContainer->setMouseTracking(true);
 
             QLabel* iconLabel = new QLabel(iconContainer);
-            iconLabel->setGeometry(0, 0, 24, 24);
+            iconLabel->setGeometry(1, 1, 22, 22);
             iconLabel->setScaledContents(true);
             iconLabel->setPixmap(
                 QPixmap(effectImagePath(effect)).scaled(
-                    24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                    22, 22,
+                    Qt::KeepAspectRatio,
+                    Qt::SmoothTransformation));
+            iconLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-            int displayValue = 0;
-            if (effect->isDebuff())
-            {
-                displayValue = effect->getDuration(); // debuff based on durationا
-            }
-            else
-            {
-                displayValue = effect->getAmount();   // buff based on amount
-            }
-
-            if (displayValue > 0)
+            int displayValue = effect->getDisplayValue();
+            if (effect->shouldShowNumber())
             {
                 QLabel* numLabel = new QLabel(iconContainer);
                 numLabel->setText(QString::number(displayValue));
                 numLabel->setAlignment(Qt::AlignRight | Qt::AlignBottom);
-                numLabel->setGeometry(10, 10, 16, 16);
+                numLabel->setGeometry(8, 8, 14, 14);
+                numLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
                 numLabel->setStyleSheet(
                     "color: #ffffff;"
-                    "font-size: 10px;"
+                    "font-size: 9px;"
                     "font-weight: bold;"
                     "background: transparent;"
                     "border: none;");
@@ -1771,7 +1820,9 @@ void BattlePage::updateEffectsUI()
         }
     }
 
-    // update enemies effects
+    // =========================
+    // Update enemies effects
+    // =========================
     for (EnemyUI& enemyUI : enemyUIs)
     {
         if (!enemyUI.effectsLayout || !enemyUI.effectsWidget || !enemyUI.enemy)
@@ -1781,47 +1832,43 @@ void BattlePage::updateEffectsUI()
         while ((item = enemyUI.effectsLayout->takeAt(0)) != nullptr)
         {
             if (item->widget())
-            {
                 item->widget()->deleteLater();
-            }
             delete item;
         }
 
-        const auto& effects = enemyUI.enemy->getEffects();
-        for (Effect* effect : effects)
+        const auto& enemyEffects = enemyUI.enemy->getEffects();
+        for (Effect* effect : enemyEffects)
         {
             if (!effect || effect->isExpired())
                 continue;
 
             QWidget* iconContainer = new QWidget(enemyUI.effectsWidget);
-            iconContainer->setFixedSize(26, 26);
+            iconContainer->setFixedSize(24, 24);
+            iconContainer->setToolTip(makeEffectTooltipHtml(effect));
+            iconContainer->setAttribute(Qt::WA_AlwaysShowToolTips, true);
+            iconContainer->setMouseTracking(true);
 
             QLabel* iconLabel = new QLabel(iconContainer);
-            iconLabel->setGeometry(0, 0, 24, 24);
+            iconLabel->setGeometry(1, 1, 22, 22);
             iconLabel->setScaledContents(true);
             iconLabel->setPixmap(
                 QPixmap(effectImagePath(effect)).scaled(
-                    24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                    22, 22,
+                    Qt::KeepAspectRatio,
+                    Qt::SmoothTransformation));
+            iconLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-            int displayValue = 0;
-            if (effect->isDebuff())
-            {
-                displayValue = effect->getDuration(); // debuff based on durationا
-            }
-            else
-            {
-                displayValue = effect->getAmount();   // buff based on amount
-            }
-
-            if (displayValue > 0)
+            int displayValue = effect->getDisplayValue();
+            if (effect->shouldShowNumber())
             {
                 QLabel* numLabel = new QLabel(iconContainer);
                 numLabel->setText(QString::number(displayValue));
                 numLabel->setAlignment(Qt::AlignRight | Qt::AlignBottom);
-                numLabel->setGeometry(10, 10, 16, 16);
+                numLabel->setGeometry(8, 8, 14, 14);
+                numLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
                 numLabel->setStyleSheet(
                     "color: #ffffff;"
-                    "font-size: 10px;"
+                    "font-size: 9px;"
                     "font-weight: bold;"
                     "background: transparent;"
                     "border: none;");
@@ -1837,8 +1884,19 @@ bool BattlePage::isCardPlayableNow(Card* card) const
     if (!card || !player)
         return false;
 
-    return card->canPlay() && player->getCurrentEnergy() >= card->getEnergyCost();
+    if (!card->canPlay())
+        return false;
+
+    if (player->getCurrentEnergy() < card->getEnergyCost())
+        return false;
+
+    if (player->hasEffect(Effect::Type::Entangle) && card->getType() == CardType::Attack)
+        return false;
+
+    return true;
 }
+
+
 
 void BattlePage::resetCardToHandPose(QGraphicsProxyWidget* proxy)
 {
@@ -1898,6 +1956,8 @@ void BattlePage::animateUnplayableCard(QGraphicsProxyWidget* proxy)
     shake->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
+/*
+
 void BattlePage::setupTestDeck()
 {
     if (!player)
@@ -1927,6 +1987,4 @@ void BattlePage::setupTestDeck()
     deck->addCard(new Exhume());
     deck->addCard(new Exhume());
 }
-
-
-
+*/
