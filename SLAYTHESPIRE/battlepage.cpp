@@ -88,6 +88,33 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     connect(combatManager, &CombatManager::battleLost,   this, &BattlePage::onBattleLost);
     connect(endTurnBtn,    &QPushButton::clicked,        combatManager, &CombatManager::endTurn);
     connect(combatManager, &CombatManager::enemyIntentUpdated, this, &BattlePage::updateEnemyIntent);
+    connect(combatManager, &CombatManager::requestPileSelection,
+            this, [this](PileType pileType)
+            {
+                if (pileType != PileType::Exhaust)
+                    return;
+
+                PileViewerDialog dialog(this->player,
+                                        PileType::Exhaust,
+                                        PileViewerMode::SelectCard,
+                                        this);
+
+                connect(&dialog, &PileViewerDialog::cardSelected,
+                        this, [this, &dialog](Card* selectedCard)
+                        {
+                            combatManager->handleExhumeSelection(selectedCard);
+                            dialog.accept();
+                        });
+
+                connect(&dialog, &QDialog::rejected,
+                        this, [this]()
+                        {
+                            combatManager->cancelExhumeSelection();
+                        });
+
+                dialog.exec();
+            });
+
 
     connect(combatManager, &CombatManager::enemyAttacking, this, [this](Enemy* e)
             {
@@ -250,7 +277,10 @@ void BattlePage::setupTopBar()
 
     connect(deckBtn, &QPushButton::clicked, this, [this]()
             {
-                PileViewerDialog dialog(player, PileType::Deck, this);
+                PileViewerDialog dialog(player,
+                            PileType::Deck,
+                            PileViewerMode::ViewOnly,
+                            this);
                 dialog.exec();
             });
 }
@@ -1198,19 +1228,30 @@ void BattlePage::onBattleLost()
 
 void BattlePage::onDrawPileClicked()
 {
-    PileViewerDialog dialog(player, PileType::Draw, this);
+    PileViewerDialog dialog(player,
+                            PileType::Draw,
+                            PileViewerMode::ViewOnly,
+                            this);
     dialog.exec();
 }
 
 void BattlePage::onExhaustPileClicked()
 {
-    PileViewerDialog dialog(player, PileType::Exhaust, this);
+    PileViewerDialog dialog(player,
+                            PileType::Exhaust,
+                            PileViewerMode::ViewOnly,
+                            this);
     dialog.exec();
 }
 
+
 void BattlePage::onDiscardPileClicked()
 {
-    PileViewerDialog dialog(player, PileType::Discard, this);
+
+    PileViewerDialog dialog(player,
+                            PileType::Discard,
+                            PileViewerMode::ViewOnly,
+                            this);
     dialog.exec();
 }
 
@@ -1883,7 +1924,8 @@ void BattlePage::setupTestDeck()
     deck->addCard(new Reaper());
 
     deck->addCard(new Impervious());
-    deck->addCard(new Impervious());
+    deck->addCard(new Exhume());
+    deck->addCard(new Exhume());
 }
 
 

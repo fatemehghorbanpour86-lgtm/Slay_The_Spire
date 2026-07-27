@@ -1,6 +1,7 @@
 #ifndef COMBATMANAGER_H
 #define COMBATMANAGER_H
 
+#include "pileviewerdialog.h"
 #include <QObject>
 #include <QVector>
 
@@ -54,6 +55,8 @@ signals:
     void battleLost();
     void combatEnded(bool playerWon);
 
+    void requestPileSelection(PileType pileType);
+
 private:
     void changeState(CombatState newState);
 
@@ -63,9 +66,14 @@ private:
     void handleEnemyTurn();
 
     void checkWinLossCondition();
-
     void connectEnemy(Enemy* enemy);
 
+    // Exhume flow
+    void beginExhumeSelection(Card* sourceCard);
+    void finalizeExhumeResolution();
+    void finalizeCardAfterUse(Card* card);
+
+private:
     CombatState currentState;
     Player* player;
     QVector<Enemy*> enemies;
@@ -73,9 +81,15 @@ private:
     CombatCalculator* calculator;
     int turnCount;
 
+    Card* pendingExhumeCard = nullptr;
+    bool waitingForExhumeSelection = false;
+
 private slots:
     void onEnemyDied(Enemy* enemy);
 
+public slots:
+    void handleExhumeSelection(Card* selectedCard);
+    void cancelExhumeSelection();
 };
 
 #endif // COMBATMANAGER_H
