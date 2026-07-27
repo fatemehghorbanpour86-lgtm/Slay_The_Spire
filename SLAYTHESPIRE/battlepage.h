@@ -176,6 +176,14 @@ private:
         return nullptr;
     }
 
+    bool isCardPlayableNow(Card* card) const;
+    void resetCardToHandPose(QGraphicsProxyWidget* proxy);
+    void animateUnplayableCard(QGraphicsProxyWidget* proxy);
+    //testing cards
+    void setupTestDeck();
+
+
+
 protected:
     void showEvent(QShowEvent* e) override;
     bool eventFilter(QObject* obj, QEvent* event) override;

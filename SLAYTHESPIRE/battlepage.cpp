@@ -1,4 +1,5 @@
 #include "battlepage.h"
+#include "attackcards.h"
 #include "combatdeck.h"
 #include "enemy.h"
 #include "normalenemies.h"
@@ -9,6 +10,8 @@
 #include "qtimer.h"
 
 #include "PileViewerDialog.h"
+#include "skillcards.h"
+#include "statuscards.h"
 
 #include <QPropertyAnimation>
 #include <QGraphicsProxyWidget>
@@ -17,6 +20,10 @@
 #include <QGraphicsDropShadowEffect>
 #include <QEasingCurve>
 #include <QPointer>
+#include <QPropertyAnimation>
+#include <QEasingCurve>
+
+
 
 
 
@@ -29,6 +36,8 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
 
     if (this->enemies.isEmpty())
         this->enemies.append (new Cultist);
+
+    setupTestDeck();
 
 
     // -- Main vertical layout --
@@ -730,11 +739,21 @@ bool BattlePage::eventFilter(QObject* obj, QEvent* event)
 
         proxy->setZValue(100);
 
-        QGraphicsDropShadowEffect* glow = new QGraphicsDropShadowEffect();
-        glow->setColor(QColor(0, 150, 255, 255));
-        glow->setBlurRadius(80);
-        glow->setOffset(0, 0);
-        proxy->setGraphicsEffect(glow);
+        const bool playableNow = isCardPlayableNow(cardData);
+
+        if (playableNow)
+        {
+            QGraphicsDropShadowEffect* glow = new QGraphicsDropShadowEffect();
+            glow->setColor(QColor(0, 150, 255, 255));
+            glow->setBlurRadius(80);
+            glow->setOffset(0, 0);
+            proxy->setGraphicsEffect(glow);
+        }
+        else
+        {
+            proxy->setGraphicsEffect(nullptr);
+        }
+
     }
     // --- Hover Leave Animation ---
     else if (event->type() == QEvent::Leave)
@@ -1075,60 +1094,39 @@ void BattlePage::refreshHand()
 
 void BattlePage::onCardClicked(Card* card, QGraphicsProxyWidget* proxy)
 {
+    if (!card || !proxy)
+        return;
+
     if (pendingCard == card)
     {
         clearSelection();
-        if (proxy)
-        {
-            QPropertyAnimation* moveDown = new QPropertyAnimation(proxy, "pos");
-            moveDown->setDuration(200);
-            moveDown->setStartValue(proxy->pos());
-            moveDown->setEndValue(QPointF(proxy->pos().x(), proxy->data(0).toInt()));
-            moveDown->setEasingCurve(QEasingCurve::OutCubic);
-            moveDown->start(QAbstractAnimation::DeleteWhenStopped);
-
-            QPropertyAnimation* rotateBack = new QPropertyAnimation(proxy, "rotation");
-            rotateBack->setDuration(200);
-            rotateBack->setStartValue(proxy->rotation());
-            rotateBack->setEndValue(proxy->data(1).toDouble());
-            rotateBack->setEasingCurve(QEasingCurve::OutCubic);
-            rotateBack->start(QAbstractAnimation::DeleteWhenStopped);
-
-            QPropertyAnimation* scaleDown = new QPropertyAnimation(proxy, "scale");
-            scaleDown->setDuration(200);
-            scaleDown->setStartValue(proxy->scale());
-            scaleDown->setEndValue(1.0);
-            scaleDown->setEasingCurve(QEasingCurve::OutCubic);
-            scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
-
-            proxy->setGraphicsEffect(nullptr);
-
-        }
+        resetCardToHandPose(proxy);
         return;
     }
 
     if (pendingCard != nullptr)
         return;
 
-    // Select this card
-    clearSelection();   // deselect any previously selected card first
+    if (!isCardPlayableNow(card))
+    {
+        clearSelection();
+        animateUnplayableCard(proxy);
+        return;
+    }
 
-    pendingCard   = card;
+    clearSelection();
+
+    pendingCard = card;
     selectedProxy = proxy;
 
-    if (selectedProxy) {
+    if (selectedProxy)
         selectedProxy->setZValue(105);
-    }
 
     CardTarget target = getCardTarget(card);
     if (target == CardTarget::Enemy)
-    {
         showEnemyHighlights();
-    }
     else if (target == CardTarget::Player)
-    {
         showPlayerHighlight();
-    }
 }
 
 void BattlePage::onBattleWon()
@@ -1136,6 +1134,7 @@ void BattlePage::onBattleWon()
     emit combatResult(true);
     emit battleEnded();
 }
+
 void BattlePage::onBattleLost()
 {
     emit combatResult(false);
@@ -1366,28 +1365,14 @@ void BattlePage::playCardWithAnimation(Card* card,
 
 
     // Not enough energy: bounce the card back; do NOT set animatingCard.
-    if (player->getCurrentEnergy() < cardToPlay->getEnergyCost())
+    if (!cardToPlay || !proxyToAnim || !isCardPlayableNow(cardToPlay))
     {
-
-        // Not enough energy — snap card back to default position
-        QPropertyAnimation* moveDown = new QPropertyAnimation(proxyToAnim, "pos");
-        moveDown->setDuration(200);
-        moveDown->setStartValue(proxyToAnim->pos());
-        moveDown->setEndValue(QPointF(proxyToAnim->pos().x(),
-                                      proxyToAnim->data(0).toInt()));
-        moveDown->setEasingCurve(QEasingCurve::OutCubic);
-        moveDown->start(QAbstractAnimation::DeleteWhenStopped);
-
-        QPropertyAnimation* scaleDown = new QPropertyAnimation(proxyToAnim, "scale");
-        scaleDown->setDuration(200);
-        scaleDown->setStartValue(proxyToAnim->scale());
-        scaleDown->setEndValue(1.0);
-        scaleDown->setEasingCurve(QEasingCurve::OutCubic);
-        scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
-
-        proxyToAnim->setGraphicsEffect(nullptr);
+        clearSelection();
+        resetCardToHandPose(proxyToAnim);
         return;
     }
+
+    clearSelection();
 
     animatingCard = true;
 
@@ -1482,11 +1467,13 @@ void BattlePage::playCardWithAnimation(Card* card,
     flyToCenter->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
+
 void BattlePage::showEvent(QShowEvent* e)
 {
     QWidget::showEvent(e);
     repositionBlockIcon();
 }
+
 
 void BattlePage::repositionBlockIcon()
 {
@@ -1501,6 +1488,7 @@ void BattlePage::repositionBlockIcon()
     playerBlockLabel->move(0, 0);
     playerBlockLabel->resize(36, 36);
 }
+
 
 void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function<void()> onDone)
 {
@@ -1618,6 +1606,7 @@ void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function
     goForward->start();
 }
 
+
 QString BattlePage::effectImagePath(const Effect* effect)
 {
     if (!effect) return QString();
@@ -1629,6 +1618,8 @@ QString BattlePage::effectImagePath(const Effect* effect)
 
     return QString(":/Effect/%1Eff.png").arg(cleanName);
 }
+
+
 void BattlePage::updateEffectsUI()
 {
     // update player effects
@@ -1748,3 +1739,98 @@ void BattlePage::updateEffectsUI()
         }
     }
 }
+
+bool BattlePage::isCardPlayableNow(Card* card) const
+{
+    if (!card || !player)
+        return false;
+
+    return card->canPlay() && player->getCurrentEnergy() >= card->getEnergyCost();
+}
+
+void BattlePage::resetCardToHandPose(QGraphicsProxyWidget* proxy)
+{
+    if (!proxy)
+        return;
+
+    QPropertyAnimation* moveDown = new QPropertyAnimation(proxy, "pos");
+    moveDown->setDuration(200);
+    moveDown->setStartValue(proxy->pos());
+    moveDown->setEndValue(QPointF(proxy->pos().x(), proxy->data(0).toInt()));
+    moveDown->setEasingCurve(QEasingCurve::OutCubic);
+    moveDown->start(QAbstractAnimation::DeleteWhenStopped);
+
+    QPropertyAnimation* rotateBack = new QPropertyAnimation(proxy, "rotation");
+    rotateBack->setDuration(200);
+    rotateBack->setStartValue(proxy->rotation());
+    rotateBack->setEndValue(proxy->data(1).toDouble());
+    rotateBack->setEasingCurve(QEasingCurve::OutCubic);
+    rotateBack->start(QAbstractAnimation::DeleteWhenStopped);
+
+    QPropertyAnimation* scaleDown = new QPropertyAnimation(proxy, "scale");
+    scaleDown->setDuration(200);
+    scaleDown->setStartValue(proxy->scale());
+    scaleDown->setEndValue(1.0);
+    scaleDown->setEasingCurve(QEasingCurve::OutCubic);
+
+    connect(scaleDown, &QPropertyAnimation::finished, this, [proxy]() {
+        if (proxy)
+            proxy->setGraphicsEffect(nullptr);
+    });
+
+    scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+
+void BattlePage::animateUnplayableCard(QGraphicsProxyWidget* proxy)
+{
+    if (!proxy)
+        return;
+
+    const QPointF origin = proxy->pos();
+
+    auto* shake = new QPropertyAnimation(proxy, "pos");
+    shake->setDuration(180);
+    shake->setKeyValueAt(0.0, origin);
+    shake->setKeyValueAt(0.20, origin + QPointF(-8, 0));
+    shake->setKeyValueAt(0.40, origin + QPointF(8, 0));
+    shake->setKeyValueAt(0.60, origin + QPointF(-5, 0));
+    shake->setKeyValueAt(0.80, origin + QPointF(5, 0));
+    shake->setKeyValueAt(1.0, origin);
+    shake->setEasingCurve(QEasingCurve::OutCubic);
+
+    connect(shake, &QPropertyAnimation::finished, this, [this, proxy]() {
+        resetCardToHandPose(proxy);
+    });
+
+    shake->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void BattlePage::setupTestDeck()
+{
+    if (!player)
+        return;
+
+    MasterDeck* deck = player->getMasterDeck();
+    if (!deck)
+        return;
+
+    QVector<Card*> oldCards = deck->getCards();
+
+    for (Card* card : oldCards)
+        deck->removeCard(card);
+
+    for (int i = 0; i < 5; ++i)
+    {
+        deck->addCard(new Strike());
+    }
+    for (int i = 0; i < 4; ++i)
+    {
+       deck->addCard(new Defend());
+    }
+    deck->addCard(new Burn());
+    deck->addCard(new Burn());
+}
+
+
+

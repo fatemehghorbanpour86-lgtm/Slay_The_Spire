@@ -12,6 +12,8 @@
 
 #include <utility>
 
+#include <QDebug>
+
 CombatManager::CombatManager(Player* p, QVector<Enemy*> e, QObject* parent)
     : QObject(parent),
     currentState(CombatState::BattleStart),
@@ -120,6 +122,9 @@ bool CombatManager::playCard(Card* card, Enemy* target)
         return false;
 
     if (!player || !card)
+        return false;
+
+    if (!card || !card->canPlay())
         return false;
 
     if (!player->useEnergy(card->getEnergyCost()))
