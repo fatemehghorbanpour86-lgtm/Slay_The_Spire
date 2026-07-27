@@ -6,6 +6,8 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QDir>
+#include <QCoreApplication>
 
 CardSelectionDialog::CardSelectionDialog(const QVector<Card*>& cardChoices, QWidget* parent)
     : QDialog(parent), cardChoices(cardChoices), chosenCard(nullptr)
@@ -23,6 +25,17 @@ void CardSelectionDialog::setupUI()
     setWindowTitle("Choose a Card");
     setStyleSheet("QDialog { border-image: url(:/Reward/SelectionViewer.png); border: none; background: transparent; }");
     setFixedSize(650, 350);
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(30, 30, 30, 30);
@@ -42,7 +55,7 @@ void CardSelectionDialog::setupUI()
         QPushButton* cardBtn = new QPushButton(this);
         cardBtn->setFixedSize(CARD_WIDTH, CARD_HEIGHT);
         cardBtn->setFlat(true);
-        cardBtn->setCursor(Qt::PointingHandCursor);
+        cardBtn->setCursor(buttonHoverCursor);
         cardBtn->setStyleSheet(
             QString("QPushButton { border: none; background: transparent; "
                     "border-image: url(%1); }"
