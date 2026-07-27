@@ -338,11 +338,10 @@ void GameManager::updateLeaderboard(RunStatus status)
 
 void GameManager::showMiniGamePage()
 {
-    showMemoryGamePage();
-    // if (QRandomGenerator::global()->bounded(100) < 50)
-    //     showMemoryGamePage();
-    // else
-    //     showTreasureGuessPage();
+    if (QRandomGenerator::global()->bounded(100) < 50)
+        showMemoryGamePage();
+    else
+        showTreasureGuessPage();
 }
 
 void GameManager::showMemoryGamePage()
@@ -690,8 +689,6 @@ void GameManager::onSettingsRequested()
 
 void GameManager::onMapNodeEntered(NodeType type)
 {
-    //showMiniGamePage();
-
     switch (type)
     {
     case NodeType::Monster:

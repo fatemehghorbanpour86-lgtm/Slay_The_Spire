@@ -232,7 +232,7 @@ void TopBarWidget::updateData(Player* player, Map* map)
     if (map)
     {
         actLabel->setText(QString("Act %1").arg(map->getCurrentAct()));
-        floorNumberLabel->setText(QString::number(map->getCurrentFloorIndex()));
+        floorNumberLabel->setText(QString::number(map->getCurrentFloorIndex() + 1));
         actLabel->setVisible(true);
         floorIconLabel->setVisible(true);
         floorNumberLabel->setVisible(true);

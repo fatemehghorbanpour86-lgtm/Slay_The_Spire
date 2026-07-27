@@ -51,7 +51,7 @@ void MapPage::setupUI() {
 
     createTopBar(mainLayout);
 
-    QScrollArea* scrollArea = new QScrollArea(this);
+    scrollArea = new QScrollArea(this);
     scrollArea->setFrameShape(QFrame::NoFrame);
     scrollArea->setStyleSheet("QScrollArea { background: transparent; border: none; }");
     scrollArea->setWidgetResizable(true);
@@ -71,6 +71,8 @@ void MapPage::setupUI() {
     mainLayout->addWidget(scrollArea);
 
     connect(mapWidget, &MapWidget::nodeClicked, this, &MapPage::onNodeClicked);
+    connect(mapWidget, &MapWidget::animationStarted, this, &MapPage::onMapAnimationStarted);
+    connect(mapWidget, &MapWidget::animationFinished, this, &MapPage::onMapAnimationFinished);
 }
 
 void MapPage::createTopBar(QVBoxLayout* mainLayout) {
@@ -129,7 +131,6 @@ void MapPage::createTopBar(QVBoxLayout* mainLayout) {
             });
     connect(relicBtn, &QPushButton::clicked, this, &MapPage::onRelicButtonClicked);
 
-    // پنل تیره با گوشه‌های گرد پشت پوشن‌ها (QFrame خودش QSS رو رندر می‌کنه)
     potionsPanel = new QFrame();
     potionsPanel->setObjectName("PotionsPanel");
     potionsPanel->setStyleSheet(
@@ -275,7 +276,7 @@ void MapPage::updateTopBarData() {
     cardLabel->setText(QString("%1").arg(player->getMasterDeck()->getCardCount()));
 
     actLabel->setText(QString("Act %1").arg(map->getCurrentAct()));
-    floorNumberLabel->setText(QString::number(map->getCurrentFloorIndex()));
+    floorNumberLabel->setText(QString::number(map->getCurrentFloorIndex() + 1));
 
     for(int i = 0; i < 3; ++i) {
         if(i < player->getPotionCount() && player->getPotion(i) != nullptr) {
@@ -321,4 +322,24 @@ void MapPage::onDeckButtonClicked() {
 
 void MapPage::onSettingsButtonClicked() {
     emit settingsRequested();
+}
+
+
+void MapPage::onMapAnimationStarted()
+{
+    // Only the scrollbar itself is disabled (it is already hidden via
+    // ScrollBarAlwaysOff, so this has no visible side effect) - blocking
+    // wheel/drag scrolling without dimming anything on screen.
+    if (scrollArea && scrollArea->verticalScrollBar())
+    {
+        scrollArea->verticalScrollBar()->setEnabled(false);
+    }
+}
+
+void MapPage::onMapAnimationFinished()
+{
+    if (scrollArea && scrollArea->verticalScrollBar())
+    {
+        scrollArea->verticalScrollBar()->setEnabled(true);
+    }
 }

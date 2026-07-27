@@ -28,10 +28,15 @@ private slots:
     void onDeckButtonClicked();
     void onSettingsButtonClicked();
 
+    void onMapAnimationStarted();
+    void onMapAnimationFinished();
+
 private:
     Map* map;
     Player* player;
     MapWidget* mapWidget;
+
+    QScrollArea* scrollArea;
 
     QLabel* cardLabel;
     QWidget* topBarWidget;
@@ -58,8 +63,6 @@ protected:
     }
 
 signals:
-    // void battleRequested();
-    // void campfireEntered();
     void nodeEntered(NodeType type);
     void settingsRequested();
 };

@@ -13,6 +13,15 @@ MapWidget::MapWidget(Map* gameMap, QWidget *parent)
     setAttribute(Qt::WA_TranslucentBackground);
     setStyleSheet("background: transparent;");
 
+    selectionAnimator = new MapSelectionAnimator(this);
+
+    connect(selectionAnimator, &MapSelectionAnimator::progressChanged,
+            this, &MapWidget::onAnimationProgress);
+    connect(selectionAnimator, &MapSelectionAnimator::circleFinished,
+            this, &MapWidget::onCircleFinished);
+    connect(selectionAnimator, &MapSelectionAnimator::selectionAnimationFinished,
+            this, &MapWidget::onSelectionFinished);
+
     createNodeButtons();
 }
 
@@ -82,7 +91,8 @@ void MapWidget::createNodeButtons() {
 
             connect(btn, &QPushButton::clicked, this, [this, node]() {
                 if (node->isAvailable()) {
-                    emit nodeClicked(node->getId());
+                    // emit nodeClicked(node->getId());
+                    startNodeSelection(node);
                 }
             });
 
@@ -90,6 +100,85 @@ void MapWidget::createNodeButtons() {
         }
     }
     refreshUI();
+}
+
+void MapWidget::startNodeSelection(MapNode* node)
+{
+    if (node == nullptr || !node->isAvailable())
+        return;
+
+    if (selectionAnimator->isAnimating())
+        return;
+
+    emit animationStarted();
+
+    // Step 1: disable every Node so nothing else can be clicked while
+    // the sequence plays out.
+    for (auto it = nodeButtons.begin(); it != nodeButtons.end(); ++it)
+    {
+        it.value()->setEnabled(false);
+    }
+
+    // Step 2 onward is entirely driven by MapSelectionAnimator; the
+    // resulting emitted signals below take care of the rest.
+    selectionAnimator->start(node, const_cast<MapNode*>(map->getCurrentNode()));
+}
+
+void MapWidget::onAnimationProgress()
+{
+    update();
+}
+
+void MapWidget::onCircleFinished()
+{
+    // Instant (non-animated) visual changes: every Node that was
+    // Available a moment ago, other than the one just chosen, now
+    // looks Locked; the paths leading to them turn gray on next paint.
+    animationLockActive = true;
+    temporarilyLockedNodes.clear();
+
+    MapNode* selected = selectionAnimator->getSelectedNode();
+    const QVector<const MapNode*> availableNodes = map->getAvailableNodes();
+
+    for (const MapNode* constNode : availableNodes)
+    {
+        MapNode* node = const_cast<MapNode*>(constNode);
+
+        if (node != selected)
+        {
+            temporarilyLockedNodes.insert(node);
+        }
+    }
+
+    updateNodeStyles();
+    update();
+}
+
+void MapWidget::onSelectionFinished(MapNode* node)
+{
+    animationLockActive = false;
+    temporarilyLockedNodes.clear();
+
+    emit animationFinished();
+
+    if (node != nullptr)
+    {
+        // Exactly the same signal, with exactly the same meaning, that
+        // used to be emitted directly on click. MapPage's handling of
+        // it (moveToNode + refreshUI + nodeEntered) is untouched.
+        emit nodeClicked(node->getId());
+    }
+}
+
+void MapWidget::updateNodeStyles()
+{
+    for (auto it = nodeButtons.begin(); it != nodeButtons.end(); ++it)
+    {
+        MapNode* node = it.key();
+        QPushButton* btn = it.value();
+
+        btn->setStyleSheet(getNodeStyleSheet(node));
+    }
 }
 
 void MapWidget::refreshUI() {
@@ -131,6 +220,13 @@ QString MapWidget::getNodeStyleSheet(MapNode* node) {
             stateStr = "hexaghost";
         else
             stateStr = "champ";
+    }
+    else if (temporarilyLockedNodes.contains(node))
+    {
+        // Purely visual, temporary override while a selection animation
+        // is in progress - the real Map state (node->isAvailable()) is
+        // left completely untouched.
+        stateStr = "locked";
     }
     else
     {
@@ -182,12 +278,12 @@ QString MapWidget::getTooltipText(NodeType type) {
 void MapWidget::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event)
 
-    // توجه: دیگه drawPrimitive(PE_Widget) صدا نمی‌زنیم چون اون یه
-    // بک‌گراند مات می‌کشید و جلوی دیده‌شدن عکس مپِ MapPage رو می‌گرفت.
-    // این ویجت باید کاملاً شفاف بمونه، فقط خطوط مسیر رو می‌کشیم.
-
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
+
+    MapNode* selectedNode = selectionAnimator->getSelectedNode();
+    MapNode* fromNode = selectionAnimator->getFromNode();
+    const bool selectionInProgress = selectionAnimator->isAnimating();
 
     const QVector<MapFloor>& floors = map->getFloors();
     for (int i = 0; i < floors.size(); ++i) {
@@ -206,33 +302,94 @@ void MapWidget::paintEvent(QPaintEvent *event) {
                 QPoint p2 = childBtn->geometry().center();
 
                 QColor lineColor = QColor(24, 28, 34);
+                bool wasAvailableEdge = false;
 
                 if (parentNode->isVisited() && childNode->isVisited()) {
                     lineColor = QColor(186, 177, 0);
                 } else if ((parentNode == map->getCurrentNode() || parentNode->isVisited()) && childNode->isAvailable()) {
                     lineColor = QColor(121, 180, 255);
+                    wasAvailableEdge = true;
                 }
 
-                painter.setPen(QPen(lineColor, 4, Qt::DashLine, Qt::RoundCap));
-                painter.drawLine(p1, p2);
+                // The single edge currently being animated to Gold
+                // (current Node -> the Node the player just picked).
+                const bool isSelectedEdge = selectionInProgress &&
+                                            fromNode != nullptr &&
+                                            parentNode == fromNode && childNode == selectedNode;
+
+                if (animationLockActive && wasAvailableEdge && !isSelectedEdge)
+                {
+                    // Every other path that used to be Available (blue)
+                    // becomes gray for the rest of the selection sequence.
+                    lineColor = QColor(24, 28, 34);
+                }
+
+                if (isSelectedEdge)
+                {
+                    const qreal t = selectionAnimator->isPathActive()
+                    ? selectionAnimator->pathProgress()
+                    : 0.0;
+
+                    const QPointF travelPoint = QPointF(p1) + (QPointF(p2 - p1) * t);
+
+                    // Traveling light: the portion already covered is
+                    // gold, the remainder still shows the path's normal
+                    // (pre-selection) color.
+                    painter.setPen(QPen(QColor(186, 177, 0), 4, Qt::DashLine, Qt::RoundCap));
+                    painter.drawLine(p1, travelPoint.toPoint());
+
+                    painter.setPen(QPen(QColor(121, 180, 255), 4, Qt::DashLine, Qt::RoundCap));
+                    painter.drawLine(travelPoint.toPoint(), p2);
+                }
+                else
+                {
+                    painter.setPen(QPen(lineColor, 4, Qt::DashLine, Qt::RoundCap));
+                    painter.drawLine(p1, p2);
+                }
             }
         }
     }
 
     const MapNode* current = map->getCurrentNode();
 
-    if (current && nodeButtons.contains(const_cast<MapNode*>(current)))
+    if (current &&!selectionInProgress && nodeButtons.contains(const_cast<MapNode*>(current)))
     {
         QPushButton* btn = nodeButtons.value(const_cast<MapNode*>(current));
 
-        QRect rect = btn->geometry().adjusted(-4, -4, 4, 4);
+        QRect rect = btn->geometry().adjusted(-14, -14, 14, 14);
 
         QPen pen(QColor(255, 215, 0));
-        pen.setWidth(4);
+        pen.setWidth(6);
 
         painter.setPen(pen);
         painter.setBrush(Qt::NoBrush);
 
         painter.drawEllipse(rect);
+    }
+
+    // Golden selection ring, only while it is actively being drawn
+    // (i.e. before the player's chosen Node is actually entered).
+    if (selectionInProgress && selectedNode != nullptr)
+    {
+        QPushButton* selectedBtn = nodeButtons.value(selectedNode);
+
+        if (selectedBtn)
+        {
+            QRect ringRect = selectedBtn->geometry().adjusted(-14, -14, 14, 14);
+
+            QPen ringPen(QColor(255, 215, 0));
+            ringPen.setWidth(6);
+            ringPen.setCapStyle(Qt::RoundCap);
+
+            painter.setPen(ringPen);
+            painter.setBrush(Qt::NoBrush);
+
+            // QPainter angles: 0 = 3 o'clock, positive span = counter-
+            // clockwise - matches "starts at 0, sweeps counter-clockwise".
+            const int sweepAngle = selectionAnimator->isCircleActive()
+                                       ? selectionAnimator->circleSweepAngle()
+                                       : 360;
+            painter.drawArc(ringRect, 0, sweepAngle * 16);
+        }
     }
 }

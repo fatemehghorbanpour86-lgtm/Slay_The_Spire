@@ -40,6 +40,7 @@ SOURCES += \
     mainpage.cpp \
     mainwindow.cpp \
     map.cpp \
+    mapanimation.cpp \
     mapfloor.cpp \
     mapnode.cpp \
     mappage.cpp \
@@ -108,6 +109,7 @@ HEADERS += \
     mainpage.h \
     mainwindow.h \
     map.h \
+    mapanimation.h \
     mapfloor.h \
     mapnode.h \
     mappage.h \
