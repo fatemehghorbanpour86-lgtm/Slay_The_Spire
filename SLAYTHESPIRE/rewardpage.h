@@ -25,6 +25,7 @@ signals:
     // Emitted once the player presses Continue. Any reward still pending
     // at that point has already been discarded (see RewardSystem::discardRemaining()).
     void continueClicked();
+    void playerStateChanged();
 
 private:
     Player* player;

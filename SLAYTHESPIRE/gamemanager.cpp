@@ -338,10 +338,11 @@ void GameManager::updateLeaderboard(RunStatus status)
 
 void GameManager::showMiniGamePage()
 {
-    if (QRandomGenerator::global()->bounded(100) < 50)
-        showMemoryGamePage();
-    else
-        showTreasureGuessPage();
+    showMemoryGamePage();
+    // if (QRandomGenerator::global()->bounded(100) < 50)
+    //     showMemoryGamePage();
+    // else
+    //     showTreasureGuessPage();
 }
 
 void GameManager::showMemoryGamePage()
@@ -389,6 +390,12 @@ void GameManager::onMemoryGameWon()
     currentEncounterKind = EncounterKind::Normal;
 
     showRewardPage(rewardSystem);
+
+    if (rewardPage && memoryGamePage)
+    {
+        connect(rewardPage, &RewardPage::playerStateChanged,
+                memoryGamePage, &MemoryGameWidget::refreshTopBar);
+    }
 }
 
 void GameManager::onMemoryGameLost()
@@ -683,40 +690,42 @@ void GameManager::onSettingsRequested()
 
 void GameManager::onMapNodeEntered(NodeType type)
 {
-    switch (type)
-    {
-    case NodeType::Monster:
-        startBattle(selectNormalEncounter(), EncounterKind::Normal);
-        break;
+    showMiniGamePage();
 
-    case NodeType::Elite:
-        startBattle(selectEliteEncounter(), EncounterKind::Elite);
-        break;
+    // switch (type)
+    // {
+    // case NodeType::Monster:
+    //     startBattle(selectNormalEncounter(), EncounterKind::Normal);
+    //     break;
 
-    case NodeType::Boss:
-        startBattle(selectBossEncounter(), EncounterKind::Boss);
-        break;
+    // case NodeType::Elite:
+    //     startBattle(selectEliteEncounter(), EncounterKind::Elite);
+    //     break;
 
-    case NodeType::Campfire:
-        showCampfirePage();
-        break;
+    // case NodeType::Boss:
+    //     startBattle(selectBossEncounter(), EncounterKind::Boss);
+    //     break;
 
-    case NodeType::Shop:
-        showShopPage();
-        break;
+    // case NodeType::Campfire:
+    //     showCampfirePage();
+    //     break;
 
-    case NodeType::Event:
-        showEventPage();
-        break;
+    // case NodeType::Shop:
+    //     showShopPage();
+    //     break;
 
-    case NodeType::Treasure:
-        showTreasurePage();
-        break;
+    // case NodeType::Event:
+    //     showEventPage();
+    //     break;
 
-    case NodeType::MiniGame:
-        showMiniGamePage();
-        break;
-    }
+    // case NodeType::Treasure:
+    //     showTreasurePage();
+    //     break;
+
+    // case NodeType::MiniGame:
+    //     showMiniGamePage();
+    //     break;
+    // }
 }
 
 void GameManager::onCombatResult(bool playerWon)

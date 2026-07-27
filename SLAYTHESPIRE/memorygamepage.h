@@ -94,6 +94,7 @@ class MemoryGameWidget : public QWidget
 
 public:
     explicit MemoryGameWidget(Player* player, Map* map, QWidget* parent = nullptr);
+    void refreshTopBar();
 
 signals:
     // ---- Future integration hooks (GameManager). Not connected anywhere yet. ----

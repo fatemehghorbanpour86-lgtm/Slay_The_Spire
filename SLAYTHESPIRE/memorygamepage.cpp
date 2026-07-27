@@ -154,6 +154,12 @@ MemoryGameWidget::MemoryGameWidget(Player* playerPtr, Map* mapPtr, QWidget* pare
         topBar->updateData(player, map);
 }
 
+void MemoryGameWidget::refreshTopBar()
+{
+    if (topBar)
+        topBar->updateData(player, map);
+}
+
 void MemoryGameWidget::setupUI()
 {
     setObjectName("MemoryGamePage");
