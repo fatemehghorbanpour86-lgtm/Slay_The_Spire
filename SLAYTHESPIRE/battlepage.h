@@ -49,6 +49,7 @@ private slots:
     void onBattleLost();
     void onDrawPileClicked();
     void onDiscardPileClicked();
+    void onExhaustPileClicked();
     void updateEnemyIntent(Enemy* enemy);
 
 private:
@@ -92,6 +93,9 @@ private:
     QPushButton* discardPileBtn = nullptr;
     QLabel* drawPileCountLabel = nullptr;
     QLabel* discardPileCountLabel = nullptr;
+    QPushButton* exhaustPileBtn = nullptr;
+    QLabel* exhaustPileCountLabel = nullptr;
+
 
     QWidget* playerWidget = nullptr;
     QPushButton* playerClickOverlay = nullptr;

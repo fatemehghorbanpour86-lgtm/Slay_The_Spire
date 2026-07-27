@@ -52,7 +52,7 @@ void PileViewerDialog::setupUI()
     containerLayout->setContentsMargins(20, 20, 20, 20);
     containerLayout->setSpacing(15);
 
-    // Title label
+     // Title label
     titleLabel = new QLabel(getTitleText(), this);
     titleLabel->setAlignment(Qt::AlignCenter);
     titleLabel->setStyleSheet(
@@ -102,10 +102,10 @@ void PileViewerDialog::setupUI()
 
     containerLayout->addWidget(scrollArea);
 
-    // Leave Button Layout
     QHBoxLayout *buttonsLayout = new QHBoxLayout();
     buttonsLayout->setAlignment(Qt::AlignCenter);
 
+    // Leave Button Layout
     leaveBtn = new QPushButton("Leave", this);
     leaveBtn->setFixedSize(160, 45);
     leaveBtn->setStyleSheet(
@@ -142,6 +142,10 @@ QString PileViewerDialog::getTitleText() const
     {
         return "Discard Pile";
     }
+    case PileType::Exhaust:
+    {
+        return "Exhaust Pile";
+    }
     case PileType::Deck:
     {
         return "Master Deck";
@@ -160,6 +164,10 @@ const QVector<Card*>& PileViewerDialog::getCardsForPile() const
     else if (pileType == PileType::Discard)
     {
         return player->getCombatDeck()->getDiscardPile();
+    }
+    else if (pileType == PileType::Exhaust)
+    {
+        return player->getCombatDeck()->getExhaustPile();
     }
 
     return player->getMasterDeck()->getCards();

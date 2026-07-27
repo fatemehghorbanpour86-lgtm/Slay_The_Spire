@@ -158,8 +158,13 @@ bool CombatManager::playCard(Card* card, Enemy* target)
 
     player->getRelicSystem().onCardPlayed(player, card);
 
-    if (player->getCombatDeck())
-        player->getCombatDeck()->moveFromHandToDiscard(card);
+    if (CombatDeck* deck = player->getCombatDeck())
+    {
+        if (card->doesExhaust())
+            deck->moveFromHandToExhaust(card);
+        else
+            deck->moveFromHandToDiscard(card);
+    }
 
     emit statsUpdated();
 
@@ -197,28 +202,26 @@ void CombatManager::endTurn()
         changeState(CombatState::TurnEnd);
 }
 
-
 void CombatManager::handleTurnEnd()
 {
     CombatDeck* deck = player->getCombatDeck();
 
     if (deck)
     {
-        for (Card* card : deck->getHand())
-        {
+        QVector<Card*> handCards = deck->getHand();
 
+        // 1) End-of-turn effects for cards still in hand
+        for (Card* card : handCards)
+        {
             if (!card)
                 continue;
 
             if (card->getName() == "Regret")
             {
                 int handSize = deck->handSize();
-
                 int damage = handSize;
-
                 player->loseHP(damage);
             }
-
 
             if (card->getName() == "Burn")
             {
@@ -229,18 +232,51 @@ void CombatManager::handleTurnEnd()
                     CombatCalculator::dealDamage(nullptr, player, burn->getDamageAmount());
                 }
             }
-
         }
 
-        deck->discardHand();
+        emit statsUpdated();
+
+        checkWinLossCondition();
+        if (currentState == CombatState::BattleLost || currentState == CombatState::BattleWon)
+            return;
+
+        // 2) Move cards based on Ethereal / Retain / Normal
+        handCards = deck->getHand();
+
+        for (Card* card : std::as_const(handCards))
+        {
+            if (!card)
+                continue;
+
+            if (card->doesEthereal())
+            {
+                deck->moveFromHandToExhaust(card);
+            }
+
+            else if (card->doesRetain())
+            {
+                // Stay in hand
+                continue;
+            }
+
+            else
+            {
+                deck->moveFromHandToDiscard(card);
+            }
+        }
     }
 
     player->getRelicSystem().onTurnEnd(player);
 
     emit statsUpdated();
 
+    checkWinLossCondition();
+    if (currentState == CombatState::BattleLost || currentState == CombatState::BattleWon)
+        return;
+
     changeState(CombatState::EnemyTurn);
 }
+
 
 void CombatManager::handleEnemyTurn()
 {

@@ -658,6 +658,52 @@ void BattlePage::setupBottomBar()
 
     connect(discardPileBtn, &QPushButton::clicked, this, &BattlePage::onDiscardPileClicked);
 
+    // ===== Exhaust Pile button (bottom-right) =====
+    QPixmap exhaustPixmap = QPixmap(":/exhaustPile.png").scaled(
+        115, 138,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation);
+
+    QSize exhaustSize = exhaustPixmap.size();
+
+    exhaustPileBtn = new QPushButton(this);
+    exhaustPileBtn->setFixedSize(exhaustSize);
+    exhaustPileBtn->move(1035, 592);
+    exhaustPileBtn->setCursor(Qt::PointingHandCursor);
+    exhaustPileBtn->setFlat(true);
+    exhaustPileBtn->setStyleSheet(
+        "QPushButton {"
+        "  border: none;"
+        "  background: transparent;"
+        "  padding: 0px;"
+        "}"
+        );
+    exhaustPileBtn->setIcon(QIcon(exhaustPixmap));
+    exhaustPileBtn->setIconSize(exhaustSize);
+
+    auto* exhaustGlow = new QGraphicsDropShadowEffect(exhaustPileBtn);
+    exhaustGlow->setColor(QColor(255, 0, 0, 255));
+    exhaustGlow->setBlurRadius(90);
+    exhaustGlow->setOffset(0, 0);
+    exhaustPileBtn->setGraphicsEffect(exhaustGlow);
+
+
+    exhaustPileBtn->raise();
+
+    exhaustPileCountLabel = new QLabel(exhaustPileBtn);
+    exhaustPileCountLabel->setGeometry(0, 0, exhaustSize.width(), exhaustSize.height());
+    exhaustPileCountLabel->setAlignment(Qt::AlignCenter);
+    exhaustPileCountLabel->setStyleSheet(
+        "color: white;"
+        "font-size: 16px;"
+        "font-weight: bold;"
+        "background: transparent;"
+        );
+    exhaustPileCountLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    exhaustPileCountLabel->raise();
+
+    connect(exhaustPileBtn, &QPushButton::clicked,
+            this, &BattlePage::onExhaustPileClicked);
 
 }
 
@@ -964,6 +1010,12 @@ void BattlePage::updateStats()
 
         if (discardPileCountLabel)
             discardPileCountLabel->setText(QString::number(deck->getDiscardPile().size()));
+
+        if (exhaustPileCountLabel)
+        {
+            exhaustPileCountLabel->setText(QString::number(deck->getExhaustPile().size()));
+        }
+
     }
     else
     {
@@ -972,6 +1024,9 @@ void BattlePage::updateStats()
 
         if (discardPileCountLabel)
             discardPileCountLabel->setText("0");
+
+        if (exhaustPileCountLabel)
+            exhaustPileCountLabel->setText("0");
     }
 
     updateEffectsUI();
@@ -1147,6 +1202,12 @@ void BattlePage::onDrawPileClicked()
     dialog.exec();
 }
 
+void BattlePage::onExhaustPileClicked()
+{
+    PileViewerDialog dialog(player, PileType::Exhaust, this);
+    dialog.exec();
+}
+
 void BattlePage::onDiscardPileClicked()
 {
     PileViewerDialog dialog(player, PileType::Discard, this);
@@ -1228,6 +1289,7 @@ BattlePage::CardTarget BattlePage::getCardTarget(Card* card)
     // Skills and Powers that target player (Defend, Flex, etc.)
     return CardTarget::Player;
 }
+
 void BattlePage::showEnemyHighlights()
 {
     clearHighlights();
@@ -1351,18 +1413,15 @@ void BattlePage::clearSelection()
     selectedProxy = nullptr;
     clearHighlights();
 }
-
 void BattlePage::playCardWithAnimation(Card* card,
                                        QGraphicsProxyWidget* proxy,
                                        Enemy* target)
 {
-
     QGraphicsProxyWidget* proxyToAnim = proxy;
-    Card* cardToPlay = card;   // Card is not QObject here; keep raw + check before use
+    Card* cardToPlay = card;
     Enemy* targetEnemy = target;
 
     clearSelection();
-
 
     // Not enough energy: bounce the card back; do NOT set animatingCard.
     if (!cardToPlay || !proxyToAnim || !isCardPlayableNow(cardToPlay))
@@ -1377,7 +1436,6 @@ void BattlePage::playCardWithAnimation(Card* card,
     animatingCard = true;
 
     // Capture pose, then transfer ownership from handScene -> animScene.
-    // After removeItem, refreshHand must not destroy this proxy (it lives in animScene).
     double currentRot   = proxyToAnim->rotation();
     double currentScale = proxyToAnim->scale();
 
@@ -1400,29 +1458,29 @@ void BattlePage::playCardWithAnimation(Card* card,
     flyToCenter->setEndValue(center);
     flyToCenter->setEasingCurve(QEasingCurve::OutCubic);
 
-
-    // Capture QPointer (by value), not raw QGraphicsProxyWidget*.
     connect(flyToCenter, &QPropertyAnimation::finished, this,
             [this, proxyToAnim, cardToPlay, targetEnemy]()
             {
+                // Step 2: fly to correct pile + shrink.
+                QPushButton* pileBtn = cardToPlay->doesExhaust()
+                                           ? exhaustPileBtn
+                                           : discardPileBtn;
 
-                // Step 2: fly to discard pile + shrink.
-                QPoint discardInAnimView = animView->mapFromGlobal
-                    (
-                      discardPileBtn->mapToGlobal(
-                      QPoint(discardPileBtn->width() / 2,
-                      discardPileBtn->height() / 2))
-                    );
+                QPoint pileInAnimView = animView->mapFromGlobal(
+                    pileBtn->mapToGlobal(
+                        QPoint(pileBtn->width() / 2,
+                               pileBtn->height() / 2)));
 
-                QPointF discardScene = animView->mapToScene(discardInAnimView);
+                QPointF pileScene = animView->mapToScene(pileInAnimView);
 
                 QSizeF proxySize = proxyToAnim->size();
-                discardScene -= QPointF(proxySize.width() / 2.0,proxySize.height() / 2.0);
+                pileScene -= QPointF(proxySize.width() / 2.0,
+                                     proxySize.height() / 2.0);
 
                 auto* flyOut = new QPropertyAnimation(proxyToAnim, "pos");
                 flyOut->setDuration(300);
                 flyOut->setStartValue(proxyToAnim->pos());
-                flyOut->setEndValue(discardScene);
+                flyOut->setEndValue(pileScene);
                 flyOut->setEasingCurve(QEasingCurve::InCubic);
 
                 auto* shrink = new QPropertyAnimation(proxyToAnim, "scale");
@@ -1431,34 +1489,28 @@ void BattlePage::playCardWithAnimation(Card* card,
                 shrink->setEndValue(0.0);
                 shrink->setEasingCurve(QEasingCurve::InCubic);
 
-                // Step 3: remove visual, unlock hand refresh, then apply rules.
                 connect(flyOut, &QPropertyAnimation::finished, this,
                         [this, proxyToAnim, cardToPlay, targetEnemy]()
                         {
-
                             animScene->removeItem(proxyToAnim);
                             animatingCard = false;
 
-
-                            // Attack cards may play a lunge animation first.
                             if (targetEnemy &&
                                 cardToPlay->getType() == CardType::Attack)
                             {
                                 QWidget* enemyW = findWidgetForEnemy(targetEnemy);
 
-
-                                animateAttack(playerWidget,enemyW,[this, cardToPlay, targetEnemy]() {
-                                                combatManager->playCard(cardToPlay, targetEnemy);
-                                        });
-
+                                animateAttack(playerWidget, enemyW,
+                                              [this, cardToPlay, targetEnemy]()
+                                              {
+                                                  combatManager->playCard(cardToPlay, targetEnemy);
+                                              });
                             }
-
                             else
                             {
                                 combatManager->playCard(cardToPlay, targetEnemy);
                             }
-
-                         });
+                        });
 
                 flyOut->start(QAbstractAnimation::DeleteWhenStopped);
                 shrink->start(QAbstractAnimation::DeleteWhenStopped);
@@ -1466,7 +1518,6 @@ void BattlePage::playCardWithAnimation(Card* card,
 
     flyToCenter->start(QAbstractAnimation::DeleteWhenStopped);
 }
-
 
 void BattlePage::showEvent(QShowEvent* e)
 {
@@ -1828,8 +1879,11 @@ void BattlePage::setupTestDeck()
     {
        deck->addCard(new Defend());
     }
-    deck->addCard(new Burn());
-    deck->addCard(new Burn());
+    deck->addCard(new Reaper());
+    deck->addCard(new Reaper());
+
+    deck->addCard(new Impervious());
+    deck->addCard(new Impervious());
 }
 
 

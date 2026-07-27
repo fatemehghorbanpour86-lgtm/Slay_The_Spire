@@ -15,6 +15,7 @@ enum class PileType
 {
     Draw,
     Discard,
+    Exhaust,
     Deck
 };
 
