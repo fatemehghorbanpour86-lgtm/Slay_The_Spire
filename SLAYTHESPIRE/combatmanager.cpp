@@ -8,7 +8,6 @@
 #include "combatdeck.h"
 #include "relicsystem.h"
 #include "statuscards.h"
-#include "eliteenemy.h"
 
 #include <utility>
 #include <QDebug>
@@ -156,13 +155,20 @@ bool CombatManager::playCard(Card* card, Enemy* target)
     {
         for (Enemy* enemy : std::as_const(enemies))
         {
-            GremlinNob* nob = dynamic_cast<GremlinNob*>(enemy);
-            if (nob && nob->isEnraged())
+            if (!enemy)
+                continue;
+
+            if (Effect* enrage = enemy->getEffect(Effect::Type::Enrage))
             {
-                nob->addEffect(Effect::Type::Strength, Effect::Category::Buff, 2);
+                enemy->addEffect(Effect::Type::Strength,
+                                 Effect::Category::Buff,
+                                 enrage->getAmount(),
+                                 0);
             }
         }
     }
+
+
 
     emit cardPlayed(card, target);
     player->getRelicSystem().onCardPlayed(player, card);

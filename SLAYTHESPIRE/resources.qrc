@@ -189,6 +189,7 @@
         <file>DarkEmbraceEff.png</file>
         <file>MetallicizeEff.png</file>
         <file>RageEff.png</file>
+        <file>EnrageEff.png</file>
     </qresource>
     <qresource prefix="/RestSite">
         <file>BackBtn.png</file>

@@ -14,13 +14,10 @@ private:
         SkullBash
     };
 
-    bool enrageActive;
-
 public:
 
     GremlinNob();
 
-    bool isEnraged() const;
 
     void chooseIntent(Player* player) override;
 

@@ -134,6 +134,9 @@ QString Effect::getTooltip() const
 
     case Type::Entangle:
         return QString("You cannot play Attack cards.\n%1 turn(s) remaining.").arg(duration);
+
+    case Type::Enrage:
+        return QString("Whenever you play a Skill card, this creature gains %1 Strength.").arg(amount);
     }
 
     return getName();

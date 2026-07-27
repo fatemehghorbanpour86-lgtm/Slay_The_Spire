@@ -32,7 +32,8 @@ public:
         FeelNoPain,
         Berserk,
         DarkEmbrace,
-        Entangle
+        Entangle,
+        Enrage
     };
 
     Effect(Type type, Category category, int amount, int duration = -1);
