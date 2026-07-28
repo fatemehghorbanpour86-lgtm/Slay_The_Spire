@@ -14,7 +14,7 @@ DeckViewerDialog::DeckViewerDialog(Player* player, QWidget* parent)
     : QDialog(parent), player(player)
 {
     setWindowTitle("Deck");
-    setFixedSize(770, 620);
+    setFixedSize(917, 620);
     setStyleSheet("QDialog { border-image: url(:/card/CardViewer.png); }");
 
     QPixmap pixmap(":/cursor.png");
@@ -65,7 +65,10 @@ void DeckViewerDialog::setupUI()
     gridLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     const int columns = 4;
-    const QSize cardSize(150, 194);
+    const QSize cardSize(162, 214);
+
+    const int paddingX = static_cast<int>(cardSize.width() * 0.15);
+    const int paddingY = static_cast<int>(cardSize.height() * 0.15);
 
     if (player && player->getMasterDeck())
     {
@@ -77,8 +80,12 @@ void DeckViewerDialog::setupUI()
             if (!card)
                 continue;
 
-            QLabel* imageLabel = new QLabel();
-            imageLabel->setFixedSize(cardSize);
+            QWidget* wrapper = new QWidget();
+            wrapper->setFixedSize(cardSize.width() + paddingX, cardSize.height() + paddingY);
+            wrapper->setStyleSheet("background: transparent;");
+
+            QLabel* imageLabel = new QLabel(wrapper);
+            imageLabel->setGeometry(paddingX / 2, paddingY / 2, cardSize.width(), cardSize.height());
             imageLabel->setStyleSheet(
                 QString("border-image: url(%1); background: transparent;")
                     .arg(cardImagePath(card))
@@ -87,7 +94,7 @@ void DeckViewerDialog::setupUI()
             imageLabel->setAttribute(Qt::WA_Hover, true);
             imageLabel->installEventFilter(this);
 
-            gridLayout->addWidget(imageLabel, i / columns, i % columns);
+            gridLayout->addWidget(wrapper, i / columns, i % columns);
         }
     }
 
@@ -104,13 +111,11 @@ bool DeckViewerDialog::eventFilter(QObject* watched, QEvent* event)
 
     if (event->type() == QEvent::Enter)
     {
-        // اولین باری که این لیبل هاور می‌شه، geometry اصلیش رو ذخیره کن
         if (!originalGeometry.contains(label))
             originalGeometry[label] = label->geometry();
 
         const QRect base = originalGeometry[label];
 
-        // اندازه بزرگ‌تر (مثلاً ۱۵٪ بزرگ‌تر)، ولی مرکزش همون مرکز قبلی بمونه
         const qreal scaleFactor = 1.15;
         const int newW = static_cast<int>(base.width() * scaleFactor);
         const int newH = static_cast<int>(base.height() * scaleFactor);
@@ -118,17 +123,18 @@ bool DeckViewerDialog::eventFilter(QObject* watched, QEvent* event)
         QRect grown(0, 0, newW, newH);
         grown.moveCenter(base.center());
 
-        // اگه انیمیشن قبلی هنوز در حال اجراست، متوقفش کن
         if (activeAnimations.contains(label))
         {
-            activeAnimations[label]->stop();
-            activeAnimations[label]->deleteLater();
+            QPropertyAnimation* oldAnim = activeAnimations.take(label);
+            oldAnim->stop();
+            oldAnim->deleteLater();
         }
 
-        label->setMinimumSize(0, 0);
-        label->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+        if (label->parentWidget()) {
+            label->parentWidget()->raise();
+        }
 
-        label->raise(); // بیاد روی لیبل‌های کناری تا موقع بزرگ شدن بریده نشه
+        label->raise();
 
         QPropertyAnimation* anim = new QPropertyAnimation(label, "geometry", label);
         anim->setDuration(100);
@@ -152,8 +158,9 @@ bool DeckViewerDialog::eventFilter(QObject* watched, QEvent* event)
 
         if (activeAnimations.contains(label))
         {
-            activeAnimations[label]->stop();
-            activeAnimations[label]->deleteLater();
+            QPropertyAnimation* oldAnim = activeAnimations.take(label);
+            oldAnim->stop();
+            oldAnim->deleteLater();
         }
 
         QPropertyAnimation* anim = new QPropertyAnimation(label, "geometry", label);
@@ -164,12 +171,6 @@ bool DeckViewerDialog::eventFilter(QObject* watched, QEvent* event)
 
         activeAnimations[label] = anim;
         anim->start(QAbstractAnimation::DeleteWhenStopped);
-
-        connect(anim, &QPropertyAnimation::finished, this, [label, base]() {
-            label->setFixedSize(base.size());
-        });
-
-        activeAnimations[label] = anim;
 
         connect(anim, &QPropertyAnimation::destroyed, this, [this, label]() {
             activeAnimations.remove(label);
