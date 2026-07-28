@@ -50,7 +50,7 @@ void Metallicize::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
         return;
 
     user->addEffect(Effect::Type::Metallicize, Effect::Category::Buff,
-                    blockAmount);
+                    blockAmount , 0);
 }
 void Metallicize::upgrade()
 {
@@ -83,7 +83,7 @@ void DemonForm::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
         return;
 
     user->addEffect(Effect::Type::DemonForm, Effect::Category::Buff,
-                    strengthPerTurn);
+                    strengthPerTurn, 0);
 }
 void DemonForm::upgrade()
 {
@@ -117,7 +117,7 @@ void Brutality::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
         return;
 
     user->addEffect(Effect::Type::Brutality, Effect::Category::Buff,
-                    1);
+                    1,0);
 }
 void Brutality::upgrade()
 {
@@ -150,7 +150,7 @@ void Barricade::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     if (!user)
         return;
 
-    user->addEffect(Effect::Type::Barricade, Effect::Category::Buff, 1);
+    user->addEffect(Effect::Type::Barricade, Effect::Category::Buff, 1 , 0);
 }
 void Barricade::upgrade()
 {
@@ -189,7 +189,7 @@ void FeelNoPain::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
         return;
 
     user->addEffect(Effect::Type::FeelNoPain, Effect::Category::Buff,
-                    blockPerExhaust);
+                    blockPerExhaust , 0);
 }
 void FeelNoPain::upgrade()
 {
@@ -224,7 +224,7 @@ void Berserk::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
 
     user->addEffect(Effect::Type::Vulnerable, Effect::Category::Debuff,
                     vulnerableAmount);
-    user->addEffect(Effect::Type::Berserk, Effect::Category::Buff, 1);
+    user->addEffect(Effect::Type::Berserk, Effect::Category::Buff, 0 , 2);
 }
 void Berserk::upgrade()
 {
@@ -259,7 +259,7 @@ void DarkEmbrace::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     if (!user)
         return;
 
-    user->addEffect(Effect::Type::DarkEmbrace, Effect::Category::Buff, 1);
+    user->addEffect(Effect::Type::DarkEmbrace, Effect::Category::Buff, 1 , 0);
 }
 void DarkEmbrace::upgrade()
 {

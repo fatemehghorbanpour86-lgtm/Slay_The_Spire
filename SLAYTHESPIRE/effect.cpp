@@ -115,7 +115,7 @@ QString Effect::getTooltip() const
         return QString("Block gained is reduced by 25%.\n%1 turn(s) remaining.").arg(duration);
 
     case Type::Rage:
-        return QString("nWhenever you play an Attack, gain %1 Block.").arg(amount);
+        return QString("Whenever you play an Attack, gain %1 Block.").arg(amount);
 
     case Type::DemonForm:
         return QString("At the start of your turn, gain %1 Strength.").arg(amount);

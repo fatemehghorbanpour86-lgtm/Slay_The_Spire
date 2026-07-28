@@ -22,7 +22,7 @@ void JAX::play(Player* user, QVector<Enemy*>& enemies,Enemy* target)
 
     user->loseHP(3);
 
-    user->addEffect( Effect::Type::Strength,Effect::Category::Buff, strengthAmount);
+    user->addEffect( Effect::Type::Strength,Effect::Category::Buff, strengthAmount , 0);
 }
 
 void JAX::upgrade()
