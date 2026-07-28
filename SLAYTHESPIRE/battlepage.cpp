@@ -26,6 +26,7 @@
 #include <QEasingCurve>
 #include <QApplication>
 #include <QToolTip>
+#include <QDir>
 
 
 static QString makeEffectTooltipHtml(const Effect* effect)
@@ -865,7 +866,9 @@ void BattlePage::setupBottomBar()
     connect(discardPileBtn, &QPushButton::clicked, this, &BattlePage::onDiscardPileClicked);
 
     // ===== Exhaust Pile button (bottom-right) =====
-    QPixmap exhaustPixmap = QPixmap(":/exhaustPile.png").scaled(
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString exhaustPath = QDir(baseDir).filePath("assets/image/exhaustPile.png");
+    QPixmap exhaustPixmap = QPixmap(exhaustPath).scaled(
         115, 138,
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation);
@@ -1973,7 +1976,16 @@ QString BattlePage::effectImagePath(const Effect* effect)
     cleanName.remove('\'');
     cleanName.remove('.');
 
-    return QString(":/Effect/%1Eff.png").arg(cleanName);
+    if(cleanName == "Enrage" || cleanName == "Berserk" || cleanName == "Entangle" || cleanName == "Rage")
+    {
+        QString baseDir = QCoreApplication::applicationDirPath();
+        QString EffectPath = QDir(baseDir).filePath("assets/Effect/%1Eff.png");
+        return EffectPath;
+    }
+    else
+    {
+        return QString(":/Effect/%1Eff.png").arg(cleanName);
+    }
 }
 
 void BattlePage::updateEffectsUI()
