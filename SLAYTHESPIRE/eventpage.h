@@ -54,6 +54,9 @@ class TransformCardsDialog : public QDialog
 public:
     explicit TransformCardsDialog(Player* playerPtr, QWidget* parent = nullptr);
 
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
 private:
     void setupUI();
     void populateCards();
@@ -68,6 +71,9 @@ private:
     const int CARD_WIDTH = 162;
     const int CARD_HEIGHT = 214;
     const int COLUMNS = 4;
+
+    QMap<QPushButton*, QRect> originalGeometry;
+    QMap<QPushButton*, QPropertyAnimation*> activeAnimations;
 };
 
 

@@ -13,7 +13,7 @@ EventManager::~EventManager()
 
 Event* EventManager::selectEvent(int act) const
 {
-    return new TheCleric();
+    return new Augmenter();
     // static const int SHARED_COUNT = 2; // Ominous Forge, Golden Shrine
 
     // const int actOnlyCount = (act == 1) ? 2 : 5;

@@ -16,6 +16,7 @@
 #include <QDir>
 #include <QCoreApplication>
 #include <QEvent>
+#include <QGraphicsDropShadowEffect>
 
 
 RemoveCardDialog::RemoveCardDialog(Player* playerPtr, QWidget* parent)
@@ -86,6 +87,12 @@ void RemoveCardDialog::populateCards()
         QString imgPath = DeckViewerDialog::cardImagePath(card);
         cardBtn->setStyleSheet(QString("QPushButton { border-image: url(%1); border: none; background: transparent; }").arg(imgPath));
 
+        connect(cardBtn, &QPushButton::pressed,
+                this, []()
+                {
+                    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+                });
+
         connect(cardBtn, &QPushButton::clicked, this, [this, card]() {
             player->getMasterDeck()->removeCard(card);
             accept();
@@ -136,9 +143,8 @@ bool RemoveCardDialog::eventFilter(QObject* watched, QEvent* event)
             button->parentWidget()->raise();
         }
 
-        button->raise(); // قرار گرفتن روی سایر ویجت‌ها
+        button->raise();
 
-        // ایجاد انیمیشن بزرگ‌شدن
         QPropertyAnimation* anim = new QPropertyAnimation(button, "geometry", button);
         anim->setDuration(100);
         anim->setStartValue(button->geometry());
@@ -166,7 +172,6 @@ bool RemoveCardDialog::eventFilter(QObject* watched, QEvent* event)
             oldAnim->deleteLater();
         }
 
-        // ایجاد انیمیشن بازگشت به اندازه اصلی
         QPropertyAnimation* anim = new QPropertyAnimation(button, "geometry", button);
         anim->setDuration(100);
         anim->setStartValue(button->geometry());
@@ -197,7 +202,7 @@ TransformCardsDialog::TransformCardsDialog(Player* playerPtr, QWidget* parent)
 void TransformCardsDialog::setupUI()
 {
     setWindowTitle("Transform 2 Cards");
-    setFixedSize(850, 620);
+    setFixedSize(917, 620);
     setStyleSheet("QDialog { border-image: url(:/card/CardViewer.png); }"
                   "QScrollArea { border: none; background: transparent; }");
 
@@ -233,6 +238,8 @@ void TransformCardsDialog::populateCards()
     QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
+    const int paddingX = static_cast<int>(CARD_WIDTH * 0.15);
+    const int paddingY = static_cast<int>(CARD_HEIGHT * 0.15);
 
     int row = 0;
     int col = 0;
@@ -242,19 +249,34 @@ void TransformCardsDialog::populateCards()
         if (!card || !card->isRemovable())
             continue;
 
-        QPushButton* cardBtn = new QPushButton();
-        cardBtn->setFixedSize(CARD_WIDTH, CARD_HEIGHT);
-        cardBtn->setIcon(QIcon(DeckViewerDialog::cardImagePath(card)));
-        cardBtn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
+        QWidget* wrapper = new QWidget();
+        wrapper->setFixedSize(CARD_WIDTH + paddingX, CARD_HEIGHT + paddingY);
+        wrapper->setStyleSheet("background: transparent;");
+
+        QPushButton* cardBtn = new QPushButton(wrapper);
+        cardBtn->setGeometry(paddingX / 2, paddingY / 2, CARD_WIDTH, CARD_HEIGHT);
         cardBtn->setFlat(true);
         cardBtn->setCursor(buttonHoverCursor);
-        cardBtn->setStyleSheet("QPushButton { border: none; background: transparent; }");
+
+        QString imgPath = DeckViewerDialog::cardImagePath(card);
+        cardBtn->setStyleSheet(QString("QPushButton { border-image: url(%1); border: none; background: transparent; }").arg(imgPath));
+
+        connect(cardBtn, &QPushButton::pressed,
+                this, []()
+                {
+                    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+                });
 
         connect(cardBtn, &QPushButton::clicked, this, [this, card, cardBtn]() {
             if (firstSelectedCard == nullptr)
             {
                 firstSelectedCard = card;
-                cardBtn->setStyleSheet("QPushButton { border: 4px solid #facc15; border-radius: 12px; background: transparent; }");
+                QGraphicsDropShadowEffect* glow = new QGraphicsDropShadowEffect(cardBtn);
+                glow->setBlurRadius(20);
+                glow->setColor(QColor("#facc15"));
+                glow->setOffset(0, 0);
+
+                cardBtn->setGraphicsEffect(glow);
                 cardBtn->setEnabled(false);
             }
             else
@@ -266,7 +288,10 @@ void TransformCardsDialog::populateCards()
             }
         });
 
-        gridLayout->addWidget(cardBtn, row, col);
+        cardBtn->setAttribute(Qt::WA_Hover, true);
+        cardBtn->installEventFilter(this);
+
+        gridLayout->addWidget(wrapper, row, col);
 
         col++;
         if (col >= COLUMNS)
@@ -275,6 +300,83 @@ void TransformCardsDialog::populateCards()
             row++;
         }
     }
+}
+
+bool TransformCardsDialog::eventFilter(QObject* watched, QEvent* event)
+{
+    QPushButton* button = qobject_cast<QPushButton*>(watched);
+    if (!button)
+        return QDialog::eventFilter(watched, event);
+
+    if (event->type() == QEvent::Enter)
+    {
+        if (!originalGeometry.contains(button))
+            originalGeometry[button] = button->geometry();
+
+        const QRect base = originalGeometry[button];
+
+        const qreal scaleFactor = 1.15;
+        const int newW = static_cast<int>(base.width() * scaleFactor);
+        const int newH = static_cast<int>(base.height() * scaleFactor);
+
+        QRect grown(0, 0, newW, newH);
+        grown.moveCenter(base.center());
+
+        if (activeAnimations.contains(button))
+        {
+            QPropertyAnimation* oldAnim = activeAnimations.take(button);
+            oldAnim->stop();
+            oldAnim->deleteLater();
+        }
+
+        if (button->parentWidget()) {
+            button->parentWidget()->raise();
+        }
+
+        button->raise();
+
+        QPropertyAnimation* anim = new QPropertyAnimation(button, "geometry", button);
+        anim->setDuration(100);
+        anim->setStartValue(button->geometry());
+        anim->setEndValue(grown);
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+
+        activeAnimations[button] = anim;
+        anim->start(QAbstractAnimation::DeleteWhenStopped);
+
+        connect(anim, &QPropertyAnimation::destroyed, this, [this, button]() {
+            activeAnimations.remove(button);
+        });
+    }
+    else if (event->type() == QEvent::Leave)
+    {
+        if (!originalGeometry.contains(button))
+            return QDialog::eventFilter(watched, event);
+
+        const QRect base = originalGeometry[button];
+
+        if (activeAnimations.contains(button))
+        {
+            QPropertyAnimation* oldAnim = activeAnimations.take(button);
+            oldAnim->stop();
+            oldAnim->deleteLater();
+        }
+
+        QPropertyAnimation* anim = new QPropertyAnimation(button, "geometry", button);
+        anim->setDuration(100);
+        anim->setStartValue(button->geometry());
+        anim->setEndValue(base);
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+
+        activeAnimations[button] = anim;
+        anim->start(QAbstractAnimation::DeleteWhenStopped);
+
+        connect(anim, &QPropertyAnimation::destroyed, this, [this, button]() {
+            activeAnimations.remove(button);
+        });
+    }
+
+    return QDialog::eventFilter(watched, event);
 }
 
 
