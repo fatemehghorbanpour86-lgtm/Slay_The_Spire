@@ -116,10 +116,6 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
 
    // setupTestDeck();
 
-    player->addPotion(new FairyInABottle());
-    player->addPotion(new EnergyPotion());
-
-
 
     // -- Main vertical layout --
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
