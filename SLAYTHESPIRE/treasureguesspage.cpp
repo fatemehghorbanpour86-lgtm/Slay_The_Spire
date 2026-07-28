@@ -237,8 +237,6 @@ void TreasureGuessPage::onRewardClicked()
     rewardBtn->hide();
     topBar->updateData(player, map);
 
-    emit rewardClaimed();
-
     showProceedButton();
 }
 

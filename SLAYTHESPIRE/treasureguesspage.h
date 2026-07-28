@@ -22,9 +22,6 @@ public:
     explicit TreasureGuessPage(Player* player, Map* map, QWidget* parent = nullptr);
 
 signals:
-    // Emitted the moment the player successfully claims the reward
-    // (i.e. presses the reward button after picking the correct chest).
-    void rewardClaimed();
 
     // Emitted when the player presses "Proceed" - the round is fully
     // over (win, claimed, or wrong guess). GameManager will eventually
