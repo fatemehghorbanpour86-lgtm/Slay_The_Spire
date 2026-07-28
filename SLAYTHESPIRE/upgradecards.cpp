@@ -4,6 +4,7 @@
 #include "card.h"
 #include "campfire.h"
 #include "deckviewer.h"
+#include "audiomanager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -13,6 +14,8 @@
 #include <QSize>
 #include <QDir>
 #include <QCoreApplication>
+#include <QPropertyAnimation>
+#include <QEvent>
 
 UpgradePreviewDialog::UpgradePreviewDialog(Card* cardPtr, Player* playerPtr, Campfire* campfirePtr, QWidget* parent)
     : QDialog(parent), card(cardPtr), player(playerPtr), campfire(campfirePtr)
@@ -112,6 +115,16 @@ void UpgradePreviewDialog::setupUI()
 
     mainLayout->addLayout(buttonsLayout);
 
+    connect(upgradeBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
+    connect(cancelBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(upgradeBtn, &QPushButton::clicked, this, &UpgradePreviewDialog::onUpgradeClicked);
     connect(cancelBtn, &QPushButton::clicked, this, &QDialog::reject);
 }
@@ -139,7 +152,7 @@ UpgradeCardsDialog::UpgradeCardsDialog(Player* playerPtr, Campfire* campfirePtr,
 void UpgradeCardsDialog::setupUI()
 {
     setWindowTitle("Upgrade Cards");
-    setFixedSize(850, 620);
+    setFixedSize(917, 620);
     setStyleSheet("QDialog { border-image: url(:/card/CardViewer.png); }"
                   "QScrollArea { border: none; background: transparent; }"
                   );
@@ -175,6 +188,9 @@ void UpgradeCardsDialog::populateCards()
     QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
+    const int paddingX = static_cast<int>(CARD_WIDTH * 0.15);
+    const int paddingY = static_cast<int>(CARD_HEIGHT * 0.15);
+
     int row = 0;
     int col = 0;
 
@@ -183,22 +199,34 @@ void UpgradeCardsDialog::populateCards()
         if (!card || card->getIsUpgraded())
             continue;
 
-        QPushButton* cardBtn = new QPushButton();
-        cardBtn->setFixedSize(CARD_WIDTH, CARD_HEIGHT);
-        cardBtn->setIcon(QIcon(DeckViewerDialog::cardImagePath(card)));
-        cardBtn->setStyleSheet("QIcon:pressed { "
-                               "   margin: 5px 5px 5px 5px; "
-                               "}");
-        cardBtn->setIconSize(QSize(CARD_WIDTH, CARD_HEIGHT));
+        QWidget* wrapper = new QWidget();
+        wrapper->setFixedSize(CARD_WIDTH + paddingX, CARD_HEIGHT+ paddingY);
+        wrapper->setStyleSheet("background: transparent;");
+
+        // ۲. ساخت دکمه و قرار دادن آن به عنوان فرزند Wrapper
+        QPushButton* cardBtn = new QPushButton(wrapper);
+        cardBtn->setGeometry(paddingX / 2, paddingY / 2, CARD_WIDTH, CARD_HEIGHT);
         cardBtn->setFlat(true);
         cardBtn->setCursor(buttonHoverCursor);
-        cardBtn->setStyleSheet("QPushButton { border: none; background: transparent; }");
 
+        // ۳. استفاده از border-image تا عکس کارت با بزرگ شدن دکمه به صورت خودکار بزرگ شود
+        QString imgPath = DeckViewerDialog::cardImagePath(card);
+        cardBtn->setStyleSheet(QString("QPushButton { border-image: url(%1); border: none; background: transparent; }").arg(imgPath));
+
+        connect(cardBtn, &QPushButton::pressed,
+                this, []()
+                {
+                    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+                });
         connect(cardBtn, &QPushButton::clicked, this, [this, card]() {
             openPreview(card);
         });
 
-        gridLayout->addWidget(cardBtn, row, col);
+        cardBtn->setAttribute(Qt::WA_Hover, true);
+        cardBtn->installEventFilter(this);
+
+        // ۴. اینجا باید Wrapper را به Layout اضافه کنیم نه خود دکمه را
+        gridLayout->addWidget(wrapper, row, col);
 
         col++;
         if (col >= COLUMNS)
@@ -219,4 +247,89 @@ void UpgradeCardsDialog::openPreview(Card* card)
         accept();
     }
     // On Cancel: stay open, same (still un-upgraded) card list.
+}
+
+bool UpgradeCardsDialog::eventFilter(QObject* watched, QEvent* event)
+{
+    // اگر شیء مورد نظر از نوع QPushButton نباشد، رویداد را رد می‌کنیم
+    QPushButton* button = qobject_cast<QPushButton*>(watched);
+    if (!button)
+        return QDialog::eventFilter(watched, event);
+
+    if (event->type() == QEvent::Enter)
+    {
+        if (!originalGeometry.contains(button))
+            originalGeometry[button] = button->geometry();
+
+        const QRect base = originalGeometry[button];
+
+        const qreal scaleFactor = 1.15;
+        const int newW = static_cast<int>(base.width() * scaleFactor);
+        const int newH = static_cast<int>(base.height() * scaleFactor);
+
+        QRect grown(0, 0, newW, newH);
+        grown.moveCenter(base.center()); // مرکز ثابت می‌ماند
+
+        if (activeAnimations.contains(button))
+        {
+            QPropertyAnimation* oldAnim = activeAnimations.take(button);
+            oldAnim->stop();
+            oldAnim->deleteLater();
+        }
+
+        if (button->parentWidget()) {
+            button->parentWidget()->raise();
+        }
+
+        button->raise(); // قرار گرفتن روی سایر ویجت‌ها
+
+        // ایجاد انیمیشن بزرگ‌شدن
+        QPropertyAnimation* anim = new QPropertyAnimation(button, "geometry", button);
+        anim->setDuration(100);
+        anim->setStartValue(button->geometry());
+        anim->setEndValue(grown);
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+
+        activeAnimations[button] = anim;
+        anim->start(QAbstractAnimation::DeleteWhenStopped);
+
+        connect(anim, &QPropertyAnimation::destroyed, this, [this, button]() {
+            activeAnimations.remove(button);
+        });
+    }
+    else if (event->type() == QEvent::Leave)
+    {
+        if (!originalGeometry.contains(button))
+            return QDialog::eventFilter(watched, event);
+
+        const QRect base = originalGeometry[button];
+
+        if (activeAnimations.contains(button))
+        {
+            QPropertyAnimation* oldAnim = activeAnimations.take(button);
+            oldAnim->stop();
+            oldAnim->deleteLater();
+        }
+
+        // ایجاد انیمیشن بازگشت به اندازه اصلی
+        QPropertyAnimation* anim = new QPropertyAnimation(button, "geometry", button);
+        anim->setDuration(100);
+        anim->setStartValue(button->geometry());
+        anim->setEndValue(base);
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+
+        activeAnimations[button] = anim;
+        anim->start(QAbstractAnimation::DeleteWhenStopped);
+
+        // پس از پایان، اندازه را ثابت می‌کنیم تا در layout دچار تغییر نشود
+        // connect(anim, &QPropertyAnimation::finished, this, [button, base]() {
+        //     button->setFixedSize(base.size());
+        // });
+
+        connect(anim, &QPropertyAnimation::destroyed, this, [this, button]() {
+            activeAnimations.remove(button);
+        });
+    }
+
+    return QDialog::eventFilter(watched, event);
 }

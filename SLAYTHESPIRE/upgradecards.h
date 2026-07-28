@@ -9,6 +9,7 @@
 class Player;
 class Campfire;
 class Card;
+class QPropertyAnimation;
 
 class UpgradePreviewDialog : public QDialog
 {
@@ -36,6 +37,9 @@ class UpgradeCardsDialog : public QDialog
 public:
     explicit UpgradeCardsDialog(Player* player, Campfire* campfire, QWidget* parent = nullptr);
 
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
 private:
     Player* player;
     Campfire* campfire;
@@ -51,6 +55,11 @@ private:
     void setupUI();
     void populateCards();
     void openPreview(Card* card);
+
+
+    QMap<QWidget*, QRect> originalGeometry;
+    QMap<QWidget*, QPropertyAnimation*> activeAnimations;
+
 };
 
 #endif // UPGRADECARDS_H
