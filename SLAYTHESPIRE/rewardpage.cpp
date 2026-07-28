@@ -172,9 +172,6 @@ QPushButton* RewardPage::createRewardButton(Reward* reward)
             if (relic)
             {
                 btn->setToolTip(relic->getDescription());
-                // btn->setStyleSheet(btn->styleSheet() +
-                //                    QString("QPushButton { border-image: url(%1); }")
-                //                        .arg(RelicViewerDialog::relicIconPath(relic)));
             }
 
             connect(btn, &QPushButton::clicked, this, [this, reward, btn]() {
@@ -286,9 +283,6 @@ void RewardPage::onBossRelicClicked(Reward* reward, QPushButton* button)
 
 void RewardPage::onContinueClicked()
 {
-    // Anything the player never clicked on is discarded here, per the
-    // design doc: "فقط Reward هایی که بازیکن روی آن‌ها کلیک کرده به
-    // دارایی‌های Player اضافه شوند".
     if (rewardSystem)
         rewardSystem->discardRemaining();
 
