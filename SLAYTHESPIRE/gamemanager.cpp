@@ -689,8 +689,7 @@ void GameManager::onSettingsRequested()
 
 void GameManager::onMapNodeEntered(NodeType type)
 {
-
-    showCampfirePage();
+    showEventPage();
     // switch (type)
     // {
     // case NodeType::Monster:

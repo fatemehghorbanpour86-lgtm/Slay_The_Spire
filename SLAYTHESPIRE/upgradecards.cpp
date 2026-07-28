@@ -203,13 +203,11 @@ void UpgradeCardsDialog::populateCards()
         wrapper->setFixedSize(CARD_WIDTH + paddingX, CARD_HEIGHT+ paddingY);
         wrapper->setStyleSheet("background: transparent;");
 
-        // ۲. ساخت دکمه و قرار دادن آن به عنوان فرزند Wrapper
         QPushButton* cardBtn = new QPushButton(wrapper);
         cardBtn->setGeometry(paddingX / 2, paddingY / 2, CARD_WIDTH, CARD_HEIGHT);
         cardBtn->setFlat(true);
         cardBtn->setCursor(buttonHoverCursor);
 
-        // ۳. استفاده از border-image تا عکس کارت با بزرگ شدن دکمه به صورت خودکار بزرگ شود
         QString imgPath = DeckViewerDialog::cardImagePath(card);
         cardBtn->setStyleSheet(QString("QPushButton { border-image: url(%1); border: none; background: transparent; }").arg(imgPath));
 
@@ -225,7 +223,6 @@ void UpgradeCardsDialog::populateCards()
         cardBtn->setAttribute(Qt::WA_Hover, true);
         cardBtn->installEventFilter(this);
 
-        // ۴. اینجا باید Wrapper را به Layout اضافه کنیم نه خود دکمه را
         gridLayout->addWidget(wrapper, row, col);
 
         col++;
@@ -251,7 +248,6 @@ void UpgradeCardsDialog::openPreview(Card* card)
 
 bool UpgradeCardsDialog::eventFilter(QObject* watched, QEvent* event)
 {
-    // اگر شیء مورد نظر از نوع QPushButton نباشد، رویداد را رد می‌کنیم
     QPushButton* button = qobject_cast<QPushButton*>(watched);
     if (!button)
         return QDialog::eventFilter(watched, event);
@@ -268,7 +264,7 @@ bool UpgradeCardsDialog::eventFilter(QObject* watched, QEvent* event)
         const int newH = static_cast<int>(base.height() * scaleFactor);
 
         QRect grown(0, 0, newW, newH);
-        grown.moveCenter(base.center()); // مرکز ثابت می‌ماند
+        grown.moveCenter(base.center());
 
         if (activeAnimations.contains(button))
         {
@@ -281,9 +277,8 @@ bool UpgradeCardsDialog::eventFilter(QObject* watched, QEvent* event)
             button->parentWidget()->raise();
         }
 
-        button->raise(); // قرار گرفتن روی سایر ویجت‌ها
+        button->raise();
 
-        // ایجاد انیمیشن بزرگ‌شدن
         QPropertyAnimation* anim = new QPropertyAnimation(button, "geometry", button);
         anim->setDuration(100);
         anim->setStartValue(button->geometry());
@@ -311,7 +306,6 @@ bool UpgradeCardsDialog::eventFilter(QObject* watched, QEvent* event)
             oldAnim->deleteLater();
         }
 
-        // ایجاد انیمیشن بازگشت به اندازه اصلی
         QPropertyAnimation* anim = new QPropertyAnimation(button, "geometry", button);
         anim->setDuration(100);
         anim->setStartValue(button->geometry());
@@ -320,11 +314,6 @@ bool UpgradeCardsDialog::eventFilter(QObject* watched, QEvent* event)
 
         activeAnimations[button] = anim;
         anim->start(QAbstractAnimation::DeleteWhenStopped);
-
-        // پس از پایان، اندازه را ثابت می‌کنیم تا در layout دچار تغییر نشود
-        // connect(anim, &QPropertyAnimation::finished, this, [button, base]() {
-        //     button->setFixedSize(base.size());
-        // });
 
         connect(anim, &QPropertyAnimation::destroyed, this, [this, button]() {
             activeAnimations.remove(button);

@@ -13,22 +13,23 @@ EventManager::~EventManager()
 
 Event* EventManager::selectEvent(int act) const
 {
-    static const int SHARED_COUNT = 2; // Ominous Forge, Golden Shrine
+    return new TheCleric();
+    // static const int SHARED_COUNT = 2; // Ominous Forge, Golden Shrine
 
-    const int actOnlyCount = (act == 1) ? 2 : 5;
+    // const int actOnlyCount = (act == 1) ? 2 : 5;
 
-    const int total = SHARED_COUNT + actOnlyCount;
-    const int roll = QRandomGenerator::global()->bounded(total);
+    // const int total = SHARED_COUNT + actOnlyCount;
+    // const int roll = QRandomGenerator::global()->bounded(total);
 
-    if (roll < SHARED_COUNT)
-        return createSharedEvent(roll);
+    // if (roll < SHARED_COUNT)
+    //     return createSharedEvent(roll);
 
-    const int actIndex = roll - SHARED_COUNT;
+    // const int actIndex = roll - SHARED_COUNT;
 
-    if (act == 1)
-        return createAct1OnlyEvent(actIndex);
+    // if (act == 1)
+    //     return createAct1OnlyEvent(actIndex);
 
-    return createAct2OnlyEvent(actIndex);
+    // return createAct2OnlyEvent(actIndex);
 }
 
 Event* EventManager::createSharedEvent(int index)
