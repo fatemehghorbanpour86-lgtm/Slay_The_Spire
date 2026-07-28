@@ -210,12 +210,13 @@ bool CombatManager::usePotion(Potion* potion, Enemy* target)
 
     potion->use(player, target);
 
+    player->removePotion(potion);
+
     emit statsUpdated();
     checkWinLossCondition();
 
     return true;
 }
-
 
 void CombatManager::endTurn()
 {
@@ -367,13 +368,33 @@ void CombatManager::handleEnemyTurn()
 
 void CombatManager::checkWinLossCondition()
 {
-    if (!player)
-    {
-        return;
-    }
+    if (!player) return;
 
     if (player->getCurrentHealth() <= 0)
     {
+        Potion* fairy = nullptr;
+
+        for (Potion* p : player->getPotions())
+        {
+            if (p && p->getName() == "Fairy in a Bottle")
+            {
+                fairy = p;
+                break;
+            }
+        }
+
+        if (fairy)
+        {
+            int healAmount = static_cast<int>(player->getMaxHealth() * 0.3);
+            player->heal(healAmount);
+
+            player->removePotion(fairy);
+
+            emit statsUpdated();
+
+            return;
+        }
+
         emit combatEnded(false);
         changeState(CombatState::BattleLost);
         return;

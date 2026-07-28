@@ -8,6 +8,7 @@
 #include "deckviewer.h"
 
 #include "outlinedlabel.h"
+#include "potion.h"
 #include "qtimer.h"
 
 #include "pileviewerdialog.h"
@@ -73,8 +74,33 @@ static void applyBattleTooltipStyleOnce()
     )");
 }
 
+static QString makePotionTooltipHtml(const Potion* potion)
+{
+    if (!potion) return {};
 
+    const QString title = potion->getName().toHtmlEscaped();
+    QString desc = potion->getDescription().toHtmlEscaped();
+    desc.replace("\n", "<br>");
 
+    return QString(R"(
+        <div style="
+            min-width: 170px;
+            max-width: 240px;
+            color: #f3e7c2;
+            font-family: 'Segoe UI';
+            font-size: 12px;
+            line-height: 1.35;
+        ">
+            <div style="
+                color: #f0c674;
+                font-size: 13px;
+                font-weight: 700;
+                margin-bottom: 4px;
+            ">%1</div>
+            <div>%2</div>
+        </div>
+    )").arg(title, desc);
+}
 
 
 
@@ -88,6 +114,10 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
         this->enemies.append (new Cultist);
 
    // setupTestDeck();
+
+    player->addPotion(new FairyInABottle());
+    player->addPotion(new EnergyPotion());
+
 
 
     // -- Main vertical layout --
@@ -242,14 +272,59 @@ void BattlePage::setupTopBar()
     leftGroup->addWidget(goldValueLabel);
     leftGroup->addSpacing(15);
 
-    // Potion slots (placeholders, 3 empty by default)
-    for (int i = 0; i < 3; i++) {
-        QLabel *potionSlot = new QLabel(topBar);
-        potionSlot->setFixedSize(24, 24);
-        potionSlot->setStyleSheet("background: rgba(255,255,255,20); border: 1px solid #666; border-radius: 4px;");
-        // later: potionSlot->setPixmap(QPixmap(":/icons/potion_X.png")...);
-        leftGroup->addWidget(potionSlot);
+    // Potion slots
+    potionButtons.clear();
+    for (int i = 0; i < 3; i++)
+    {
+        QPushButton *potionBtn = new QPushButton(topBar);
+        potionBtn->setFixedSize(30, 30);
+        potionBtn->setCursor(Qt::PointingHandCursor);
+        potionBtn->setStyleSheet(
+            "QPushButton {"
+            "background: rgba(255,255,255,20); border: 1px solid #666; border-radius: 4px;"
+            "}"
+            "QPushButton:hover:!disabled { border: 1px solid #fff; }"
+            );
+
+        connect(potionBtn, &QPushButton::clicked, this, [this, i]() {
+            if (waitingForPotionTarget)
+            {
+                clearPotionSelection();
+                return;
+            }
+
+            const auto& potions = player->getPotions();
+            if (i >= potions.size() || !potions[i])
+                return;
+
+            Potion* potion = potions[i];
+
+            if (isPotionTargeted(potion))
+            {
+
+                if (pendingCard)
+                    clearSelection();
+
+                pendingPotion = potion;
+                waitingForPotionTarget = true;
+
+                showEnemyPotionHighlights();
+            }
+
+            else
+            {
+                Enemy* target = nullptr;
+                if (combatManager->usePotion(potion, target))
+                {
+                    updateStats();
+                }
+            }
+        });
+
+
+        leftGroup->addWidget(potionBtn);
         leftGroup->addSpacing(4);
+        potionButtons.append(potionBtn);
     }
 
     // ===== CENTER: floor icon + count =====
@@ -578,11 +653,28 @@ void BattlePage::setupClickOverlays()
 
         ui.clickOverlay = overlay;
 
-        connect(overlay, &QPushButton::clicked, this, [this, enemy = ui.enemy]()
+        connect(overlay, &QPushButton::clicked, this,
+                [this, enemy = ui.enemy]()
                 {
-                    if (pendingCard && enemy && !enemy->isDead())
+                    if (!enemy || enemy->isDead())
+                        return;
+
+                    if (waitingForPotionTarget && pendingPotion)
+                    {
+                        if (combatManager->usePotion(pendingPotion, enemy))
+                            updateStats();
+
+                        clearPotionSelection();
+                        return;
+                    }
+
+                    if (pendingCard)
+                    {
                         playCardWithAnimation(pendingCard, selectedProxy, enemy);
+                        return;
+                    }
                 });
+
     }
 
     playerClickOverlay = new QPushButton(this);
@@ -839,10 +931,22 @@ bool BattlePage::eventFilter(QObject* obj, QEvent* event)
             }
         }
 
-        if (target && pendingCard && !target->isDead())
+        if (target && !target->isDead())
         {
-            playCardWithAnimation(pendingCard, selectedProxy, target);
-            return true;
+            if (waitingForPotionTarget && pendingPotion)
+            {
+                if (combatManager->usePotion(pendingPotion, target))
+                    updateStats();
+
+                clearPotionSelection();
+                return true;
+            }
+
+            if (pendingCard)
+            {
+                playCardWithAnimation(pendingCard, selectedProxy, target);
+                return true;
+            }
         }
 
         return QWidget::eventFilter(obj, event);
@@ -1188,6 +1292,8 @@ void BattlePage::updateStats()
     }
 
     updateEffectsUI();
+
+    updatePotionUI();
 }
 
 void BattlePage::refreshHand()
@@ -2085,6 +2191,83 @@ void BattlePage::clearDamagePreview(Enemy* enemy)
 {
     updateDamagePreview(enemy, 0);
 }
+
+void BattlePage::updatePotionUI()
+{
+    auto potions = player->getPotions();
+
+    for (int i = 0; i < 3; i++)
+    {
+        QPushButton* btn = potionButtons.at(i);
+
+        if (i < potions.size())
+        {
+            Potion* potion = potions.at(i);
+
+            btn->setIcon(QIcon(getPotionImagePath(potion->getName())));
+            btn->setIconSize(QSize(28, 28));
+            btn->setToolTip(makePotionTooltipHtml(potion));
+        }
+        else
+        {
+            btn->setIcon(QIcon(getPotionImagePath("Potion Empty")));
+            btn->setToolTip(QString());
+        }
+    }
+}
+
+
+QString BattlePage::getPotionImagePath(const QString &potionName)
+{
+    if (potionName == "Block Potion")
+    {
+        return ":/Potion/block_potion.png";
+    }
+    else if (potionName == "Energy Potion")
+    {
+        return ":/Potion/energy_potion.png";
+    }
+    else if (potionName == "Fairy in a Bottle")
+    {
+        return ":/Potion/fairy_in_a_bottle.png";
+    }
+    else if (potionName == "Fire Potion")
+    {
+        return ":/Potion/fire_potion.png";
+    }
+    else if (potionName == "Swift Potion")
+    {
+        return ":/Potion/swift_potion.png";
+    }
+    else if (potionName == "Potion Empty")
+    {
+        return ":/Potion/potionEmpty.png";
+    }
+
+    return ":/Potion/potionEmpty.png";
+}
+
+void BattlePage::showEnemyPotionHighlights()
+{
+   showEnemyHighlights();
+}
+
+void BattlePage::clearPotionSelection()
+{
+    pendingPotion = nullptr;
+    waitingForPotionTarget = false;
+
+    clearHighlights();
+}
+
+bool BattlePage::isPotionTargeted(Potion* potion) const
+{
+    if (!potion)
+        return false;
+
+    return potion->getName() == "Fire Potion";
+}
+
 
 /*
 

@@ -123,6 +123,9 @@ private:
     QWidget* playerEffectsWidget = nullptr;
     QHBoxLayout* playerEffectsLayout = nullptr;
 
+    QList<QPushButton*> potionButtons;
+
+
     enum class CardTarget
     {
         Enemy,
@@ -158,6 +161,7 @@ private:
     QString enemyImagePath(Enemy* enemy);
     QString effectImagePath(const Effect* effect);
     QString getIntentText(Enemy* enemy);
+    QString getPotionImagePath(const QString &potionName);
 
     QWidget* findWidgetForEnemy(Enemy* enemy)
     {
@@ -195,6 +199,15 @@ private:
 
     void updateDamagePreview(Enemy* enemy, int damage);
     void clearDamagePreview(Enemy* enemy);
+
+    Potion* pendingPotion = nullptr;
+    bool waitingForPotionTarget = false;
+
+    void updatePotionUI();
+    bool isPotionTargeted(Potion* potion) const;
+    void showEnemyPotionHighlights();
+    void clearPotionSelection();
+
 
 
 

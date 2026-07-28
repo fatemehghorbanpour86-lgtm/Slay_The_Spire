@@ -84,13 +84,6 @@ bool Player::useEnergy(int amount)
 void Player::resetEnergy()
 {
     currentEnergy = maxEnergy;
-
-    // TODO (Anahita)
-    // Apply card effects that change Energy.
-
-
-    // TODO (Fateme)
-    // Apply Relic effects that grant Energy.
 }
 
 
@@ -158,13 +151,26 @@ void Player::increaseMaxEnergy(int amount)
     maxEnergy += amount;
 }
 
-void Player::addPotion(Potion* potion)
+bool Player::hasPotionSpace() const
+{
+    return potions.size() < MAX_POTION_SLOTS;
+}
+
+bool Player::addPotion(Potion* potion)
 {
     if (potion == nullptr)
-        return;
+        return false;
+
+    if (!hasPotionSpace())
+    {
+        delete potion;
+        return false;
+    }
 
     potions.append(potion);
+    return true;
 }
+
 
 bool Player::removePotion(Potion* potion)
 {
