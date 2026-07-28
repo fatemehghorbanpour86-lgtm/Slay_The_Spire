@@ -64,6 +64,10 @@ private:
         QPointer<QPushButton> clickOverlay;
         QPointer<QLabel> damageIconLabel;
         QPointer<QLabel> damageValueLabel;
+        QWidget* blockWidget = nullptr;
+        QLabel* blockIconLabel = nullptr;
+        QLabel* blockValueLabel = nullptr;
+
 
     };
 

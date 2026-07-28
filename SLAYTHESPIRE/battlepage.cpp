@@ -451,7 +451,7 @@ void BattlePage::setupBattleField()
         ui.hpBar = new QProgressBar(ui.widget);
         ui.hpBar->setRange(0, enemy->getMaxHealth());
         ui.hpBar->setValue(enemy->getCurrentHealth());
-        ui.hpBar->setFixedSize(150, 16);
+        ui.hpBar->setFixedSize(100, 16);
         ui.hpBar->setTextVisible(true);
         ui.hpBar->setFormat("%v / %m");
         ui.hpBar->setStyleSheet(
@@ -497,15 +497,35 @@ void BattlePage::setupBattleField()
             );
         ui.damageValueLabel->hide();
 
+        //Defend (Block)
+        ui.blockWidget = new QWidget(ui.widget);
+        ui.blockWidget->setFixedSize(36, 36);
+        ui.blockWidget->setStyleSheet("background: transparent;");
+
+        ui.blockIconLabel = new QLabel(ui.blockWidget);
+        ui.blockIconLabel->setGeometry(0, 0, 36, 36);
+        ui.blockIconLabel->setPixmap(QPixmap(":/defendIcon.png").scaled(
+            36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui.blockIconLabel->setStyleSheet("background: transparent;");
+
+        ui.blockValueLabel = new QLabel(ui.blockWidget);
+        ui.blockValueLabel->setGeometry(0, 0, 36, 36);
+        ui.blockValueLabel->setAlignment(Qt::AlignCenter);
+        ui.blockValueLabel->setStyleSheet("color: black; font-size: 13px; font-weight: bold; background: transparent;");
+
 
         // --- HP & Damage Container ---
         QWidget* hpDamageContainer = new QWidget(ui.widget);
         hpDamageContainer->setStyleSheet("background: transparent;");
         QHBoxLayout* hpDamageLayout = new QHBoxLayout(hpDamageContainer);
         hpDamageLayout->setContentsMargins(0, 0, 0, 0);
-        hpDamageLayout->setSpacing(8);
+        hpDamageLayout->setSpacing(2);
+
+        hpDamageLayout->addWidget(ui.blockWidget);
         hpDamageLayout->addWidget(ui.hpBar);
         hpDamageLayout->addWidget(damagePreviewWidget);
+
+
 
         // Enemy effects
         ui.effectsWidget = new QWidget(ui.widget);
@@ -515,14 +535,10 @@ void BattlePage::setupBattleField()
         ui.effectsLayout->setSpacing(4);
         ui.effectsLayout->setAlignment(Qt::AlignCenter);
 
-        // Add to main vertical layout
         enemyInnerLayout->addWidget(ui.intentLabel, 0, Qt::AlignHCenter);
         enemyInnerLayout->addStretch();
         enemyInnerLayout->addWidget(enemyImg, 0, Qt::AlignHCenter | Qt::AlignBottom);
-
-        // Add the container that has both HP and Damage
         enemyInnerLayout->addWidget(hpDamageContainer, 0, Qt::AlignHCenter);
-
         enemyInnerLayout->addWidget(ui.effectsWidget, 0, Qt::AlignHCenter);
 
         enemyUIs.append(ui);
@@ -1075,14 +1091,58 @@ void BattlePage::updateStats()
                 ui.clickOverlay->hide();
             }
 
+            if (ui.blockWidget)
+                ui.blockWidget->hide();
+
             continue;
         }
+
+        int block = ui.enemy->getBlock();
+        bool hasBlock = block > 0;
 
 
         if (ui.hpBar)
         {
             ui.hpBar->setMaximum(ui.enemy->getMaxHealth());
             ui.hpBar->setValue(ui.enemy->getCurrentHealth());
+
+
+            if (hasBlock)
+            {
+                if (!ui.hpBar->graphicsEffect())
+                {
+                    auto* glow = new QGraphicsDropShadowEffect(ui.hpBar);
+                    glow->setColor(QColor(96, 165, 250, 255));
+                    glow->setBlurRadius(20);
+                    glow->setOffset(0, 0);
+                    ui.hpBar->setGraphicsEffect(glow);
+                }
+
+                ui.hpBar->setStyleSheet(
+                    "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
+                    "border-radius: 6px; color: white; font-size: 11px; text-align: center; }"
+                    "QProgressBar::chunk { background: #60a5fa; border-radius: 4px; }"
+                    );
+            }
+            else
+            {
+                ui.hpBar->setGraphicsEffect(nullptr);
+                ui.hpBar->setStyleSheet(
+                    "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
+                    "border-radius: 6px; color: white; font-size: 11px; text-align: center; }"
+                    "QProgressBar::chunk { background: #e63946; border-radius: 4px; }"
+                    );
+            }
+        }
+
+
+        if (ui.blockWidget)
+        {
+            ui.blockWidget->setVisible(hasBlock);
+            if (hasBlock && ui.blockValueLabel)
+            {
+                ui.blockValueLabel->setText(QString::number(block));
+            }
         }
 
         if (ui.intentLabel)
