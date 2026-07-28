@@ -2,7 +2,7 @@
 #include "campfirepage.h" // TopBarWidget
 #include "relicviewer.h"
 #include "deckviewer.h"
-
+#include "audiomanager.h"
 #include <QIcon>
 #include <QPixmap>
 #include <QTimer>
@@ -65,6 +65,11 @@ void MemoryRewardDialog::setupUI()
         "font-weight: bold; border: 1px solid rgba(255,255,255,40); }"
         "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
         );
+    connect(rewardBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
 
     connect(rewardBtn, &QPushButton::clicked, this, &MemoryRewardDialog::onRewardClicked);
 
@@ -132,6 +137,11 @@ void MemoryLoseDialog::setupUI()
         "font-weight: bold; border: 1px solid rgba(255,255,255,40); }"
         "QPushButton:pressed { margin: 5px 5px 5px 5px; }"
         );
+    connect(continueBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
 
     // Only closes the dialog for now - GameManager will decide what
     // happens next (e.g. return to Map) once this Room is wired in.
