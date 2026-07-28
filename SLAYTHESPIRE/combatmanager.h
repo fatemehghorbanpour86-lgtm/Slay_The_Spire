@@ -1,6 +1,8 @@
 #ifndef COMBATMANAGER_H
 #define COMBATMANAGER_H
 
+#include "character.h"
+#include "pileviewerdialog.h"
 #include <QObject>
 #include <QVector>
 
@@ -39,6 +41,9 @@ public:
     CombatState getCurrentState() const;
     const QVector<Enemy*>& getEnemies() const;
 
+    CombatCalculator* getCalculator() const { return calculator; }
+
+
 signals:
     void combatStateChanged(CombatState state);
     void statsUpdated();
@@ -54,6 +59,8 @@ signals:
     void battleLost();
     void combatEnded(bool playerWon);
 
+    void requestPileSelection(PileType pileType);
+
 private:
     void changeState(CombatState newState);
 
@@ -63,9 +70,24 @@ private:
     void handleEnemyTurn();
 
     void checkWinLossCondition();
-
     void connectEnemy(Enemy* enemy);
 
+    // Exhume flow
+    void beginExhumeSelection(Card* sourceCard);
+    void finalizeExhumeResolution();
+    void finalizeCardAfterUse(Card* card);
+
+    void decreaseTimedEffects(Character* character);
+    void triggerOnCardExhaust(Card* card);
+    void moveCardFromHandToExhaust(Card* card);
+    bool isBattleFinished() const;
+
+    void cleanupAfterCombat();
+    bool combatCleanedUp = false;
+
+
+
+private:
     CombatState currentState;
     Player* player;
     QVector<Enemy*> enemies;
@@ -73,9 +95,15 @@ private:
     CombatCalculator* calculator;
     int turnCount;
 
+    Card* pendingExhumeCard = nullptr;
+    bool waitingForExhumeSelection = false;
+
 private slots:
     void onEnemyDied(Enemy* enemy);
 
+public slots:
+    void handleExhumeSelection(Card* selectedCard);
+    void cancelExhumeSelection();
 };
 
 #endif // COMBATMANAGER_H

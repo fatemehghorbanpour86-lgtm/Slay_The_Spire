@@ -63,6 +63,9 @@ QString Effect::getName() const
 
     case Type::Entangle:
         return "Entangle";
+
+    case Type::Enrage:
+        return "Enrage";
     }
 
     return "";
@@ -88,10 +91,65 @@ int Effect::getDuration() const
     return duration;
 }
 
+
+QString Effect::getTooltip() const
+{
+    switch (type)
+    {
+    case Type::Strength:
+        return QString("Attack damage is increased by %1.").arg(amount);
+
+    case Type::Dexterity:
+        return QString("Block gained from cards is increased by %1.").arg(amount);
+
+    case Type::Metallicize:
+        return QString("At the end of your turn, gain %1 Block.").arg(amount);
+
+    case Type::Weak:
+        return QString("Attacks deal 25% less damage.\n%1 turn(s) remaining.").arg(duration);
+
+    case Type::Vulnerable:
+        return QString("Attacks against this target deal 50% more damage.\n%1 turn(s) remaining.").arg(duration);
+
+    case Type::Frail:
+        return QString("Block gained is reduced by 25%.\n%1 turn(s) remaining.").arg(duration);
+
+    case Type::Rage:
+        return QString("Whenever you play an Attack, gain %1 Block.").arg(amount);
+
+    case Type::DemonForm:
+        return QString("At the start of your turn, gain %1 Strength.").arg(amount);
+
+    case Type::Brutality:
+        return QString("At the start of your turn, lose %1 HP and draw 1 card.").arg(amount);
+
+    case Type::Barricade:
+        return QString("Block is not removed at the start of your turn.");
+
+    case Type::FeelNoPain:
+        return QString("Whenever you Exhaust a card, gain %1 Block.").arg(amount);
+
+    case Type::Berserk:
+        return QString("At the start of your turn, gain %1 Energy.").arg(amount);
+
+    case Type::DarkEmbrace:
+        return QString("Whenever you Exhaust a card, draw 1 card.");
+
+    case Type::Entangle:
+        return QString("You cannot play Attack cards.\n%1 turn(s) remaining.").arg(duration);
+
+    case Type::Enrage:
+        return QString("Whenever you play a Skill card, this creature gains %1 Strength.").arg(amount);
+    }
+
+    return getName();
+}
+
 bool Effect::isExpired() const
 {
-    return duration == 0;
+    return usesDuration() && duration == 0;
 }
+
 
 bool Effect::isBuff() const
 {
@@ -105,19 +163,50 @@ bool Effect::isDebuff() const
 
 void Effect::stack(int value)
 {
-    if(type == Type::Entangle)
+    switch (type)
     {
+     case Type::Entangle:
         duration = 1;
-    }
-    else if(type == Type::Weak || type == Type::Vulnerable || type == Type::Frail)
-    {
+        break;
+
+     case Type::Weak:
+     case Type::Vulnerable:
+     case Type::Frail:
         duration += value;
-    }
-    else
-    {
+        break;
+
+     default:
         amount += value;
+        break;
     }
 }
+
+
+int Effect::getDisplayValue() const
+{
+    switch (type)
+    {
+    case Type::Weak:
+    case Type::Vulnerable:
+    case Type::Frail:
+    case Type::Entangle:
+        return duration;
+
+    case Type::Barricade:
+    case Type::DarkEmbrace:
+        return 0;
+
+    default:
+        return amount;
+    }
+}
+
+bool Effect::shouldShowNumber() const
+{
+    return getDisplayValue() != 0;
+}
+
+
 
 void Effect::decreaseDuration()
 {
@@ -129,40 +218,10 @@ void Effect::decreaseDuration()
 
 void Effect::onTurnStart(Character *target)
 {
-    Q_UNUSED(target)
+    if (!target) return;
 
     switch(type)
     {
-    case Type::Strength:
-        break;
-
-    case Type::Dexterity:
-        break;
-
-    case Type::Weak:
-        break;
-
-    case Type::Vulnerable:
-        break;
-
-    case Type::Frail:
-        break;
-
-    case Type::Metallicize:
-        break;
-
-    case Type::Rage:
-        break;
-
-    case Type::Barricade:
-        break;
-
-    case Type::FeelNoPain:
-        break;
-
-    case Type::DarkEmbrace:
-        break;
-
     case Type::DemonForm:
         target->addEffect(Effect::Type::Strength, Effect::Category::Buff, amount);
         break;
@@ -171,34 +230,53 @@ void Effect::onTurnStart(Character *target)
         if (Player* p = dynamic_cast<Player*>(target))
         {
             p->loseHP(amount);
-            //p->drawCards(1);
+            p->drawCards(1);
         }
         break;
 
     case Type::Berserk:
         if (Player* p = dynamic_cast<Player*>(target))
+        {
             p->gainEnergy(amount);
+        }
         break;
 
-    case Type::Entangle:
+    default:
         break;
     }
-
 }
 
 void Effect::onTurnEnd(Character *target)
 {
+    if (!target) return;
+
     switch(type)
     {
-
     case Type::Metallicize:
         target->addBlock(CombatCalculator::calculateBlock(target, amount));
         break;
 
     default:
         break;
-
     }
+}
 
-    decreaseDuration();
+
+bool Effect::usesDuration() const
+{
+    switch (type)
+    {
+    case Type::Weak:
+    case Type::Vulnerable:
+    case Type::Frail:
+    case Type::Entangle:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool Effect::isPermanent() const
+{
+    return duration < 0;
 }

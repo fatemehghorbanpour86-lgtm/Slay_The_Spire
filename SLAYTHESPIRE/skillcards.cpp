@@ -51,7 +51,6 @@ void Exhume::play(Player* user,QVector <Enemy*>& enemies, Enemy* target)
     if (!user)
         return;
 
-    user->moveFromExhaustToHand();
 }
 void Exhume::upgrade()
 {

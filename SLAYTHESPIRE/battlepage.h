@@ -49,6 +49,7 @@ private slots:
     void onBattleLost();
     void onDrawPileClicked();
     void onDiscardPileClicked();
+    void onExhaustPileClicked();
     void updateEnemyIntent(Enemy* enemy);
 
 private:
@@ -61,6 +62,13 @@ private:
         QPointer<QWidget> effectsWidget;
         QPointer<QHBoxLayout> effectsLayout;
         QPointer<QPushButton> clickOverlay;
+        QPointer<QLabel> damageIconLabel;
+        QPointer<QLabel> damageValueLabel;
+        QWidget* blockWidget = nullptr;
+        QLabel* blockIconLabel = nullptr;
+        QLabel* blockValueLabel = nullptr;
+
+
     };
 
     QVector<EnemyUI> enemyUIs;
@@ -92,6 +100,9 @@ private:
     QPushButton* discardPileBtn = nullptr;
     QLabel* drawPileCountLabel = nullptr;
     QLabel* discardPileCountLabel = nullptr;
+    QPushButton* exhaustPileBtn = nullptr;
+    QLabel* exhaustPileCountLabel = nullptr;
+
 
     QWidget* playerWidget = nullptr;
     QPushButton* playerClickOverlay = nullptr;
@@ -111,6 +122,9 @@ private:
 
     QWidget* playerEffectsWidget = nullptr;
     QHBoxLayout* playerEffectsLayout = nullptr;
+
+    QList<QPushButton*> potionButtons;
+
 
     enum class CardTarget
     {
@@ -147,6 +161,7 @@ private:
     QString enemyImagePath(Enemy* enemy);
     QString effectImagePath(const Effect* effect);
     QString getIntentText(Enemy* enemy);
+    QString getPotionImagePath(const QString &potionName);
 
     QWidget* findWidgetForEnemy(Enemy* enemy)
     {
@@ -175,6 +190,27 @@ private:
 
         return nullptr;
     }
+
+    bool isCardPlayableNow(Card* card) const;
+    void resetCardToHandPose(QGraphicsProxyWidget* proxy);
+    void animateUnplayableCard(QGraphicsProxyWidget* proxy);
+    //testing cards
+    void setupTestDeck();
+
+    void updateDamagePreview(Enemy* enemy, int damage);
+    void clearDamagePreview(Enemy* enemy);
+
+    Potion* pendingPotion = nullptr;
+    bool waitingForPotionTarget = false;
+
+    void updatePotionUI();
+    bool isPotionTargeted(Potion* potion) const;
+    void showEnemyPotionHighlights();
+    void clearPotionSelection();
+
+
+
+
 
 protected:
     void showEvent(QShowEvent* e) override;

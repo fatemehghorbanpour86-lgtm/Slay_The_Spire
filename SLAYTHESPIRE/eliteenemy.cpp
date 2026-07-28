@@ -9,14 +9,8 @@
 
 
 GremlinNob::GremlinNob()
-    : Enemy("Gremlin Knob", QRandomGenerator::global()->bounded(82,87))
+    : Enemy("Gremlin Nob", QRandomGenerator::global()->bounded(82,87))
 {
-    enrageActive = false;
-}
-
-bool GremlinNob::isEnraged() const
-{
-    return enrageActive;
 }
 
 void GremlinNob::chooseIntent(Player* player)
@@ -72,12 +66,7 @@ void GremlinNob::executeMove(Player *player)
 
      case Bellow:
 
-        enrageActive = true;
-
-        // Gremlin Nob enters Enrage state.
-        // Whenever the player plays a Skill card,
-        // CombatManager should grant:
-        // addEffect(Strength, Buff, 2)
+        addEffect(Effect::Type::Enrage, Effect::Category::Buff, 2, 0);
 
         break;
 

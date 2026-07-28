@@ -58,6 +58,8 @@ class Player : public Character
 
 public:
 
+    static constexpr int MAX_POTION_SLOTS = 3;
+
     Player(const QString& name, int maxHealth);
 
     ~Player() override;
@@ -87,8 +89,9 @@ public:
     //Does NOT touch currentEnergy directly;
 
 
-    void addPotion(Potion* potion);
+    bool addPotion(Potion* potion);
     bool removePotion(Potion* potion);
+    bool hasPotionSpace() const;
     Potion* getPotion(int index) const;
     int getPotionCount() const;
     const QVector<Potion*>& getPotions() const;

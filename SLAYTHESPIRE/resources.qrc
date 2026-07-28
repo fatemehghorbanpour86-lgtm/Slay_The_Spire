@@ -181,6 +181,10 @@
         <file>BrutalityEff.png</file>
         <file>DemonFormEff.png</file>
         <file>VulnerableEff.png</file>
+        <file>BarricadeEff.png</file>
+        <file>DexterityEff.png</file>
+        <file>DarkEmbraceEff.png</file>
+        <file>MetallicizeEff.png</file>
     </qresource>
     <qresource prefix="/RestSite">
         <file>BackBtn.png</file>

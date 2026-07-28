@@ -227,7 +227,7 @@ void ShopPage::setupTopBar()
             {
                 if (player)
                 {
-                    PileViewerDialog dialog(player, PileType::Deck, this);
+                    PileViewerDialog dialog(player, PileType::Deck,PileViewerMode::ViewOnly, this);
                     dialog.exec();
                 }
             });

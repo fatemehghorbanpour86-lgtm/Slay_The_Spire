@@ -126,9 +126,7 @@ void SwiftPotion::use(Player* user, Enemy* target)
     if (!user)
         return;
 
-    // TODO (Anahita)
-    // Draw 3 cards from the CombatDeck.
-    // Example: user->drawCards(3);
+    user->drawCards(3);
 }
 
 

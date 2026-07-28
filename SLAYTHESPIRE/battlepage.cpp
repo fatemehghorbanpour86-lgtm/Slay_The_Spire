@@ -1,4 +1,6 @@
 #include "battlepage.h"
+#include "attackcards.h"
+#include "combatcalculator.h"
 #include "combatdeck.h"
 #include "enemy.h"
 #include "normalenemies.h"
@@ -6,9 +8,12 @@
 #include "deckviewer.h"
 
 #include "outlinedlabel.h"
+#include "potion.h"
 #include "qtimer.h"
 
-#include "PileViewerDialog.h"
+#include "pileviewerdialog.h"
+#include "skillcards.h"
+#include "statuscards.h"
 
 #include <QPropertyAnimation>
 #include <QGraphicsProxyWidget>
@@ -17,7 +22,86 @@
 #include <QGraphicsDropShadowEffect>
 #include <QEasingCurve>
 #include <QPointer>
+#include <QPropertyAnimation>
+#include <QEasingCurve>
+#include <QApplication>
+#include <QToolTip>
+#include <QDir>
 
+
+static QString makeEffectTooltipHtml(const Effect* effect)
+{
+    if (!effect) return {};
+
+    QString title = effect->getName().toHtmlEscaped();
+    QString desc  = effect->getTooltip().toHtmlEscaped();
+
+    desc.replace("\n", "<br>");
+
+    return QString(R"(
+        <div style="
+            min-width: 170px;
+            max-width: 240px;
+            color: #f3e7c2;
+            font-family: 'Segoe UI';
+            font-size: 12px;
+            line-height: 1.35;
+        ">
+            <div style="
+                color: #f0c674;
+                font-size: 13px;
+                font-weight: 700;
+                margin-bottom: 4px;
+            ">%1</div>
+            <div>%2</div>
+        </div>
+    )").arg(title, desc);
+}
+
+static void applyBattleTooltipStyleOnce()
+{
+    static bool applied = false;
+    if (applied) return;
+    applied = true;
+
+    qApp->setStyleSheet(qApp->styleSheet() + R"(
+        QToolTip {
+            background-color: rgba(22, 16, 12, 245);
+            color: #f3e7c2;
+            border: 1px solid #c89b3c;
+            border-radius: 8px;
+            padding: 6px 8px;
+        }
+    )");
+}
+
+static QString makePotionTooltipHtml(const Potion* potion)
+{
+    if (!potion) return {};
+
+    const QString title = potion->getName().toHtmlEscaped();
+    QString desc = potion->getDescription().toHtmlEscaped();
+    desc.replace("\n", "<br>");
+
+    return QString(R"(
+        <div style="
+            min-width: 170px;
+            max-width: 240px;
+            color: #f3e7c2;
+            font-family: 'Segoe UI';
+            font-size: 12px;
+            line-height: 1.35;
+        ">
+            <div style="
+                color: #f0c674;
+                font-size: 13px;
+                font-weight: 700;
+                margin-bottom: 4px;
+            ">%1</div>
+            <div>%2</div>
+        </div>
+    )").arg(title, desc);
+}
 
 
 
@@ -29,6 +113,12 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
 
     if (this->enemies.isEmpty())
         this->enemies.append (new Cultist);
+
+   // setupTestDeck();
+
+    player->addPotion(new FairyInABottle());
+    player->addPotion(new EnergyPotion());
+
 
 
     // -- Main vertical layout --
@@ -45,6 +135,8 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
         Qt::SmoothTransformation
         ));
     bg->lower(); // push behind all other widgets
+
+    applyBattleTooltipStyleOnce();
 
     // -- Create the three main sections --
     topBar      = new QWidget(this);
@@ -69,6 +161,7 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     setupBattleField();
     setupBottomBar();
     setupClickOverlays();
+    battleField->raise();
     QTimer::singleShot(0, this, &BattlePage::repositionOverlays);
 
 
@@ -79,6 +172,33 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     connect(combatManager, &CombatManager::battleLost,   this, &BattlePage::onBattleLost);
     connect(endTurnBtn,    &QPushButton::clicked,        combatManager, &CombatManager::endTurn);
     connect(combatManager, &CombatManager::enemyIntentUpdated, this, &BattlePage::updateEnemyIntent);
+    connect(combatManager, &CombatManager::requestPileSelection,
+            this, [this](PileType pileType)
+            {
+                if (pileType != PileType::Exhaust)
+                    return;
+
+                PileViewerDialog dialog(this->player,
+                                        PileType::Exhaust,
+                                        PileViewerMode::SelectCard,
+                                        this);
+
+                connect(&dialog, &PileViewerDialog::cardSelected,
+                        this, [this, &dialog](Card* selectedCard)
+                        {
+                            combatManager->handleExhumeSelection(selectedCard);
+                            dialog.accept();
+                        });
+
+                connect(&dialog, &QDialog::rejected,
+                        this, [this]()
+                        {
+                            combatManager->cancelExhumeSelection();
+                        });
+
+                dialog.exec();
+            });
+
 
     connect(combatManager, &CombatManager::enemyAttacking, this, [this](Enemy* e)
             {
@@ -153,14 +273,59 @@ void BattlePage::setupTopBar()
     leftGroup->addWidget(goldValueLabel);
     leftGroup->addSpacing(15);
 
-    // Potion slots (placeholders, 3 empty by default)
-    for (int i = 0; i < 3; i++) {
-        QLabel *potionSlot = new QLabel(topBar);
-        potionSlot->setFixedSize(24, 24);
-        potionSlot->setStyleSheet("background: rgba(255,255,255,20); border: 1px solid #666; border-radius: 4px;");
-        // later: potionSlot->setPixmap(QPixmap(":/icons/potion_X.png")...);
-        leftGroup->addWidget(potionSlot);
+    // Potion slots
+    potionButtons.clear();
+    for (int i = 0; i < 3; i++)
+    {
+        QPushButton *potionBtn = new QPushButton(topBar);
+        potionBtn->setFixedSize(30, 30);
+        potionBtn->setCursor(Qt::PointingHandCursor);
+        potionBtn->setStyleSheet(
+            "QPushButton {"
+            "background: rgba(255,255,255,20); border: 1px solid #666; border-radius: 4px;"
+            "}"
+            "QPushButton:hover:!disabled { border: 1px solid #fff; }"
+            );
+
+        connect(potionBtn, &QPushButton::clicked, this, [this, i]() {
+            if (waitingForPotionTarget)
+            {
+                clearPotionSelection();
+                return;
+            }
+
+            const auto& potions = player->getPotions();
+            if (i >= potions.size() || !potions[i])
+                return;
+
+            Potion* potion = potions[i];
+
+            if (isPotionTargeted(potion))
+            {
+
+                if (pendingCard)
+                    clearSelection();
+
+                pendingPotion = potion;
+                waitingForPotionTarget = true;
+
+                showEnemyPotionHighlights();
+            }
+
+            else
+            {
+                Enemy* target = nullptr;
+                if (combatManager->usePotion(potion, target))
+                {
+                    updateStats();
+                }
+            }
+        });
+
+
+        leftGroup->addWidget(potionBtn);
         leftGroup->addSpacing(4);
+        potionButtons.append(potionBtn);
     }
 
     // ===== CENTER: floor icon + count =====
@@ -241,13 +406,14 @@ void BattlePage::setupTopBar()
 
     connect(deckBtn, &QPushButton::clicked, this, [this]()
             {
-                PileViewerDialog dialog(player, PileType::Deck, this);
+                PileViewerDialog dialog(player,
+                            PileType::Deck,
+                            PileViewerMode::ViewOnly,
+                            this);
                 dialog.exec();
             });
 }
 
-
-// ─────────────────────────────────────────
 void BattlePage::setupBattleField()
 {
     QHBoxLayout *layout = new QHBoxLayout(battleField);
@@ -295,7 +461,6 @@ void BattlePage::setupBattleField()
 
     playerLayout->addWidget(playerEffectsWidget, 0, Qt::AlignHCenter);
 
-
     // Shield icon + block count
     playerBlockIconLabel = new QLabel(playerWidget);
     playerBlockIconLabel->setFixedSize(36, 36);
@@ -309,7 +474,6 @@ void BattlePage::setupBattleField()
     playerBlockLabel->setStyleSheet("color: black; font-size: 13px; font-weight: bold; background: transparent;");
 
     playerBlockIconLabel->hide();
-
 
     // -- Enemy container (right side) --
     enemyContainer = new QWidget(battleField);
@@ -363,7 +527,7 @@ void BattlePage::setupBattleField()
         ui.hpBar = new QProgressBar(ui.widget);
         ui.hpBar->setRange(0, enemy->getMaxHealth());
         ui.hpBar->setValue(enemy->getCurrentHealth());
-        ui.hpBar->setFixedSize(150, 16);
+        ui.hpBar->setFixedSize(100, 16);
         ui.hpBar->setTextVisible(true);
         ui.hpBar->setFormat("%v / %m");
         ui.hpBar->setStyleSheet(
@@ -381,40 +545,77 @@ void BattlePage::setupBattleField()
             "}"
             );
 
+        // Damage UI
+        // Damage UI - Fixed with absolute positioning
+        QWidget* damagePreviewWidget = new QWidget(ui.widget);
+        damagePreviewWidget->setFixedSize(70, 40);
+        damagePreviewWidget->setStyleSheet("background: transparent;");
+
+        ui.damageIconLabel = new QLabel(damagePreviewWidget);
+        ui.damageIconLabel->setGeometry(0, 0, 40, 40);
+        ui.damageIconLabel->setPixmap(
+            QPixmap(":/attack.png").scaled(
+                40, 40,
+                Qt::KeepAspectRatio,
+                Qt::SmoothTransformation
+                )
+            );
+        ui.damageIconLabel->setStyleSheet("background: transparent;");
+        ui.damageIconLabel->hide();
+
+        ui.damageValueLabel = new QLabel(damagePreviewWidget);
+        ui.damageValueLabel->setGeometry(35, 8, 35, 24);
+        ui.damageValueLabel->setStyleSheet(
+            "color: #ff4d4d;"
+            "font-size: 16px;"
+            "font-weight: bold;"
+            "background: transparent;"
+            );
+        ui.damageValueLabel->hide();
+
+        //Defend (Block)
+        ui.blockWidget = new QWidget(ui.widget);
+        ui.blockWidget->setFixedSize(36, 36);
+        ui.blockWidget->setStyleSheet("background: transparent;");
+
+        ui.blockIconLabel = new QLabel(ui.blockWidget);
+        ui.blockIconLabel->setGeometry(0, 0, 36, 36);
+        ui.blockIconLabel->setPixmap(QPixmap(":/defendIcon.png").scaled(
+            36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui.blockIconLabel->setStyleSheet("background: transparent;");
+
+        ui.blockValueLabel = new QLabel(ui.blockWidget);
+        ui.blockValueLabel->setGeometry(0, 0, 36, 36);
+        ui.blockValueLabel->setAlignment(Qt::AlignCenter);
+        ui.blockValueLabel->setStyleSheet("color: black; font-size: 13px; font-weight: bold; background: transparent;");
+
+
+        // --- HP & Damage Container ---
+        QWidget* hpDamageContainer = new QWidget(ui.widget);
+        hpDamageContainer->setStyleSheet("background: transparent;");
+        QHBoxLayout* hpDamageLayout = new QHBoxLayout(hpDamageContainer);
+        hpDamageLayout->setContentsMargins(0, 0, 0, 0);
+        hpDamageLayout->setSpacing(2);
+
+        hpDamageLayout->addWidget(ui.blockWidget);
+        hpDamageLayout->addWidget(ui.hpBar);
+        hpDamageLayout->addWidget(damagePreviewWidget);
+
+
+
         // Enemy effects
         ui.effectsWidget = new QWidget(ui.widget);
         ui.effectsWidget->setFixedHeight(28);
-
         ui.effectsLayout = new QHBoxLayout(ui.effectsWidget);
         ui.effectsLayout->setContentsMargins(0, 2, 0, 0);
         ui.effectsLayout->setSpacing(4);
         ui.effectsLayout->setAlignment(Qt::AlignCenter);
 
-        enemyInnerLayout->addWidget(
-            ui.intentLabel,
-            0,
-            Qt::AlignHCenter
-            );
-
+        enemyInnerLayout->addWidget(ui.intentLabel, 0, Qt::AlignHCenter);
         enemyInnerLayout->addStretch();
-
-        enemyInnerLayout->addWidget(
-            enemyImg,
-            0,
-            Qt::AlignHCenter | Qt::AlignBottom
-            );
-
-        enemyInnerLayout->addWidget(
-            ui.hpBar,
-            0,
-            Qt::AlignHCenter
-            );
-
-        enemyInnerLayout->addWidget(
-            ui.effectsWidget,
-            0,
-            Qt::AlignHCenter
-            );
+        enemyInnerLayout->addWidget(enemyImg, 0, Qt::AlignHCenter | Qt::AlignBottom);
+        enemyInnerLayout->addWidget(hpDamageContainer, 0, Qt::AlignHCenter);
+        enemyInnerLayout->addWidget(ui.effectsWidget, 0, Qt::AlignHCenter);
 
         enemyUIs.append(ui);
     }
@@ -422,8 +623,6 @@ void BattlePage::setupBattleField()
     layout->addWidget(playerWidget, 0, Qt::AlignBottom);
     layout->addStretch(1);
     layout->addWidget(enemyContainer, 0, Qt::AlignBottom);
-
-
 }
 
 void BattlePage::setupClickOverlays()
@@ -455,11 +654,28 @@ void BattlePage::setupClickOverlays()
 
         ui.clickOverlay = overlay;
 
-        connect(overlay, &QPushButton::clicked, this, [this, enemy = ui.enemy]()
+        connect(overlay, &QPushButton::clicked, this,
+                [this, enemy = ui.enemy]()
                 {
-                    if (pendingCard && enemy && !enemy->isDead())
+                    if (!enemy || enemy->isDead())
+                        return;
+
+                    if (waitingForPotionTarget && pendingPotion)
+                    {
+                        if (combatManager->usePotion(pendingPotion, enemy))
+                            updateStats();
+
+                        clearPotionSelection();
+                        return;
+                    }
+
+                    if (pendingCard)
+                    {
                         playCardWithAnimation(pendingCard, selectedProxy, enemy);
+                        return;
+                    }
                 });
+
     }
 
     playerClickOverlay = new QPushButton(this);
@@ -649,6 +865,54 @@ void BattlePage::setupBottomBar()
 
     connect(discardPileBtn, &QPushButton::clicked, this, &BattlePage::onDiscardPileClicked);
 
+    // ===== Exhaust Pile button (bottom-right) =====
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString exhaustPath = QDir(baseDir).filePath("assets/image/exhaustPile.png");
+    QPixmap exhaustPixmap = QPixmap(exhaustPath).scaled(
+        115, 138,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation);
+
+    QSize exhaustSize = exhaustPixmap.size();
+
+    exhaustPileBtn = new QPushButton(this);
+    exhaustPileBtn->setFixedSize(exhaustSize);
+    exhaustPileBtn->move(1035, 592);
+    exhaustPileBtn->setCursor(Qt::PointingHandCursor);
+    exhaustPileBtn->setFlat(true);
+    exhaustPileBtn->setStyleSheet(
+        "QPushButton {"
+        "  border: none;"
+        "  background: transparent;"
+        "  padding: 0px;"
+        "}"
+        );
+    exhaustPileBtn->setIcon(QIcon(exhaustPixmap));
+    exhaustPileBtn->setIconSize(exhaustSize);
+
+    auto* exhaustGlow = new QGraphicsDropShadowEffect(exhaustPileBtn);
+    exhaustGlow->setColor(QColor(255, 0, 0, 255));
+    exhaustGlow->setBlurRadius(90);
+    exhaustGlow->setOffset(0, 0);
+    exhaustPileBtn->setGraphicsEffect(exhaustGlow);
+
+
+    exhaustPileBtn->raise();
+
+    exhaustPileCountLabel = new QLabel(exhaustPileBtn);
+    exhaustPileCountLabel->setGeometry(0, 0, exhaustSize.width(), exhaustSize.height());
+    exhaustPileCountLabel->setAlignment(Qt::AlignCenter);
+    exhaustPileCountLabel->setStyleSheet(
+        "color: white;"
+        "font-size: 16px;"
+        "font-weight: bold;"
+        "background: transparent;"
+        );
+    exhaustPileCountLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    exhaustPileCountLabel->raise();
+
+    connect(exhaustPileBtn, &QPushButton::clicked,
+            this, &BattlePage::onExhaustPileClicked);
 
 }
 
@@ -670,10 +934,22 @@ bool BattlePage::eventFilter(QObject* obj, QEvent* event)
             }
         }
 
-        if (target && pendingCard && !target->isDead())
+        if (target && !target->isDead())
         {
-            playCardWithAnimation(pendingCard, selectedProxy, target);
-            return true;
+            if (waitingForPotionTarget && pendingPotion)
+            {
+                if (combatManager->usePotion(pendingPotion, target))
+                    updateStats();
+
+                clearPotionSelection();
+                return true;
+            }
+
+            if (pendingCard)
+            {
+                playCardWithAnimation(pendingCard, selectedProxy, target);
+                return true;
+            }
         }
 
         return QWidget::eventFilter(obj, event);
@@ -730,11 +1006,21 @@ bool BattlePage::eventFilter(QObject* obj, QEvent* event)
 
         proxy->setZValue(100);
 
-        QGraphicsDropShadowEffect* glow = new QGraphicsDropShadowEffect();
-        glow->setColor(QColor(0, 150, 255, 255));
-        glow->setBlurRadius(80);
-        glow->setOffset(0, 0);
-        proxy->setGraphicsEffect(glow);
+        const bool playableNow = isCardPlayableNow(cardData);
+
+        if (playableNow)
+        {
+            QGraphicsDropShadowEffect* glow = new QGraphicsDropShadowEffect();
+            glow->setColor(QColor(0, 150, 255, 255));
+            glow->setBlurRadius(80);
+            glow->setOffset(0, 0);
+            proxy->setGraphicsEffect(glow);
+        }
+        else
+        {
+            proxy->setGraphicsEffect(nullptr);
+        }
+
     }
     // --- Hover Leave Animation ---
     else if (event->type() == QEvent::Leave)
@@ -912,14 +1198,58 @@ void BattlePage::updateStats()
                 ui.clickOverlay->hide();
             }
 
+            if (ui.blockWidget)
+                ui.blockWidget->hide();
+
             continue;
         }
+
+        int block = ui.enemy->getBlock();
+        bool hasBlock = block > 0;
 
 
         if (ui.hpBar)
         {
             ui.hpBar->setMaximum(ui.enemy->getMaxHealth());
             ui.hpBar->setValue(ui.enemy->getCurrentHealth());
+
+
+            if (hasBlock)
+            {
+                if (!ui.hpBar->graphicsEffect())
+                {
+                    auto* glow = new QGraphicsDropShadowEffect(ui.hpBar);
+                    glow->setColor(QColor(96, 165, 250, 255));
+                    glow->setBlurRadius(20);
+                    glow->setOffset(0, 0);
+                    ui.hpBar->setGraphicsEffect(glow);
+                }
+
+                ui.hpBar->setStyleSheet(
+                    "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
+                    "border-radius: 6px; color: white; font-size: 11px; text-align: center; }"
+                    "QProgressBar::chunk { background: #60a5fa; border-radius: 4px; }"
+                    );
+            }
+            else
+            {
+                ui.hpBar->setGraphicsEffect(nullptr);
+                ui.hpBar->setStyleSheet(
+                    "QProgressBar { background: #1a1a1a; border: 2px solid #333;"
+                    "border-radius: 6px; color: white; font-size: 11px; text-align: center; }"
+                    "QProgressBar::chunk { background: #e63946; border-radius: 4px; }"
+                    );
+            }
+        }
+
+
+        if (ui.blockWidget)
+        {
+            ui.blockWidget->setVisible(hasBlock);
+            if (hasBlock && ui.blockValueLabel)
+            {
+                ui.blockValueLabel->setText(QString::number(block));
+            }
         }
 
         if (ui.intentLabel)
@@ -945,6 +1275,12 @@ void BattlePage::updateStats()
 
         if (discardPileCountLabel)
             discardPileCountLabel->setText(QString::number(deck->getDiscardPile().size()));
+
+        if (exhaustPileCountLabel)
+        {
+            exhaustPileCountLabel->setText(QString::number(deck->getExhaustPile().size()));
+        }
+
     }
     else
     {
@@ -953,9 +1289,14 @@ void BattlePage::updateStats()
 
         if (discardPileCountLabel)
             discardPileCountLabel->setText("0");
+
+        if (exhaustPileCountLabel)
+            exhaustPileCountLabel->setText("0");
     }
 
     updateEffectsUI();
+
+    updatePotionUI();
 }
 
 void BattlePage::refreshHand()
@@ -1075,60 +1416,63 @@ void BattlePage::refreshHand()
 
 void BattlePage::onCardClicked(Card* card, QGraphicsProxyWidget* proxy)
 {
+    if (!card || !proxy)
+        return;
+
     if (pendingCard == card)
     {
         clearSelection();
-        if (proxy)
-        {
-            QPropertyAnimation* moveDown = new QPropertyAnimation(proxy, "pos");
-            moveDown->setDuration(200);
-            moveDown->setStartValue(proxy->pos());
-            moveDown->setEndValue(QPointF(proxy->pos().x(), proxy->data(0).toInt()));
-            moveDown->setEasingCurve(QEasingCurve::OutCubic);
-            moveDown->start(QAbstractAnimation::DeleteWhenStopped);
-
-            QPropertyAnimation* rotateBack = new QPropertyAnimation(proxy, "rotation");
-            rotateBack->setDuration(200);
-            rotateBack->setStartValue(proxy->rotation());
-            rotateBack->setEndValue(proxy->data(1).toDouble());
-            rotateBack->setEasingCurve(QEasingCurve::OutCubic);
-            rotateBack->start(QAbstractAnimation::DeleteWhenStopped);
-
-            QPropertyAnimation* scaleDown = new QPropertyAnimation(proxy, "scale");
-            scaleDown->setDuration(200);
-            scaleDown->setStartValue(proxy->scale());
-            scaleDown->setEndValue(1.0);
-            scaleDown->setEasingCurve(QEasingCurve::OutCubic);
-            scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
-
-            proxy->setGraphicsEffect(nullptr);
-
-        }
+        resetCardToHandPose(proxy);
         return;
     }
 
     if (pendingCard != nullptr)
         return;
 
-    // Select this card
-    clearSelection();   // deselect any previously selected card first
-
-    pendingCard   = card;
-    selectedProxy = proxy;
-
-    if (selectedProxy) {
-        selectedProxy->setZValue(105);
+    if (!isCardPlayableNow(card))
+    {
+        clearSelection();
+        animateUnplayableCard(proxy);
+        return;
     }
 
+    clearSelection();
+
+    pendingCard = card;
+    selectedProxy = proxy;
+
+    if (selectedProxy)
+        selectedProxy->setZValue(105);
+
     CardTarget target = getCardTarget(card);
+
     if (target == CardTarget::Enemy)
     {
         showEnemyHighlights();
+
+        int baseDamage  = card->getBaseDamage();
+        int damageHits  = card->getDamageHits();
+
+        for (const EnemyUI& ui : std::as_const(enemyUIs))
+        {
+            if (ui.enemy && !ui.enemy->isDead())
+            {
+                int perHitDamage = combatManager->getCalculator()->calculateDamage(player, ui.enemy, baseDamage);
+
+                int totalDamage = perHitDamage * damageHits;
+
+                updateDamagePreview(ui.enemy, totalDamage);
+            }
+        }
     }
     else if (target == CardTarget::Player)
     {
         showPlayerHighlight();
     }
+
+
+    else if (target == CardTarget::Player)
+        showPlayerHighlight();
 }
 
 void BattlePage::onBattleWon()
@@ -1136,6 +1480,7 @@ void BattlePage::onBattleWon()
     emit combatResult(true);
     emit battleEnded();
 }
+
 void BattlePage::onBattleLost()
 {
     emit combatResult(false);
@@ -1144,13 +1489,30 @@ void BattlePage::onBattleLost()
 
 void BattlePage::onDrawPileClicked()
 {
-    PileViewerDialog dialog(player, PileType::Draw, this);
+    PileViewerDialog dialog(player,
+                            PileType::Draw,
+                            PileViewerMode::ViewOnly,
+                            this);
     dialog.exec();
 }
 
+void BattlePage::onExhaustPileClicked()
+{
+    PileViewerDialog dialog(player,
+                            PileType::Exhaust,
+                            PileViewerMode::ViewOnly,
+                            this);
+    dialog.exec();
+}
+
+
 void BattlePage::onDiscardPileClicked()
 {
-    PileViewerDialog dialog(player, PileType::Discard, this);
+
+    PileViewerDialog dialog(player,
+                            PileType::Discard,
+                            PileViewerMode::ViewOnly,
+                            this);
     dialog.exec();
 }
 
@@ -1229,6 +1591,7 @@ BattlePage::CardTarget BattlePage::getCardTarget(Card* card)
     // Skills and Powers that target player (Defend, Flex, etc.)
     return CardTarget::Player;
 }
+
 void BattlePage::showEnemyHighlights()
 {
     clearHighlights();
@@ -1351,48 +1714,37 @@ void BattlePage::clearSelection()
     pendingCard   = nullptr;
     selectedProxy = nullptr;
     clearHighlights();
-}
 
+    for (const EnemyUI& ui : std::as_const(enemyUIs))
+    {
+        if (ui.enemy)
+            clearDamagePreview(ui.enemy);
+    }
+
+}
 void BattlePage::playCardWithAnimation(Card* card,
                                        QGraphicsProxyWidget* proxy,
                                        Enemy* target)
 {
-
     QGraphicsProxyWidget* proxyToAnim = proxy;
-    Card* cardToPlay = card;   // Card is not QObject here; keep raw + check before use
+    Card* cardToPlay = card;
     Enemy* targetEnemy = target;
 
     clearSelection();
 
-
     // Not enough energy: bounce the card back; do NOT set animatingCard.
-    if (player->getCurrentEnergy() < cardToPlay->getEnergyCost())
+    if (!cardToPlay || !proxyToAnim || !isCardPlayableNow(cardToPlay))
     {
-
-        // Not enough energy — snap card back to default position
-        QPropertyAnimation* moveDown = new QPropertyAnimation(proxyToAnim, "pos");
-        moveDown->setDuration(200);
-        moveDown->setStartValue(proxyToAnim->pos());
-        moveDown->setEndValue(QPointF(proxyToAnim->pos().x(),
-                                      proxyToAnim->data(0).toInt()));
-        moveDown->setEasingCurve(QEasingCurve::OutCubic);
-        moveDown->start(QAbstractAnimation::DeleteWhenStopped);
-
-        QPropertyAnimation* scaleDown = new QPropertyAnimation(proxyToAnim, "scale");
-        scaleDown->setDuration(200);
-        scaleDown->setStartValue(proxyToAnim->scale());
-        scaleDown->setEndValue(1.0);
-        scaleDown->setEasingCurve(QEasingCurve::OutCubic);
-        scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
-
-        proxyToAnim->setGraphicsEffect(nullptr);
+        clearSelection();
+        resetCardToHandPose(proxyToAnim);
         return;
     }
+
+    clearSelection();
 
     animatingCard = true;
 
     // Capture pose, then transfer ownership from handScene -> animScene.
-    // After removeItem, refreshHand must not destroy this proxy (it lives in animScene).
     double currentRot   = proxyToAnim->rotation();
     double currentScale = proxyToAnim->scale();
 
@@ -1415,29 +1767,29 @@ void BattlePage::playCardWithAnimation(Card* card,
     flyToCenter->setEndValue(center);
     flyToCenter->setEasingCurve(QEasingCurve::OutCubic);
 
-
-    // Capture QPointer (by value), not raw QGraphicsProxyWidget*.
     connect(flyToCenter, &QPropertyAnimation::finished, this,
             [this, proxyToAnim, cardToPlay, targetEnemy]()
             {
+                // Step 2: fly to correct pile + shrink.
+                QPushButton* pileBtn = cardToPlay->doesExhaust()
+                                           ? exhaustPileBtn
+                                           : discardPileBtn;
 
-                // Step 2: fly to discard pile + shrink.
-                QPoint discardInAnimView = animView->mapFromGlobal
-                    (
-                      discardPileBtn->mapToGlobal(
-                      QPoint(discardPileBtn->width() / 2,
-                      discardPileBtn->height() / 2))
-                    );
+                QPoint pileInAnimView = animView->mapFromGlobal(
+                    pileBtn->mapToGlobal(
+                        QPoint(pileBtn->width() / 2,
+                               pileBtn->height() / 2)));
 
-                QPointF discardScene = animView->mapToScene(discardInAnimView);
+                QPointF pileScene = animView->mapToScene(pileInAnimView);
 
                 QSizeF proxySize = proxyToAnim->size();
-                discardScene -= QPointF(proxySize.width() / 2.0,proxySize.height() / 2.0);
+                pileScene -= QPointF(proxySize.width() / 2.0,
+                                     proxySize.height() / 2.0);
 
                 auto* flyOut = new QPropertyAnimation(proxyToAnim, "pos");
                 flyOut->setDuration(300);
                 flyOut->setStartValue(proxyToAnim->pos());
-                flyOut->setEndValue(discardScene);
+                flyOut->setEndValue(pileScene);
                 flyOut->setEasingCurve(QEasingCurve::InCubic);
 
                 auto* shrink = new QPropertyAnimation(proxyToAnim, "scale");
@@ -1446,34 +1798,28 @@ void BattlePage::playCardWithAnimation(Card* card,
                 shrink->setEndValue(0.0);
                 shrink->setEasingCurve(QEasingCurve::InCubic);
 
-                // Step 3: remove visual, unlock hand refresh, then apply rules.
                 connect(flyOut, &QPropertyAnimation::finished, this,
                         [this, proxyToAnim, cardToPlay, targetEnemy]()
                         {
-
                             animScene->removeItem(proxyToAnim);
                             animatingCard = false;
 
-
-                            // Attack cards may play a lunge animation first.
                             if (targetEnemy &&
                                 cardToPlay->getType() == CardType::Attack)
                             {
                                 QWidget* enemyW = findWidgetForEnemy(targetEnemy);
 
-
-                                animateAttack(playerWidget,enemyW,[this, cardToPlay, targetEnemy]() {
-                                                combatManager->playCard(cardToPlay, targetEnemy);
-                                        });
-
+                                animateAttack(playerWidget, enemyW,
+                                              [this, cardToPlay, targetEnemy]()
+                                              {
+                                                  combatManager->playCard(cardToPlay, targetEnemy);
+                                              });
                             }
-
                             else
                             {
                                 combatManager->playCard(cardToPlay, targetEnemy);
                             }
-
-                         });
+                        });
 
                 flyOut->start(QAbstractAnimation::DeleteWhenStopped);
                 shrink->start(QAbstractAnimation::DeleteWhenStopped);
@@ -1488,6 +1834,7 @@ void BattlePage::showEvent(QShowEvent* e)
     repositionBlockIcon();
 }
 
+
 void BattlePage::repositionBlockIcon()
 {
     if (!playerBlockIconLabel || !playerHPBar || !playerWidget) return;
@@ -1501,6 +1848,7 @@ void BattlePage::repositionBlockIcon()
     playerBlockLabel->move(0, 0);
     playerBlockLabel->resize(36, 36);
 }
+
 
 void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function<void()> onDone)
 {
@@ -1618,6 +1966,7 @@ void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function
     goForward->start();
 }
 
+
 QString BattlePage::effectImagePath(const Effect* effect)
 {
     if (!effect) return QString();
@@ -1627,58 +1976,66 @@ QString BattlePage::effectImagePath(const Effect* effect)
     cleanName.remove('\'');
     cleanName.remove('.');
 
-    return QString(":/Effect/%1Eff.png").arg(cleanName);
+    if(cleanName == "Enrage" || cleanName == "Berserk" || cleanName == "Entangle" || cleanName == "Rage")
+    {
+        QString baseDir = QCoreApplication::applicationDirPath();
+        QString EffectPath = QDir(baseDir).filePath("assets/Effect/%1Eff.png");
+        return EffectPath;
+    }
+    else
+    {
+        return QString(":/Effect/%1Eff.png").arg(cleanName);
+    }
 }
+
 void BattlePage::updateEffectsUI()
 {
-    // update player effects
-    if (playerEffectsLayout && player)
+    // =========================
+    // Update player effects
+    // =========================
+    if (playerEffectsLayout && playerEffectsWidget && player)
     {
         QLayoutItem* item;
         while ((item = playerEffectsLayout->takeAt(0)) != nullptr)
         {
             if (item->widget())
-            {
                 item->widget()->deleteLater();
-            }
             delete item;
         }
 
-        const auto& effects = player->getEffects();
-        for (Effect* effect : effects)
+        const auto& playerEffects = player->getEffects();
+        for (Effect* effect : playerEffects)
         {
             if (!effect || effect->isExpired())
                 continue;
 
             QWidget* iconContainer = new QWidget(playerEffectsWidget);
-            iconContainer->setFixedSize(26, 26);
+            iconContainer->setFixedSize(24, 24);
+            iconContainer->setToolTip(makeEffectTooltipHtml(effect));
+            iconContainer->setAttribute(Qt::WA_AlwaysShowToolTips, true);
+            iconContainer->setMouseTracking(true);
 
             QLabel* iconLabel = new QLabel(iconContainer);
-            iconLabel->setGeometry(0, 0, 24, 24);
+            iconLabel->setGeometry(1, 1, 22, 22);
             iconLabel->setScaledContents(true);
             iconLabel->setPixmap(
                 QPixmap(effectImagePath(effect)).scaled(
-                    24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                    22, 22,
+                    Qt::KeepAspectRatio,
+                    Qt::SmoothTransformation));
+            iconLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-            int displayValue = 0;
-            if (effect->isDebuff())
-            {
-                displayValue = effect->getDuration(); // debuff based on durationا
-            }
-            else
-            {
-                displayValue = effect->getAmount();   // buff based on amount
-            }
-
-            if (displayValue > 0)
+            int displayValue = effect->getDisplayValue();
+            if (effect->shouldShowNumber())
             {
                 QLabel* numLabel = new QLabel(iconContainer);
                 numLabel->setText(QString::number(displayValue));
                 numLabel->setAlignment(Qt::AlignRight | Qt::AlignBottom);
-                numLabel->setGeometry(10, 10, 16, 16);
+                numLabel->setGeometry(8, 8, 14, 14);
+                numLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
                 numLabel->setStyleSheet(
                     "color: #ffffff;"
-                    "font-size: 10px;"
+                    "font-size: 9px;"
                     "font-weight: bold;"
                     "background: transparent;"
                     "border: none;");
@@ -1688,7 +2045,9 @@ void BattlePage::updateEffectsUI()
         }
     }
 
-    // update enemies effects
+    // =========================
+    // Update enemies effects
+    // =========================
     for (EnemyUI& enemyUI : enemyUIs)
     {
         if (!enemyUI.effectsLayout || !enemyUI.effectsWidget || !enemyUI.enemy)
@@ -1698,47 +2057,43 @@ void BattlePage::updateEffectsUI()
         while ((item = enemyUI.effectsLayout->takeAt(0)) != nullptr)
         {
             if (item->widget())
-            {
                 item->widget()->deleteLater();
-            }
             delete item;
         }
 
-        const auto& effects = enemyUI.enemy->getEffects();
-        for (Effect* effect : effects)
+        const auto& enemyEffects = enemyUI.enemy->getEffects();
+        for (Effect* effect : enemyEffects)
         {
             if (!effect || effect->isExpired())
                 continue;
 
             QWidget* iconContainer = new QWidget(enemyUI.effectsWidget);
-            iconContainer->setFixedSize(26, 26);
+            iconContainer->setFixedSize(24, 24);
+            iconContainer->setToolTip(makeEffectTooltipHtml(effect));
+            iconContainer->setAttribute(Qt::WA_AlwaysShowToolTips, true);
+            iconContainer->setMouseTracking(true);
 
             QLabel* iconLabel = new QLabel(iconContainer);
-            iconLabel->setGeometry(0, 0, 24, 24);
+            iconLabel->setGeometry(1, 1, 22, 22);
             iconLabel->setScaledContents(true);
             iconLabel->setPixmap(
                 QPixmap(effectImagePath(effect)).scaled(
-                    24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                    22, 22,
+                    Qt::KeepAspectRatio,
+                    Qt::SmoothTransformation));
+            iconLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-            int displayValue = 0;
-            if (effect->isDebuff())
-            {
-                displayValue = effect->getDuration(); // debuff based on durationا
-            }
-            else
-            {
-                displayValue = effect->getAmount();   // buff based on amount
-            }
-
-            if (displayValue > 0)
+            int displayValue = effect->getDisplayValue();
+            if (effect->shouldShowNumber())
             {
                 QLabel* numLabel = new QLabel(iconContainer);
                 numLabel->setText(QString::number(displayValue));
                 numLabel->setAlignment(Qt::AlignRight | Qt::AlignBottom);
-                numLabel->setGeometry(10, 10, 16, 16);
+                numLabel->setGeometry(8, 8, 14, 14);
+                numLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
                 numLabel->setStyleSheet(
                     "color: #ffffff;"
-                    "font-size: 10px;"
+                    "font-size: 9px;"
                     "font-weight: bold;"
                     "background: transparent;"
                     "border: none;");
@@ -1748,3 +2103,213 @@ void BattlePage::updateEffectsUI()
         }
     }
 }
+
+bool BattlePage::isCardPlayableNow(Card* card) const
+{
+    if (!card || !player)
+        return false;
+
+    if (!card->canPlay())
+        return false;
+
+    if (player->getCurrentEnergy() < card->getEnergyCost())
+        return false;
+
+    if (player->hasEffect(Effect::Type::Entangle) && card->getType() == CardType::Attack)
+        return false;
+
+    return true;
+}
+
+
+
+void BattlePage::resetCardToHandPose(QGraphicsProxyWidget* proxy)
+{
+    if (!proxy)
+        return;
+
+    QPropertyAnimation* moveDown = new QPropertyAnimation(proxy, "pos");
+    moveDown->setDuration(200);
+    moveDown->setStartValue(proxy->pos());
+    moveDown->setEndValue(QPointF(proxy->pos().x(), proxy->data(0).toInt()));
+    moveDown->setEasingCurve(QEasingCurve::OutCubic);
+    moveDown->start(QAbstractAnimation::DeleteWhenStopped);
+
+    QPropertyAnimation* rotateBack = new QPropertyAnimation(proxy, "rotation");
+    rotateBack->setDuration(200);
+    rotateBack->setStartValue(proxy->rotation());
+    rotateBack->setEndValue(proxy->data(1).toDouble());
+    rotateBack->setEasingCurve(QEasingCurve::OutCubic);
+    rotateBack->start(QAbstractAnimation::DeleteWhenStopped);
+
+    QPropertyAnimation* scaleDown = new QPropertyAnimation(proxy, "scale");
+    scaleDown->setDuration(200);
+    scaleDown->setStartValue(proxy->scale());
+    scaleDown->setEndValue(1.0);
+    scaleDown->setEasingCurve(QEasingCurve::OutCubic);
+
+    connect(scaleDown, &QPropertyAnimation::finished, this, [proxy]() {
+        if (proxy)
+            proxy->setGraphicsEffect(nullptr);
+    });
+
+    scaleDown->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+
+void BattlePage::animateUnplayableCard(QGraphicsProxyWidget* proxy)
+{
+    if (!proxy)
+        return;
+
+    const QPointF origin = proxy->pos();
+
+    auto* shake = new QPropertyAnimation(proxy, "pos");
+    shake->setDuration(180);
+    shake->setKeyValueAt(0.0, origin);
+    shake->setKeyValueAt(0.20, origin + QPointF(-8, 0));
+    shake->setKeyValueAt(0.40, origin + QPointF(8, 0));
+    shake->setKeyValueAt(0.60, origin + QPointF(-5, 0));
+    shake->setKeyValueAt(0.80, origin + QPointF(5, 0));
+    shake->setKeyValueAt(1.0, origin);
+    shake->setEasingCurve(QEasingCurve::OutCubic);
+
+    connect(shake, &QPropertyAnimation::finished, this, [this, proxy]() {
+        resetCardToHandPose(proxy);
+    });
+
+    shake->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void BattlePage::updateDamagePreview(Enemy* enemy, int damage)
+{
+    EnemyUI* ui = findEnemyUi(enemy);
+    if (!ui || !ui->damageIconLabel || !ui->damageValueLabel)
+        return;
+
+    if (damage <= 0)
+    {
+        ui->damageIconLabel->hide();
+        ui->damageValueLabel->hide();
+        return;
+    }
+
+    ui->damageIconLabel->show();
+    ui->damageValueLabel->show();
+    ui->damageValueLabel->setText(QString::number(damage));
+}
+
+void BattlePage::clearDamagePreview(Enemy* enemy)
+{
+    updateDamagePreview(enemy, 0);
+}
+
+void BattlePage::updatePotionUI()
+{
+    auto potions = player->getPotions();
+
+    for (int i = 0; i < 3; i++)
+    {
+        QPushButton* btn = potionButtons.at(i);
+
+        if (i < potions.size())
+        {
+            Potion* potion = potions.at(i);
+
+            btn->setIcon(QIcon(getPotionImagePath(potion->getName())));
+            btn->setIconSize(QSize(28, 28));
+            btn->setToolTip(makePotionTooltipHtml(potion));
+        }
+        else
+        {
+            btn->setIcon(QIcon(getPotionImagePath("Potion Empty")));
+            btn->setToolTip(QString());
+        }
+    }
+}
+
+
+QString BattlePage::getPotionImagePath(const QString &potionName)
+{
+    if (potionName == "Block Potion")
+    {
+        return ":/Potion/block_potion.png";
+    }
+    else if (potionName == "Energy Potion")
+    {
+        return ":/Potion/energy_potion.png";
+    }
+    else if (potionName == "Fairy in a Bottle")
+    {
+        return ":/Potion/fairy_in_a_bottle.png";
+    }
+    else if (potionName == "Fire Potion")
+    {
+        return ":/Potion/fire_potion.png";
+    }
+    else if (potionName == "Swift Potion")
+    {
+        return ":/Potion/swift_potion.png";
+    }
+    else if (potionName == "Potion Empty")
+    {
+        return ":/Potion/potionEmpty.png";
+    }
+
+    return ":/Potion/potionEmpty.png";
+}
+
+void BattlePage::showEnemyPotionHighlights()
+{
+   showEnemyHighlights();
+}
+
+void BattlePage::clearPotionSelection()
+{
+    pendingPotion = nullptr;
+    waitingForPotionTarget = false;
+
+    clearHighlights();
+}
+
+bool BattlePage::isPotionTargeted(Potion* potion) const
+{
+    if (!potion)
+        return false;
+
+    return potion->getName() == "Fire Potion";
+}
+
+
+/*
+
+void BattlePage::setupTestDeck()
+{
+    if (!player)
+        return;
+
+    MasterDeck* deck = player->getMasterDeck();
+    if (!deck)
+        return;
+
+    QVector<Card*> oldCards = deck->getCards();
+
+    for (Card* card : oldCards)
+        deck->removeCard(card);
+
+    for (int i = 0; i < 5; ++i)
+    {
+        deck->addCard(new Strike());
+    }
+    for (int i = 0; i < 4; ++i)
+    {
+       deck->addCard(new Defend());
+    }
+    deck->addCard(new Reaper());
+    deck->addCard(new Reaper());
+
+    deck->addCard(new Impervious());
+    deck->addCard(new Exhume());
+    deck->addCard(new Exhume());
+}
+*/
