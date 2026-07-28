@@ -1975,7 +1975,7 @@ QString BattlePage::effectImagePath(const Effect* effect)
     if(cleanName == "Enrage" || cleanName == "Berserk" || cleanName == "Entangle" || cleanName == "Rage")
     {
         QString baseDir = QCoreApplication::applicationDirPath();
-        QString EffectPath = QDir(baseDir).filePath("assets/Effect/%1Eff.png");
+        QString EffectPath = QDir(baseDir).filePath(QString("assets/Effect/%1Eff.png").arg(cleanName));
         return EffectPath;
     }
     else
