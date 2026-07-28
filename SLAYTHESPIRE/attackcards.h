@@ -17,6 +17,8 @@ public:
 
     void play(Player* user , QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
 
+    int getBaseDamage() const override { return damageAmount; }
+
     void upgrade() override;
 
     virtual Card* clone() const override;
@@ -32,6 +34,8 @@ public:
     Reaper();
 
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+
+    int getBaseDamage() const override { return damageAmount; }
 
     void upgrade() override;
 
@@ -50,6 +54,8 @@ public:
 
     void play(Player* user, QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
 
+    int getBaseDamage() const override { return damageAmount; }
+
     void upgrade() override;
 
     virtual Card* clone() const override;
@@ -66,6 +72,8 @@ public:
 
     void play(Player* user,QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
+    int getBaseDamage() const override { return damageAmount; }
+
     void upgrade() override;
 
     virtual Card* clone() const override;
@@ -81,6 +89,8 @@ public:
     Immolate();
 
     void play(Player* user,QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
+
+    int getBaseDamage() const override { return damageAmount; }
 
     void upgrade() override;
 
@@ -99,6 +109,10 @@ public:
 
     void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
+    int getBaseDamage() const override { return damageAmount; }
+    int getDamageHits() const override { return 2; }
+
+
     void upgrade() override;
 
     virtual Card* clone() const override;
@@ -116,6 +130,8 @@ public:
 
     void play(Player* user, QVector<Enemy*>& enemies,Enemy* target = nullptr) override;
 
+    int getBaseDamage() const override { return damageAmount; }
+
     void upgrade() override;
 
     virtual Card* clone() const override;
@@ -131,6 +147,8 @@ public:
     Carnage();
 
     void play(Player* user,QVector<Enemy*>& enemies, Enemy* target = nullptr) override;
+
+    int getBaseDamage() const override { return damageAmount; }
 
     void upgrade() override;
 

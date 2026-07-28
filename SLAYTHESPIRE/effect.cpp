@@ -63,6 +63,9 @@ QString Effect::getName() const
 
     case Type::Entangle:
         return "Entangle";
+
+    case Type::Enrage:
+        return "Enrage";
     }
 
     return "";

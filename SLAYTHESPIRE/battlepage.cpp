@@ -1,5 +1,6 @@
 #include "battlepage.h"
 #include "attackcards.h"
+#include "combatcalculator.h"
 #include "combatdeck.h"
 #include "enemy.h"
 #include "normalenemies.h"
@@ -337,8 +338,6 @@ void BattlePage::setupTopBar()
             });
 }
 
-
-// ─────────────────────────────────────────
 void BattlePage::setupBattleField()
 {
     QHBoxLayout *layout = new QHBoxLayout(battleField);
@@ -386,7 +385,6 @@ void BattlePage::setupBattleField()
 
     playerLayout->addWidget(playerEffectsWidget, 0, Qt::AlignHCenter);
 
-
     // Shield icon + block count
     playerBlockIconLabel = new QLabel(playerWidget);
     playerBlockIconLabel->setFixedSize(36, 36);
@@ -400,7 +398,6 @@ void BattlePage::setupBattleField()
     playerBlockLabel->setStyleSheet("color: black; font-size: 13px; font-weight: bold; background: transparent;");
 
     playerBlockIconLabel->hide();
-
 
     // -- Enemy container (right side) --
     enemyContainer = new QWidget(battleField);
@@ -472,40 +469,61 @@ void BattlePage::setupBattleField()
             "}"
             );
 
+        // Damage UI
+        // Damage UI - Fixed with absolute positioning
+        QWidget* damagePreviewWidget = new QWidget(ui.widget);
+        damagePreviewWidget->setFixedSize(70, 40);
+        damagePreviewWidget->setStyleSheet("background: transparent;");
+
+        ui.damageIconLabel = new QLabel(damagePreviewWidget);
+        ui.damageIconLabel->setGeometry(0, 0, 40, 40);
+        ui.damageIconLabel->setPixmap(
+            QPixmap(":/attack.png").scaled(
+                40, 40,
+                Qt::KeepAspectRatio,
+                Qt::SmoothTransformation
+                )
+            );
+        ui.damageIconLabel->setStyleSheet("background: transparent;");
+        ui.damageIconLabel->hide();
+
+        ui.damageValueLabel = new QLabel(damagePreviewWidget);
+        ui.damageValueLabel->setGeometry(35, 8, 35, 24);
+        ui.damageValueLabel->setStyleSheet(
+            "color: #ff4d4d;"
+            "font-size: 16px;"
+            "font-weight: bold;"
+            "background: transparent;"
+            );
+        ui.damageValueLabel->hide();
+
+
+        // --- HP & Damage Container ---
+        QWidget* hpDamageContainer = new QWidget(ui.widget);
+        hpDamageContainer->setStyleSheet("background: transparent;");
+        QHBoxLayout* hpDamageLayout = new QHBoxLayout(hpDamageContainer);
+        hpDamageLayout->setContentsMargins(0, 0, 0, 0);
+        hpDamageLayout->setSpacing(8);
+        hpDamageLayout->addWidget(ui.hpBar);
+        hpDamageLayout->addWidget(damagePreviewWidget);
+
         // Enemy effects
         ui.effectsWidget = new QWidget(ui.widget);
         ui.effectsWidget->setFixedHeight(28);
-
         ui.effectsLayout = new QHBoxLayout(ui.effectsWidget);
         ui.effectsLayout->setContentsMargins(0, 2, 0, 0);
         ui.effectsLayout->setSpacing(4);
         ui.effectsLayout->setAlignment(Qt::AlignCenter);
 
-        enemyInnerLayout->addWidget(
-            ui.intentLabel,
-            0,
-            Qt::AlignHCenter
-            );
-
+        // Add to main vertical layout
+        enemyInnerLayout->addWidget(ui.intentLabel, 0, Qt::AlignHCenter);
         enemyInnerLayout->addStretch();
+        enemyInnerLayout->addWidget(enemyImg, 0, Qt::AlignHCenter | Qt::AlignBottom);
 
-        enemyInnerLayout->addWidget(
-            enemyImg,
-            0,
-            Qt::AlignHCenter | Qt::AlignBottom
-            );
+        // Add the container that has both HP and Damage
+        enemyInnerLayout->addWidget(hpDamageContainer, 0, Qt::AlignHCenter);
 
-        enemyInnerLayout->addWidget(
-            ui.hpBar,
-            0,
-            Qt::AlignHCenter
-            );
-
-        enemyInnerLayout->addWidget(
-            ui.effectsWidget,
-            0,
-            Qt::AlignHCenter
-            );
+        enemyInnerLayout->addWidget(ui.effectsWidget, 0, Qt::AlignHCenter);
 
         enemyUIs.append(ui);
     }
@@ -513,8 +531,6 @@ void BattlePage::setupBattleField()
     layout->addWidget(playerWidget, 0, Qt::AlignBottom);
     layout->addStretch(1);
     layout->addWidget(enemyContainer, 0, Qt::AlignBottom);
-
-
 }
 
 void BattlePage::setupClickOverlays()
@@ -1260,8 +1276,32 @@ void BattlePage::onCardClicked(Card* card, QGraphicsProxyWidget* proxy)
         selectedProxy->setZValue(105);
 
     CardTarget target = getCardTarget(card);
+
     if (target == CardTarget::Enemy)
+    {
         showEnemyHighlights();
+
+        int baseDamage  = card->getBaseDamage();
+        int damageHits  = card->getDamageHits();
+
+        for (const EnemyUI& ui : std::as_const(enemyUIs))
+        {
+            if (ui.enemy && !ui.enemy->isDead())
+            {
+                int perHitDamage = combatManager->getCalculator()->calculateDamage(player, ui.enemy, baseDamage);
+
+                int totalDamage = perHitDamage * damageHits;
+
+                updateDamagePreview(ui.enemy, totalDamage);
+            }
+        }
+    }
+    else if (target == CardTarget::Player)
+    {
+        showPlayerHighlight();
+    }
+
+
     else if (target == CardTarget::Player)
         showPlayerHighlight();
 }
@@ -1505,6 +1545,13 @@ void BattlePage::clearSelection()
     pendingCard   = nullptr;
     selectedProxy = nullptr;
     clearHighlights();
+
+    for (const EnemyUI& ui : std::as_const(enemyUIs))
+    {
+        if (ui.enemy)
+            clearDamagePreview(ui.enemy);
+    }
+
 }
 void BattlePage::playCardWithAnimation(Card* card,
                                        QGraphicsProxyWidget* proxy,
@@ -1954,6 +2001,29 @@ void BattlePage::animateUnplayableCard(QGraphicsProxyWidget* proxy)
     });
 
     shake->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void BattlePage::updateDamagePreview(Enemy* enemy, int damage)
+{
+    EnemyUI* ui = findEnemyUi(enemy);
+    if (!ui || !ui->damageIconLabel || !ui->damageValueLabel)
+        return;
+
+    if (damage <= 0)
+    {
+        ui->damageIconLabel->hide();
+        ui->damageValueLabel->hide();
+        return;
+    }
+
+    ui->damageIconLabel->show();
+    ui->damageValueLabel->show();
+    ui->damageValueLabel->setText(QString::number(damage));
+}
+
+void BattlePage::clearDamagePreview(Enemy* enemy)
+{
+    updateDamagePreview(enemy, 0);
 }
 
 /*

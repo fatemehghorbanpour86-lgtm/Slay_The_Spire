@@ -62,6 +62,9 @@ private:
         QPointer<QWidget> effectsWidget;
         QPointer<QHBoxLayout> effectsLayout;
         QPointer<QPushButton> clickOverlay;
+        QPointer<QLabel> damageIconLabel;
+        QPointer<QLabel> damageValueLabel;
+
     };
 
     QVector<EnemyUI> enemyUIs;
@@ -185,6 +188,10 @@ private:
     void animateUnplayableCard(QGraphicsProxyWidget* proxy);
     //testing cards
     void setupTestDeck();
+
+    void updateDamagePreview(Enemy* enemy, int damage);
+    void clearDamagePreview(Enemy* enemy);
+
 
 
 

@@ -41,6 +41,9 @@ public:
     CombatState getCurrentState() const;
     const QVector<Enemy*>& getEnemies() const;
 
+    CombatCalculator* getCalculator() const { return calculator; }
+
+
 signals:
     void combatStateChanged(CombatState state);
     void statsUpdated();
