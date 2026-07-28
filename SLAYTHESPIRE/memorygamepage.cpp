@@ -78,11 +78,6 @@ void MemoryRewardDialog::setupUI()
 
 void MemoryRewardDialog::onRewardClicked()
 {
-    // Backend stub only - see MemoryGameModel::createRandomNormalRelic().
-    // Actually granting the relic to the Player is left for the future
-    // RelicSystem integration.
-    MemoryGameModel::createRandomNormalRelic();
-
     accept();
 }
 
@@ -509,8 +504,6 @@ void MemoryGameWidget::checkGameEndState()
     if (model.isGameWon())
     {
         inputLocked = true;
-
-        emit memoryGameWon();
 
         MemoryRewardDialog dialog(this);
         dialog.exec();

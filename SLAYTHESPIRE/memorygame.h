@@ -90,19 +90,6 @@ public:
     // True once MAX_MOVES moves have been used without winning.
     bool isGameLost() const;
 
-    // ---------------------------------
-    // Reward (stub - not yet connected to RelicSystem)
-    // ---------------------------------
-
-    // TODO (RelicSystem integration): should return a freshly created
-    // random Normal-tier Relic, mirroring
-    // RelicSystem::createRandomRelic(player, Relic::Tier::Normal).
-    // Deliberately left unimplemented for now - only the call site
-    // exists so MemoryRewardDialog already has something to invoke, and
-    // wiring it up later (once this Room has a Player to grant to) is a
-    // one-line change.
-    static void createRandomNormalRelic();
-
 private:
     QVector<MemoryCard> cards;
 

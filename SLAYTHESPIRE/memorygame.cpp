@@ -150,14 +150,6 @@ bool MemoryGameModel::isGameLost() const
     return !isGameWon() && moveCount >= MAX_MOVES;
 }
 
-void MemoryGameModel::createRandomNormalRelic()
-{
-    // TODO: once this Room is wired into GameManager/Player, replace
-    // this stub with something like:
-    //   Relic* relic = RelicSystem::createRandomRelic(player, Relic::Tier::Normal);
-    //   if (relic) player->addRelic(relic);
-}
-
 void MemoryGameModel::resetSelection()
 {
     firstSelectedIndex = -1;

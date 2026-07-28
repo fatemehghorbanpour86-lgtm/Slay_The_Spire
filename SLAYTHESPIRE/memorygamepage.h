@@ -98,7 +98,6 @@ public:
 
 signals:
     // ---- Future integration hooks (GameManager). Not connected anywhere yet. ----
-    void memoryGameWon();
     void memoryGameLost();
     void requestReward();
 
