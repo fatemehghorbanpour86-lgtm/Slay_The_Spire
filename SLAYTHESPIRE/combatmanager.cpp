@@ -1,5 +1,6 @@
 #include "combatmanager.h"
 
+#include "normalenemies.h"
 #include "player.h"
 #include "enemy.h"
 #include "card.h"
@@ -319,8 +320,9 @@ void CombatManager::handleEnemyTurn()
 {
     emit enemyTurnStarted();
 
-    for (Enemy* enemy : std::as_const(enemies))
+    for (int i = 0; i < enemies.size(); ++i)
     {
+        Enemy* enemy = enemies[i];
         if (!enemy || enemy->isDead())
             continue;
 
@@ -339,22 +341,29 @@ void CombatManager::handleEnemyTurn()
 
         enemy->executeMove(player);
 
+        handleEnemySplit(enemy);
+
+        if (!enemies.contains(enemy))
+        {
+            i += 1;
+        }
+
         emit statsUpdated();
         checkWinLossCondition();
         if (isBattleFinished())
             return;
 
-        if (enemy->isDead())
-            continue;
-
-        enemy->onTurnEndEffects();
-        decreaseTimedEffects(enemy);
-        enemy->finishTurn();
-
-        if (!enemy->isDead() && player->getCurrentHealth() > 0)
+        if (enemies.contains(enemy) && !enemy->isDead())
         {
-            enemy->chooseIntent(player);
-            emit enemyIntentUpdated(enemy);
+            enemy->onTurnEndEffects();
+            decreaseTimedEffects(enemy);
+            enemy->finishTurn();
+
+            if (!enemy->isDead() && player->getCurrentHealth() > 0)
+            {
+                enemy->chooseIntent(player);
+                emit enemyIntentUpdated(enemy);
+            }
         }
 
         emit statsUpdated();
@@ -620,5 +629,38 @@ void CombatManager::cleanupAfterCombat()
 
     emit statsUpdated();
 }
+
+void CombatManager::handleEnemySplit(Enemy* enemy)
+{
+    auto* largeSlime = dynamic_cast<LargeSlime*>(enemy);
+
+    if (!largeSlime || !largeSlime->isSplitRequested())
+        return;
+
+    int remainingHp = largeSlime->getCurrentHealth();
+
+    int index = enemies.indexOf(largeSlime);
+    if (index == -1)
+        return;
+
+    largeSlime->disconnect(this);
+    enemies.removeAt(index);
+
+    for (int i = 0; i < 2; ++i)
+    {
+
+        MediumSlime* medium = new MediumSlime(remainingHp);
+
+        connectEnemy(medium);
+
+        enemies.insert(index + i, medium);
+    }
+
+    largeSlime->deleteLater();
+
+    emit enemiesChanged();
+    emit statsUpdated();
+}
+
 
 

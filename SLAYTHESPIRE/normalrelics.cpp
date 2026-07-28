@@ -32,7 +32,7 @@ bool Girya::lift(Player* player)
         return false;
 
     // Permanent Strength -> default duration (-1) never expires.
-    player->addEffect(Effect::Type::Strength, Effect::Category::Buff, 1);
+    player->addEffect(Effect::Type::Strength, Effect::Category::Buff, 1 , -1);
     setCounter(getCounter() + 1);
     return true;
 }

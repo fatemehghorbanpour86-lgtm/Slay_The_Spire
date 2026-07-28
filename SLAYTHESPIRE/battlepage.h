@@ -51,6 +51,7 @@ private slots:
     void onDiscardPileClicked();
     void onExhaustPileClicked();
     void updateEnemyIntent(Enemy* enemy);
+    void rebuildEnemyUI();
 
 private:
     struct EnemyUI
@@ -207,6 +208,9 @@ private:
     bool isPotionTargeted(Potion* potion) const;
     void showEnemyPotionHighlights();
     void clearPotionSelection();
+
+    EnemyUI createEnemyUI(Enemy* enemy);
+
 
 
 

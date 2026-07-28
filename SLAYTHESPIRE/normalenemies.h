@@ -3,6 +3,9 @@
 
 #include "enemy.h"
 
+#include <QRandomGenerator>
+
+
 class Player;
 
 class JawWorm : public Enemy
@@ -79,7 +82,7 @@ class MediumSlime : public Enemy
 {
 public:
 
-    MediumSlime();
+    explicit MediumSlime(int hp = QRandomGenerator::global()->bounded(28, 33));
     virtual ~MediumSlime() override = default;
 
     virtual void chooseIntent(Player* player) override;

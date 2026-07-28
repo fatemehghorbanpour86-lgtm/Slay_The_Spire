@@ -2,7 +2,7 @@
 
 #include "player.h"
 #include "combatcalculator.h"
-#include <QRandomGenerator>
+#include "statuscards.h"
 
 JawWorm::JawWorm()
     : Enemy("Jaw Worm", QRandomGenerator::global()->bounded(42,47))
@@ -219,8 +219,8 @@ void SmallSlime::performLick(Player* player)
 
 
 
-MediumSlime::MediumSlime()
-    : Enemy("Medium Slime", QRandomGenerator::global()->bounded(28, 33))
+MediumSlime::MediumSlime(int hp)
+    : Enemy("Medium Slime", hp)
 {
 }
 void MediumSlime::chooseIntent(Player* player)
@@ -284,9 +284,9 @@ void MediumSlime::performCorrosiveSpit(Player* player)
      CombatCalculator::dealDamage(this, player, 7);
 
 
-    // 2. Add SLIMED status card to the player's Discard Pile using the standard interface
-    // player->addCardToDiscard(new SlimedCard());
+     player->addCardToDiscardPile(new Slime());
 }
+
 void MediumSlime::performTackle(Player* player)
 {
     if (!player) return;
@@ -297,7 +297,7 @@ void MediumSlime::performTackle(Player* player)
 void MediumSlime::performLick(Player* player)
 {
     if (!player) return;
-    player->addEffect(Effect::Type::Weak, Effect::Category::Debuff, 1, 1);
+    player->addEffect(Effect::Type::Weak, Effect::Category::Debuff, 0, 1);
 }
 
 
@@ -310,18 +310,19 @@ LargeSlime::LargeSlime()
     m_splitRequested(false)
 {
 }
+
 void LargeSlime::chooseIntent(Player* player)
 {
-    Q_UNUSED(player)
-
-    if (!m_splitExecuted && (getCurrentHealth() <= (getMaxHealth() / 2)))
+    if (!m_splitExecuted && getCurrentHealth() <= getMaxHealth() / 2)
     {
         m_splitReady = true;
+    }
+
+    if (m_splitReady)
+    {
         setIntent(Intent::Unknown);
         setCurrentMove(Split);
-
         setIntentDamage(0);
-
         setIntentHits(0);
         return;
     }
@@ -332,31 +333,25 @@ void LargeSlime::chooseIntent(Player* player)
     {
         setIntent(Intent::AttackDebuff);
         setCurrentMove(CorrosiveSpit);
-
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
-
-
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this, player, 7));
         setIntentHits(1);
     }
     else if (roll <= 70)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
-
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
-
+        setIntentDamage(CombatCalculator::calculateIntentDamage(this, player, 10));
         setIntentHits(1);
     }
     else
     {
         setIntent(Intent::Debuff);
         setCurrentMove(Lick);
-
         setIntentDamage(0);
-
         setIntentHits(0);
     }
 }
+
 void LargeSlime::executeMove(Player* player)
 {
     switch (getCurrentMove())
@@ -381,6 +376,7 @@ void LargeSlime::executeMove(Player* player)
         break;
     }
 }
+
 void LargeSlime::performCorrosiveSpit(Player* player)
 {
     if (!player) return;
@@ -388,8 +384,7 @@ void LargeSlime::performCorrosiveSpit(Player* player)
      CombatCalculator::dealDamage(this, player, 7);
 
 
-    // Add SLIMED status card to the player's Discard Pile using the integrated Deck System
-    // player->addCardToDiscard(new SlimedCard());
+    player->addCardToDiscardPile(new Slime());
 }
 void LargeSlime::performTackle(Player* player)
 {
