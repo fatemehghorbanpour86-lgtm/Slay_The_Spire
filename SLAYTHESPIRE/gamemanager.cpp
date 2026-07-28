@@ -689,41 +689,40 @@ void GameManager::onSettingsRequested()
 
 void GameManager::onMapNodeEntered(NodeType type)
 {
-    showEventPage();
-    // switch (type)
-    // {
-    // case NodeType::Monster:
-    //     startBattle(selectNormalEncounter(), EncounterKind::Normal);
-    //     break;
+    switch (type)
+    {
+    case NodeType::Monster:
+        startBattle(selectNormalEncounter(), EncounterKind::Normal);
+        break;
 
-    // case NodeType::Elite:
-    //     startBattle(selectEliteEncounter(), EncounterKind::Elite);
-    //     break;
+    case NodeType::Elite:
+        startBattle(selectEliteEncounter(), EncounterKind::Elite);
+        break;
 
-    // case NodeType::Boss:
-    //     startBattle(selectBossEncounter(), EncounterKind::Boss);
-    //     break;
+    case NodeType::Boss:
+        startBattle(selectBossEncounter(), EncounterKind::Boss);
+        break;
 
-    // case NodeType::Campfire:
-    //     showCampfirePage();
-    //     break;
+    case NodeType::Campfire:
+        showCampfirePage();
+        break;
 
-    // case NodeType::Shop:
-    //     showShopPage();
-    //     break;
+    case NodeType::Shop:
+        showShopPage();
+        break;
 
-    // case NodeType::Event:
-    //     showEventPage();
-    //     break;
+    case NodeType::Event:
+        showEventPage();
+        break;
 
-    // case NodeType::Treasure:
-    //     showTreasurePage();
-    //     break;
+    case NodeType::Treasure:
+        showTreasurePage();
+        break;
 
-    // case NodeType::MiniGame:
-    //     showMiniGamePage();
-    //     break;
-    // }
+    case NodeType::MiniGame:
+        showMiniGamePage();
+        break;
+    }
 }
 
 void GameManager::onCombatResult(bool playerWon)

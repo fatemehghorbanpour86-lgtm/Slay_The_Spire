@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QVector>
+#include <QPropertyAnimation>
 
 class Card;
 
@@ -15,11 +16,17 @@ public:
 
     Card* getChosenCard() const;
 
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
 private:
     QVector<Card*> cardChoices;
     Card* chosenCard;
 
     void setupUI();
+
+    QMap<QPushButton*, QRect> originalGeometry;
+    QMap<QPushButton*, QPropertyAnimation*> activeAnimations;
 };
 
 #endif // CARDSELECTION_H
