@@ -17,7 +17,7 @@ void JawWorm::chooseIntent(Player* player)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Chomp);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,11) );
+        setIntentDamage(11);
         setIntentHits(1);
         return;
     }
@@ -28,14 +28,14 @@ void JawWorm::chooseIntent(Player* player)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Chomp);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,11) );
+        setIntentDamage(11);
         setIntentHits(1);
     }
     else if (roll <= 55)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Thrash);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
+        setIntentDamage(7);
         setIntentHits(1);
     }
     else
@@ -107,7 +107,7 @@ void Louse::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
         setCurrentMove(Bite);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,randomizedBiteDamage) );
+        setIntentDamage(randomizedBiteDamage);
         setIntentHits(1);
     }
     else
@@ -175,7 +175,7 @@ void SmallSlime::chooseIntent(Player* player)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,3) );
+        setIntentDamage(3);
         setIntentHits(1);
     }
     else
@@ -234,7 +234,7 @@ void MediumSlime::chooseIntent(Player* player)
         setIntent(Intent::AttackDebuff);
         setCurrentMove(CorrosiveSpit);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
+        setIntentDamage(7);
 
         setIntentHits(1);
     }
@@ -243,7 +243,7 @@ void MediumSlime::chooseIntent(Player* player)
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
+        setIntentDamage(10);
 
         setIntentHits(1);
     }
@@ -333,14 +333,14 @@ void LargeSlime::chooseIntent(Player* player)
     {
         setIntent(Intent::AttackDebuff);
         setCurrentMove(CorrosiveSpit);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this, player, 7));
+        setIntentDamage(7);
         setIntentHits(1);
     }
     else if (roll <= 70)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this, player, 10));
+        setIntentDamage(10);
         setIntentHits(1);
     }
     else
@@ -443,8 +443,7 @@ void Cultist::chooseIntent(Player* player)
 
     setIntent(Intent::Attack);
 
-    setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,6) );
-
+    setIntentDamage(6);
 
     setIntentHits(1);
 }
@@ -472,7 +471,7 @@ void Cultist::executeMove(Player* player)
         break;
     }
 
-    addEffect(Effect::Type::Strength, Effect::Category::Buff, 3,-1);
+    addEffect(Effect::Type::Strength, Effect::Category::Buff, 3,0);
 }
 
 
@@ -512,11 +511,11 @@ void Thief::chooseIntent(Player* player)
 
         if(thiefType == Looter)
         {
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
+            setIntentDamage(10);
         }
         else
         {
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,14) );
+            setIntentDamage(14);
         }
 
         setIntentHits(1);
@@ -664,7 +663,7 @@ void BlueSlaver::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,12) );
+        setIntentDamage(12);
 
         setIntentHits(1);
 
@@ -676,7 +675,7 @@ void BlueSlaver::chooseIntent(Player* player)
 
         setIntent(Intent::AttackDebuff);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
+        setIntentDamage(7);
 
         setIntentHits(1);
 
@@ -736,7 +735,7 @@ void RedSlaver::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,13) );
+        setIntentDamage(13);
 
         setIntentHits(1);
 
@@ -763,7 +762,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::Attack);
 
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,13) );
+            setIntentDamage(13);
 
             setIntentHits(1);
         }
@@ -773,7 +772,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::AttackDebuff);
 
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,8) );
+            setIntentDamage(8);
 
             setIntentHits(1);
         }
@@ -788,7 +787,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::Attack);
 
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,13) );
+            setIntentDamage(13);
 
             setIntentHits(1);
         }
@@ -798,7 +797,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::AttackDebuff);
 
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,8) );
+            setIntentDamage(8);
 
             setIntentHits(1);
         }
@@ -863,7 +862,7 @@ void SphericGuardian::chooseIntent(Player *player)
 
         setIntent(Intent::AttackDebuff);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
+        setIntentDamage(10);
 
         setIntentHits(1);
 
@@ -876,7 +875,7 @@ void SphericGuardian::chooseIntent(Player *player)
 
         setIntent(Intent::AttackDefend);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
+        setIntentDamage(10);
 
         setIntentHits(1);
     }
@@ -886,7 +885,7 @@ void SphericGuardian::chooseIntent(Player *player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
+        setIntentDamage(10);
 
         setIntentHits(2);
     }
