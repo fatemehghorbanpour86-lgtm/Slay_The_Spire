@@ -37,7 +37,7 @@ void GremlinNob::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,14));
+        setIntentDamage(14);
 
         setIntentHits(1);
     }
@@ -48,7 +48,7 @@ void GremlinNob::chooseIntent(Player* player)
 
         setIntent(Intent::AttackDebuff);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,6));
+        setIntentDamage(6);
 
         setIntentHits(1);
     }
@@ -111,7 +111,7 @@ void Sentry::chooseIntent(Player* player)
 
             setIntent(Intent::Attack);
 
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,9));
+            setIntentDamage(9);
 
             setIntentHits(1);
         }
@@ -146,7 +146,7 @@ void Sentry::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,9));
+        setIntentDamage(9);
 
         setIntentHits(1);
     }
@@ -198,14 +198,14 @@ void BookOfStabbing::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
         setCurrentMove(MultiStab);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,6));
+        setIntentDamage(6);
         setIntentHits(hits);
     }
     else
     {
         setIntent(Intent::Attack);
         setCurrentMove(SingleStab);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,21));
+        setIntentDamage(21);
         setIntentHits(1);
     }
 }
@@ -264,7 +264,7 @@ void Taskmaster::chooseIntent(Player* player)
     // Only one move exists, so intent never changes turn to turn.
     setIntent(Intent::Attack);
     setCurrentMove(ScouringWhip);
-    setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7));
+    setIntentDamage(7);
     setIntentHits(1);
 }
 void Taskmaster::executeMove(Player *player)

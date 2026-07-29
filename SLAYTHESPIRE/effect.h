@@ -36,7 +36,7 @@ public:
         Enrage
     };
 
-    Effect(Type type, Category category, int amount, int duration = -1);
+    Effect(Type type, Category category, int amount, int duration = 0);
 
     QString getName() const;
     Type getType() const;

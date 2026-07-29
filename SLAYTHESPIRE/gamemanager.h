@@ -31,6 +31,8 @@ class MemoryGameWidget;
 class TreasureGuessPage;
 class QDialog;
 class LeaderboardPage;
+class DefeatPage;
+
 
 
 
@@ -69,6 +71,8 @@ private:
     ShopPage*     shopPage     = nullptr;
     EventPage*    eventPage    = nullptr;
     LeaderboardPage* leaderboardPage = nullptr;
+    DefeatPage* defeatPage = nullptr;
+
 
 
     // ---- Mini Games (Floor 9) ----
@@ -114,6 +118,7 @@ private:
     void showTreasurePage();
     void showEventPage();
     void showVictoryPage();
+    void showLeaderboardPage(bool openedFromDefeat = false);
     void showDefeatPage();
     void updateLeaderboard(RunStatus status);
 
@@ -151,7 +156,6 @@ private:
     void onTreasureFinished();
     void onMapPauseRequested();
     void onEventResolved();
-    void showLeaderboardPage();
 
     // ---- Mini Game result slots ----
     void onMemoryGameWon();
@@ -161,6 +165,11 @@ private:
     // Hook: connect this to the (future) Defeat/Victory page's
     // "Return to Main Menu" button.
     void onReturnToMainMenuRequested();
+
+private slots:
+    void onDefeatLeaderboardRequested();
+    void onLeaderboardBackRequestedAfterDefeat();
+
 };
 
 #endif // GAMEMANAGER_H

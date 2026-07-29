@@ -61,6 +61,8 @@ signals:
 
     void requestPileSelection(PileType pileType);
 
+    void enemiesChanged();
+
 private:
     void changeState(CombatState newState);
 
@@ -84,6 +86,8 @@ private:
 
     void cleanupAfterCombat();
     bool combatCleanedUp = false;
+
+    void handleEnemySplit(Enemy* enemy);
 
 
 
