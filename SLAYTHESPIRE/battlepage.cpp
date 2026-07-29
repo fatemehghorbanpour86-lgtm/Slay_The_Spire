@@ -1394,7 +1394,6 @@ QString BattlePage::getIntentText(Enemy* enemy)
 {
     if (!enemy || enemy->isDead())
         return "Defeated";
-
     QString emoji;
     switch (enemy->getIntent())
     {
@@ -1409,11 +1408,18 @@ QString BattlePage::getIntentText(Enemy* enemy)
     case Intent::Escape:       emoji = "💨";       break;
     case Intent::Unknown:      emoji = "❓";       break;
     }
-
     QString text = emoji;
-    if (enemy->getIntentDamage() > 0)
+
+    int baseDamage = enemy->getIntentDamage();
+    if (baseDamage > 0)
     {
-        text += QString(" %1").arg(enemy->getIntentDamage());
+        int displayDamage = baseDamage;
+        if (combatManager && player)
+        {
+            displayDamage = combatManager->getCalculator()
+            ->calculateIntentDamage(enemy, player, baseDamage);
+        }
+        text += QString(" %1").arg(displayDamage);
         if (enemy->getIntentHits() > 1)
             text += QString(" x%1").arg(enemy->getIntentHits());
     }

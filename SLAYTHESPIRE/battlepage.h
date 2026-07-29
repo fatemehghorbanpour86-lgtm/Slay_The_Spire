@@ -126,6 +126,9 @@ private:
 
     QList<QPushButton*> potionButtons;
 
+    QLabel* actLabel = nullptr;
+    QLabel* floorCountLabel = nullptr;
+
 
     enum class CardTarget
     {
