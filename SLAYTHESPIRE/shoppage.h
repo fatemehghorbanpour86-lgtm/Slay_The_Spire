@@ -38,6 +38,7 @@ private:
     void updateUI();
     void populateInventory();
     void positionGreetingActors();
+    void updateTopBarStats();
     QString getPotionImagePath(const QString &potionName);
 
     bool cardRemovalSold = false;
@@ -63,13 +64,14 @@ private:
     QWidget *inventoryContainer;
     QPushButton *leaveBtn;
 
-    // Top bar labels
+    // Top bar labels and elements
     QLabel *playerHpLabel;
     QLabel *deckCountLabel = nullptr;
     QLabel *goldValueLabel;
     QLabel *bg;
 
-
+    // Disabled potion buttons for visual display in the top bar
+    QVector<QPushButton*> potionButtons;
 
 signals:
     void shoppingDone();

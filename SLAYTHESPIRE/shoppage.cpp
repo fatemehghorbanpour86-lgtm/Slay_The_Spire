@@ -4,11 +4,11 @@
 #include "potion.h"
 #include "deckviewer.h"
 #include "PileViewerDialog.h"
+#include "relicviewer.h"
 
 #include <QDebug>
 #include <QLayoutItem>
 #include <QSpacerItem>
-
 
 ShopPage::ShopPage(Player *player, QWidget *parent)
     : QWidget(parent),
@@ -54,31 +54,18 @@ void ShopPage::setupTopBar()
     layout->setContentsMargins(20, 6, 20, 6);
     layout->setSpacing(0);
 
-    // ===== LEFT GROUP: name + HP + gold + potions =====
+    // ===== LEFT GROUP: name/class + HP + gold + potions =====
     QHBoxLayout *leftGroup = new QHBoxLayout();
     leftGroup->setSpacing(10);
 
-    QLabel *nameLabel = new QLabel(player->getName(), topBar);
-    nameLabel->setStyleSheet(
-        "color: white;"
-        "font-size: 14px;"
-        "font-weight: bold;"
-        "background: transparent;"
-        );
-
     QLabel *classLabel = new QLabel("the Ironclad", topBar);
-    classLabel->setStyleSheet(
-        "color: #cfcfcf;"
-        "font-size: 13px;"
-        "background: transparent;"
-        );
+    classLabel->setStyleSheet("color: #cfcfcf; font-size: 13px; background: transparent;");
 
     QLabel *heartIcon = new QLabel(topBar);
     heartIcon->setFixedSize(45, 45);
     heartIcon->setStyleSheet("background: transparent;");
     heartIcon->setPixmap(QPixmap(":/heartIcon.png").scaled(
-        45,
-        45,
+        45, 45,
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
         ));
@@ -90,33 +77,21 @@ void ShopPage::setupTopBar()
             .arg(player->getMaxHealth()),
         topBar
         );
-    playerHpLabel->setStyleSheet(
-        "color: #e63946;"
-        "font-size: 14px;"
-        "font-weight: bold;"
-        "background: transparent;"
-        );
+    playerHpLabel->setStyleSheet("color: #e63946; font-size: 14px; font-weight: bold; background: transparent;");
 
     QLabel *goldIcon = new QLabel(topBar);
     goldIcon->setFixedSize(45, 45);
     goldIcon->setStyleSheet("background: transparent;");
     goldIcon->setPixmap(QPixmap(":/moneyPouch.png").scaled(
-        45,
-        45,
+        45, 45,
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
         ));
     goldIcon->setAlignment(Qt::AlignCenter);
 
     goldValueLabel = new QLabel(QString::number(player->getGold()), topBar);
-    goldValueLabel->setStyleSheet(
-        "color: #f5c518;"
-        "font-size: 14px;"
-        "font-weight: bold;"
-        "background: transparent;"
-        );
+    goldValueLabel->setStyleSheet("color: #f5c518; font-size: 14px; font-weight: bold; background: transparent;");
 
-    leftGroup->addWidget(nameLabel);
     leftGroup->addWidget(classLabel);
     leftGroup->addSpacing(15);
     leftGroup->addWidget(heartIcon);
@@ -126,55 +101,55 @@ void ShopPage::setupTopBar()
     leftGroup->addWidget(goldValueLabel);
     leftGroup->addSpacing(15);
 
+    // Visual Potion slots (Disabled & non-interactive in the shop)
+    potionButtons.clear();
     for (int i = 0; i < 3; ++i)
     {
-        QLabel *potionSlot = new QLabel(topBar);
-        potionSlot->setFixedSize(24, 24);
-        potionSlot->setStyleSheet(
-            "background: rgba(255,255,255,20);"
-            "border: 1px solid #666;"
-            "border-radius: 4px;"
+        QPushButton *potionBtn = new QPushButton(topBar);
+        potionBtn->setFixedSize(30, 30);
+        potionBtn->setEnabled(false);
+        potionBtn->setFocusPolicy(Qt::NoFocus);
+        potionBtn->setStyleSheet(
+            "QPushButton {"
+            "   background: rgba(255,255,255,20); border: 1px solid #666; border-radius: 4px;"
+            "}"
+            "QPushButton:disabled {"
+            "   opacity: 1;"
+            "}"
             );
-        leftGroup->addWidget(potionSlot);
+        leftGroup->addWidget(potionBtn);
         leftGroup->addSpacing(4);
+        potionButtons.append(potionBtn);
     }
 
-    // ===== CENTER: floor icon + count =====
-    QHBoxLayout *centerGroup = new QHBoxLayout();
-    centerGroup->setSpacing(6);
-
-    QLabel *floorIcon = new QLabel(topBar);
-    floorIcon->setFixedSize(45, 45);
-    floorIcon->setStyleSheet("background: transparent;");
-    floorIcon->setPixmap(QPixmap(":/floor.png").scaled(
-        45,
-        45,
-        Qt::KeepAspectRatio,
-        Qt::SmoothTransformation
-        ));
-    floorIcon->setAlignment(Qt::AlignCenter);
-
-    QLabel *floorCountLabel = new QLabel("10", topBar);
-    floorCountLabel->setStyleSheet(
-        "color: white;"
-        "font-size: 14px;"
-        "font-weight: bold;"
-        "background: transparent;"
-        );
-
-    centerGroup->addWidget(floorIcon);
-    centerGroup->addWidget(floorCountLabel);
-
-    // ===== RIGHT GROUP: notes/scroll, map, settings =====
+    // ===== RIGHT GROUP: relic, map, deck =====
     QHBoxLayout *rightGroup = new QHBoxLayout();
     rightGroup->setSpacing(14);
+
+    QPushButton *relicBtn = new QPushButton(topBar);
+    relicBtn->setFixedSize(30, 30);
+    relicBtn->setCursor(Qt::PointingHandCursor);
+    relicBtn->setStyleSheet(
+        "QPushButton {"
+        "   background: transparent;"
+        "   border: none;"
+        "   border-image: url(:/map/relicIcon.png);"
+        "}"
+        "QPushButton:pressed {"
+        "   margin: 2px 2px 2px 2px;"
+        "}"
+        );
+
+    connect(relicBtn, &QPushButton::clicked, this, [this]() {
+        RelicViewerDialog dialog(player, this);
+        dialog.exec();
+    });
 
     QLabel *mapIcon = new QLabel(topBar);
     mapIcon->setFixedSize(60, 60);
     mapIcon->setStyleSheet("background: transparent; margin-top: -20px;");
     mapIcon->setPixmap(QPixmap(":/mapIcon.png").scaled(
-        55,
-        55,
+        55, 55,
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
         ));
@@ -196,28 +171,13 @@ void ShopPage::setupTopBar()
         "}"
         );
 
-    // Deck Count Label
-
-    QLabel *settingsIcon = new QLabel(topBar);
-    settingsIcon->setFixedSize(45, 45);
-    settingsIcon->setStyleSheet("background: transparent;");
-    settingsIcon->setPixmap(QPixmap(":/settingicon.png").scaled(
-        45,
-        45,
-        Qt::KeepAspectRatio,
-        Qt::SmoothTransformation
-        ));
-    settingsIcon->setAlignment(Qt::AlignCenter);
-
+    rightGroup->addWidget(relicBtn);
     rightGroup->addWidget(mapIcon);
     rightGroup->addWidget(deckBtn);
-    rightGroup->addWidget(deckCountLabel);
-    rightGroup->addWidget(settingsIcon);
 
     // ===== Assemble =====
     layout->addLayout(leftGroup);
     layout->addStretch();
-    layout->addLayout(centerGroup);
     layout->addStretch();
     layout->addLayout(rightGroup);
 
@@ -227,7 +187,7 @@ void ShopPage::setupTopBar()
             {
                 if (player)
                 {
-                    PileViewerDialog dialog(player, PileType::Deck,PileViewerMode::ViewOnly, this);
+                    PileViewerDialog dialog(player, PileType::Deck, PileViewerMode::ViewOnly, this);
                     dialog.exec();
                 }
             });
@@ -350,7 +310,6 @@ static void clearLayout(QLayout *layout)
     }
 }
 
-
 void ShopPage::populateInventory()
 {
     if (QLayout *oldLayout = inventoryContainer->layout())
@@ -417,9 +376,7 @@ void ShopPage::populateInventory()
     }
 
     cardsLayout->addStretch();
-
     mainInvLayout->addLayout(cardsLayout);
-
     mainInvLayout->addSpacing(40);
 
     // =========================
@@ -484,7 +441,6 @@ void ShopPage::populateInventory()
     removalLayout->setContentsMargins(0, 0, 0, 0);
     removalLayout->setSpacing(5);
     removalLayout->setAlignment(Qt::AlignCenter);
-
 
     QPushButton *remBtn = new QPushButton(removalWidget);
     remBtn->setFixedSize(150, 190);
@@ -580,9 +536,36 @@ void ShopPage::populateInventory()
                 }
             });
 
-
     mainInvLayout->addLayout(bottomRowLayout);
+}
 
+void ShopPage::updateTopBarStats()
+{
+    if (!player)
+        return;
+
+    // 1. Sync textual HP and Gold details
+    goldValueLabel->setText(QString::number(player->getGold()));
+    playerHpLabel->setText(
+        QString("%1/%2")
+            .arg(player->getCurrentHealth())
+            .arg(player->getMaxHealth())
+        );
+
+    // 2. Dynamic visual refresh of the top-bar potion slots
+    const auto &potions = player->getPotions();
+    for (int i = 0; i < potionButtons.size(); ++i)
+    {
+        if (i < potions.size() && potions[i] != nullptr)
+        {
+            potionButtons[i]->setIcon(QIcon(getPotionImagePath(potions[i]->getName())));
+            potionButtons[i]->setIconSize(QSize(24, 24));
+        }
+        else
+        {
+            potionButtons[i]->setIcon(QIcon());
+        }
+    }
 }
 
 void ShopPage::updateUI()
@@ -622,15 +605,10 @@ void ShopPage::updateUI()
         inventoryContainer->setGeometry(140, 15, 1000, 540);
 
         populateInventory();
-
-        goldValueLabel->setText(QString::number(player->getGold()));
-        playerHpLabel->setText(
-            QString("%1/%2")
-                .arg(player->getCurrentHealth())
-                .arg(player->getMaxHealth())
-            );
     }
 
+    // Keep the top bar synced with the current player state
+    updateTopBarStats();
 }
 
 void ShopPage::onBuyCard(int index)
@@ -645,7 +623,6 @@ void ShopPage::onBuyCard(int index)
     }
 }
 
-
 void ShopPage::onBuyPotion(int index)
 {
     if (shopLogic->buyPotion(player, index))
@@ -658,11 +635,8 @@ void ShopPage::onBuyPotion(int index)
     }
 }
 
-
 void ShopPage::positionGreetingActors()
 {
-
     playerContainer->setGeometry(200, 150, 250, 350);
     merchantBtn->setGeometry(700, 180, 320, 320);
 }
-
