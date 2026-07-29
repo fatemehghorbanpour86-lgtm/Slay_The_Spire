@@ -51,6 +51,7 @@ private slots:
     void onDiscardPileClicked();
     void onExhaustPileClicked();
     void updateEnemyIntent(Enemy* enemy);
+    void rebuildEnemyUI();
 
 private:
     struct EnemyUI
@@ -124,6 +125,9 @@ private:
     QHBoxLayout* playerEffectsLayout = nullptr;
 
     QList<QPushButton*> potionButtons;
+
+    QLabel* actLabel = nullptr;
+    QLabel* floorCountLabel = nullptr;
 
 
     enum class CardTarget
@@ -207,6 +211,9 @@ private:
     bool isPotionTargeted(Potion* potion) const;
     void showEnemyPotionHighlights();
     void clearPotionSelection();
+
+    EnemyUI createEnemyUI(Enemy* enemy);
+
 
 
 

@@ -2,7 +2,7 @@
 
 #include "player.h"
 #include "combatcalculator.h"
-#include <QRandomGenerator>
+#include "statuscards.h"
 
 JawWorm::JawWorm()
     : Enemy("Jaw Worm", QRandomGenerator::global()->bounded(42,47))
@@ -17,7 +17,7 @@ void JawWorm::chooseIntent(Player* player)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Chomp);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,11) );
+        setIntentDamage(11);
         setIntentHits(1);
         return;
     }
@@ -28,14 +28,14 @@ void JawWorm::chooseIntent(Player* player)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Chomp);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,11) );
+        setIntentDamage(11);
         setIntentHits(1);
     }
     else if (roll <= 55)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Thrash);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
+        setIntentDamage(7);
         setIntentHits(1);
     }
     else
@@ -107,7 +107,7 @@ void Louse::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
         setCurrentMove(Bite);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,randomizedBiteDamage) );
+        setIntentDamage(randomizedBiteDamage);
         setIntentHits(1);
     }
     else
@@ -175,7 +175,7 @@ void SmallSlime::chooseIntent(Player* player)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,3) );
+        setIntentDamage(3);
         setIntentHits(1);
     }
     else
@@ -219,8 +219,8 @@ void SmallSlime::performLick(Player* player)
 
 
 
-MediumSlime::MediumSlime()
-    : Enemy("Medium Slime", QRandomGenerator::global()->bounded(28, 33))
+MediumSlime::MediumSlime(int hp)
+    : Enemy("Medium Slime", hp)
 {
 }
 void MediumSlime::chooseIntent(Player* player)
@@ -234,7 +234,7 @@ void MediumSlime::chooseIntent(Player* player)
         setIntent(Intent::AttackDebuff);
         setCurrentMove(CorrosiveSpit);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
+        setIntentDamage(7);
 
         setIntentHits(1);
     }
@@ -243,7 +243,7 @@ void MediumSlime::chooseIntent(Player* player)
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
+        setIntentDamage(10);
 
         setIntentHits(1);
     }
@@ -284,9 +284,9 @@ void MediumSlime::performCorrosiveSpit(Player* player)
      CombatCalculator::dealDamage(this, player, 7);
 
 
-    // 2. Add SLIMED status card to the player's Discard Pile using the standard interface
-    // player->addCardToDiscard(new SlimedCard());
+     player->addCardToDiscardPile(new Slime());
 }
+
 void MediumSlime::performTackle(Player* player)
 {
     if (!player) return;
@@ -297,7 +297,7 @@ void MediumSlime::performTackle(Player* player)
 void MediumSlime::performLick(Player* player)
 {
     if (!player) return;
-    player->addEffect(Effect::Type::Weak, Effect::Category::Debuff, 1, 1);
+    player->addEffect(Effect::Type::Weak, Effect::Category::Debuff, 0, 1);
 }
 
 
@@ -310,18 +310,19 @@ LargeSlime::LargeSlime()
     m_splitRequested(false)
 {
 }
+
 void LargeSlime::chooseIntent(Player* player)
 {
-    Q_UNUSED(player)
-
-    if (!m_splitExecuted && (getCurrentHealth() <= (getMaxHealth() / 2)))
+    if (!m_splitExecuted && getCurrentHealth() <= getMaxHealth() / 2)
     {
         m_splitReady = true;
+    }
+
+    if (m_splitReady)
+    {
         setIntent(Intent::Unknown);
         setCurrentMove(Split);
-
         setIntentDamage(0);
-
         setIntentHits(0);
         return;
     }
@@ -332,31 +333,25 @@ void LargeSlime::chooseIntent(Player* player)
     {
         setIntent(Intent::AttackDebuff);
         setCurrentMove(CorrosiveSpit);
-
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
-
-
+        setIntentDamage(7);
         setIntentHits(1);
     }
     else if (roll <= 70)
     {
         setIntent(Intent::Attack);
         setCurrentMove(Tackle);
-
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
-
+        setIntentDamage(10);
         setIntentHits(1);
     }
     else
     {
         setIntent(Intent::Debuff);
         setCurrentMove(Lick);
-
         setIntentDamage(0);
-
         setIntentHits(0);
     }
 }
+
 void LargeSlime::executeMove(Player* player)
 {
     switch (getCurrentMove())
@@ -381,6 +376,7 @@ void LargeSlime::executeMove(Player* player)
         break;
     }
 }
+
 void LargeSlime::performCorrosiveSpit(Player* player)
 {
     if (!player) return;
@@ -388,8 +384,7 @@ void LargeSlime::performCorrosiveSpit(Player* player)
      CombatCalculator::dealDamage(this, player, 7);
 
 
-    // Add SLIMED status card to the player's Discard Pile using the integrated Deck System
-    // player->addCardToDiscard(new SlimedCard());
+    player->addCardToDiscardPile(new Slime());
 }
 void LargeSlime::performTackle(Player* player)
 {
@@ -448,8 +443,7 @@ void Cultist::chooseIntent(Player* player)
 
     setIntent(Intent::Attack);
 
-    setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,6) );
-
+    setIntentDamage(6);
 
     setIntentHits(1);
 }
@@ -477,7 +471,7 @@ void Cultist::executeMove(Player* player)
         break;
     }
 
-    addEffect(Effect::Type::Strength, Effect::Category::Buff, 3,-1);
+    addEffect(Effect::Type::Strength, Effect::Category::Buff, 3,0);
 }
 
 
@@ -517,11 +511,11 @@ void Thief::chooseIntent(Player* player)
 
         if(thiefType == Looter)
         {
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
+            setIntentDamage(10);
         }
         else
         {
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,14) );
+            setIntentDamage(14);
         }
 
         setIntentHits(1);
@@ -669,7 +663,7 @@ void BlueSlaver::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,12) );
+        setIntentDamage(12);
 
         setIntentHits(1);
 
@@ -681,7 +675,7 @@ void BlueSlaver::chooseIntent(Player* player)
 
         setIntent(Intent::AttackDebuff);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,7) );
+        setIntentDamage(7);
 
         setIntentHits(1);
 
@@ -741,7 +735,7 @@ void RedSlaver::chooseIntent(Player* player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,13) );
+        setIntentDamage(13);
 
         setIntentHits(1);
 
@@ -768,7 +762,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::Attack);
 
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,13) );
+            setIntentDamage(13);
 
             setIntentHits(1);
         }
@@ -778,7 +772,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::AttackDebuff);
 
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,8) );
+            setIntentDamage(8);
 
             setIntentHits(1);
         }
@@ -793,7 +787,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::Attack);
 
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,13) );
+            setIntentDamage(13);
 
             setIntentHits(1);
         }
@@ -803,7 +797,7 @@ void RedSlaver::chooseIntent(Player* player)
 
             setIntent(Intent::AttackDebuff);
 
-            setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,8) );
+            setIntentDamage(8);
 
             setIntentHits(1);
         }
@@ -868,7 +862,7 @@ void SphericGuardian::chooseIntent(Player *player)
 
         setIntent(Intent::AttackDebuff);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
+        setIntentDamage(10);
 
         setIntentHits(1);
 
@@ -881,7 +875,7 @@ void SphericGuardian::chooseIntent(Player *player)
 
         setIntent(Intent::AttackDefend);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
+        setIntentDamage(10);
 
         setIntentHits(1);
     }
@@ -891,7 +885,7 @@ void SphericGuardian::chooseIntent(Player *player)
 
         setIntent(Intent::Attack);
 
-        setIntentDamage(CombatCalculator::calculateIntentDamage(this,player,10) );
+        setIntentDamage(10);
 
         setIntentHits(2);
     }

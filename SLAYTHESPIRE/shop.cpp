@@ -133,15 +133,29 @@ bool Shop::buyPotion(Player* player, int index)
 {
     if (player == nullptr)
         return false;
+
     if (index < 0 || index >= potionOffers.size())
         return false;
+
     const ShopPotionOffer offer = potionOffers[index];
+
+    if (!player->hasPotionSpace())
+        return false;
+
     if (!player->spendGold(offer.price))
         return false;
-    player->addPotion(offer.potion); // ownership transfers to Player
+
+    if (!player->addPotion(offer.potion))
+    {
+        // safety rollback if something unexpected happens
+        player->gainGold(offer.price);
+        return false;
+    }
+
     potionOffers.removeAt(index);
     return true;
 }
+
 bool Shop::removeCard(Player* player, Card* card)
 {
     if (player == nullptr || card == nullptr)

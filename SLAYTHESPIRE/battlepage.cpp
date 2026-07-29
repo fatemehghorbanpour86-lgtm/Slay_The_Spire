@@ -14,6 +14,8 @@
 #include "pileviewerdialog.h"
 #include "skillcards.h"
 #include "statuscards.h"
+#include "relicviewer.h"
+
 
 #include <QPropertyAnimation>
 #include <QGraphicsProxyWidget>
@@ -161,6 +163,7 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     QTimer::singleShot(0, this, &BattlePage::repositionOverlays);
 
 
+
     combatManager = new CombatManager(player, enemies, this);
 
     connect(combatManager, &CombatManager::statsUpdated, this, &BattlePage::updateStats);
@@ -168,6 +171,8 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     connect(combatManager, &CombatManager::battleLost,   this, &BattlePage::onBattleLost);
     connect(endTurnBtn,    &QPushButton::clicked,        combatManager, &CombatManager::endTurn);
     connect(combatManager, &CombatManager::enemyIntentUpdated, this, &BattlePage::updateEnemyIntent);
+    connect(combatManager, &CombatManager::enemiesChanged, this, &BattlePage::rebuildEnemyUI);
+
     connect(combatManager, &CombatManager::requestPileSelection,
             this, [this](PileType pileType)
             {
@@ -221,14 +226,8 @@ void BattlePage::setupTopBar()
     QHBoxLayout *leftGroup = new QHBoxLayout();
     leftGroup->setSpacing(10);
 
-    // Character name
-    QLabel *nameLabel = new QLabel(player->getName(), topBar);
-    nameLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold; background: transparent;");
-
     QLabel *classLabel = new QLabel("the Ironclad", topBar);
     classLabel->setStyleSheet("color: #cfcfcf; font-size: 13px; background: transparent;");
-
-    // HP icon + value
 
     QLabel *heartIcon = new QLabel(topBar);
     heartIcon->setFixedSize(45, 45);
@@ -240,26 +239,22 @@ void BattlePage::setupTopBar()
         ));
     heartIcon->setAlignment(Qt::AlignCenter);
 
-
     playerHpLabel = new QLabel("80/80", topBar);
     playerHpLabel->setStyleSheet("color: #e63946; font-size: 14px; font-weight: bold; background: transparent;");
 
-
-    // Gold icon + value
     QLabel *goldIcon = new QLabel(topBar);
     goldIcon->setFixedSize(45, 45);
     goldIcon->setStyleSheet("background: transparent;");
     goldIcon->setPixmap(QPixmap(":/moneyPouch.png").scaled(
-             45,45,
-             Qt::KeepAspectRatio,
-             Qt::SmoothTransformation
-             ));
+        45, 45,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        ));
     goldIcon->setAlignment(Qt::AlignCenter);
 
     goldValueLabel = new QLabel(QString::number(player->getGold()), topBar);
     goldValueLabel->setStyleSheet("color: #f5c518; font-size: 14px; font-weight: bold; background: transparent;");
 
-    leftGroup->addWidget(nameLabel);
     leftGroup->addWidget(classLabel);
     leftGroup->addSpacing(15);
     leftGroup->addWidget(heartIcon);
@@ -298,16 +293,13 @@ void BattlePage::setupTopBar()
 
             if (isPotionTargeted(potion))
             {
-
                 if (pendingCard)
                     clearSelection();
 
                 pendingPotion = potion;
                 waitingForPotionTarget = true;
-
                 showEnemyPotionHighlights();
             }
-
             else
             {
                 Enemy* target = nullptr;
@@ -318,47 +310,46 @@ void BattlePage::setupTopBar()
             }
         });
 
-
         leftGroup->addWidget(potionBtn);
         leftGroup->addSpacing(4);
         potionButtons.append(potionBtn);
     }
 
-    // ===== CENTER: floor icon + count =====
-    QHBoxLayout *centerGroup = new QHBoxLayout();
-    centerGroup->setSpacing(6);
-
-    QLabel *floorIcon = new QLabel(topBar);
-    floorIcon->setFixedSize(45, 45);
-    floorIcon->setStyleSheet("background: transparent;");
-    floorIcon->setPixmap(QPixmap(":/floor.png").scaled(
-        45,45,
-        Qt::KeepAspectRatio,
-        Qt::SmoothTransformation
-        ));
-    floorIcon->setAlignment(Qt::AlignCenter);
-
-    QLabel *floorCountLabel = new QLabel("10", topBar);
-    floorCountLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold;  background: transparent;");
-
-    centerGroup->addWidget(floorIcon);
-    centerGroup->addWidget(floorCountLabel);
-
-    // ===== RIGHT GROUP: notes/scroll, map, settings =====
+    // ===== RIGHT GROUP: relic, map, deck =====
     QHBoxLayout *rightGroup = new QHBoxLayout();
     rightGroup->setSpacing(14);
+
+    // Relic button
+    // Relic button
+    QPushButton *relicBtn = new QPushButton(topBar);
+    relicBtn->setFixedSize(30, 30);
+    relicBtn->setCursor(Qt::PointingHandCursor);
+    relicBtn->setStyleSheet(
+        "QPushButton {"
+        "   background: transparent;"
+        "   border: none;"
+        "   border-image: url(:/map/relicIcon.png);"
+        "}"
+        "QPushButton:pressed {"
+        "   margin: 2px 2px 2px 2px;"
+        "}"
+        );
+
+
+    connect(relicBtn, &QPushButton::clicked, this, [this]() {
+        RelicViewerDialog dialog(player, this);
+        dialog.exec();
+    });
 
     QLabel *mapIcon = new QLabel(topBar);
     mapIcon->setFixedSize(60, 60);
     mapIcon->setStyleSheet("background: transparent; margin-top: -20px;");
-
     mapIcon->setPixmap(QPixmap(":/mapIcon.png").scaled(
-        55,55,
+        55, 55,
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
         ));
     mapIcon->setAlignment(Qt::AlignCenter);
-
 
     QPushButton *deckBtn = new QPushButton(topBar);
     deckBtn->setFixedSize(45, 45);
@@ -376,36 +367,22 @@ void BattlePage::setupTopBar()
         "}"
         );
 
-    // Deck Count Label
-
-
-    QLabel *settingsIcon = new QLabel(topBar);
-    settingsIcon->setFixedSize(45, 45);
-    settingsIcon->setStyleSheet("background: transparent;");
-    settingsIcon->setPixmap(QPixmap(":/settingicon.png").scaled(
-        45,45,
-        Qt::KeepAspectRatio,
-        Qt::SmoothTransformation
-        ));
-    settingsIcon->setAlignment(Qt::AlignCenter);
-
+    rightGroup->addWidget(relicBtn);
     rightGroup->addWidget(mapIcon);
     rightGroup->addWidget(deckBtn);
-    rightGroup->addWidget(settingsIcon);
 
     // ===== Assemble =====
     layout->addLayout(leftGroup);
     layout->addStretch();
-    layout->addLayout(centerGroup);
     layout->addStretch();
     layout->addLayout(rightGroup);
 
     connect(deckBtn, &QPushButton::clicked, this, [this]()
             {
                 PileViewerDialog dialog(player,
-                            PileType::Deck,
-                            PileViewerMode::ViewOnly,
-                            this);
+                                        PileType::Deck,
+                                        PileViewerMode::ViewOnly,
+                                        this);
                 dialog.exec();
             });
 }
@@ -477,6 +454,7 @@ void BattlePage::setupBattleField()
     enemyLayout->setAlignment(Qt::AlignCenter | Qt::AlignBottom);
     enemyLayout->setSpacing(30);
 
+
     enemyUIs.clear();
 
     for (Enemy* enemy : std::as_const(enemies))
@@ -484,137 +462,10 @@ void BattlePage::setupBattleField()
         if (!enemy)
             continue;
 
-        EnemyUI ui{};
-        ui.enemy = enemy;
-
-        ui.widget = new QWidget(enemyContainer);
-        ui.widget->setFixedSize(220, 380);
-        ui.widget->setStyleSheet("background: transparent;");
-        enemyLayout->addWidget(ui.widget);
-
-        QVBoxLayout* enemyInnerLayout = new QVBoxLayout(ui.widget);
-        enemyInnerLayout->setContentsMargins(0, 0, 0, 10);
-        enemyInnerLayout->setSpacing(5);
-
-        // Enemy intent
-        ui.intentLabel = new QLabel(getIntentText(enemy), ui.widget);
-        ui.intentLabel->setAlignment(Qt::AlignCenter);
-        ui.intentLabel->setFixedHeight(30);
-        ui.intentLabel->setStyleSheet(
-            "color: #f87171; font-size: 15px; font-weight: bold;"
-            "background: transparent; border-radius: 8px; padding: 2px;"
-            );
-
-        // Enemy image
-        QLabel* enemyImg = new QLabel(ui.widget);
-        enemyImg->setFixedSize(180, 200);
-        enemyImg->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
-        enemyImg->setStyleSheet("background: transparent;");
-
-        QPixmap px(enemyImagePath(enemy));
-        enemyImg->setPixmap(px.scaled(
-            180,
-            200,
-            Qt::KeepAspectRatio,
-            Qt::SmoothTransformation
-            ));
-
-        // Enemy HP bar
-        ui.hpBar = new QProgressBar(ui.widget);
-        ui.hpBar->setRange(0, enemy->getMaxHealth());
-        ui.hpBar->setValue(enemy->getCurrentHealth());
-        ui.hpBar->setFixedSize(100, 16);
-        ui.hpBar->setTextVisible(true);
-        ui.hpBar->setFormat("%v / %m");
-        ui.hpBar->setStyleSheet(
-            "QProgressBar {"
-            "background: #1a1a1a;"
-            "border: 2px solid #333;"
-            "border-radius: 6px;"
-            "color: white;"
-            "font-size: 11px;"
-            "text-align: center;"
-            "}"
-            "QProgressBar::chunk {"
-            "background: #e63946;"
-            "border-radius: 4px;"
-            "}"
-            );
-
-        // Damage UI
-        // Damage UI - Fixed with absolute positioning
-        QWidget* damagePreviewWidget = new QWidget(ui.widget);
-        damagePreviewWidget->setFixedSize(70, 40);
-        damagePreviewWidget->setStyleSheet("background: transparent;");
-
-        ui.damageIconLabel = new QLabel(damagePreviewWidget);
-        ui.damageIconLabel->setGeometry(0, 0, 40, 40);
-        ui.damageIconLabel->setPixmap(
-            QPixmap(":/attack.png").scaled(
-                40, 40,
-                Qt::KeepAspectRatio,
-                Qt::SmoothTransformation
-                )
-            );
-        ui.damageIconLabel->setStyleSheet("background: transparent;");
-        ui.damageIconLabel->hide();
-
-        ui.damageValueLabel = new QLabel(damagePreviewWidget);
-        ui.damageValueLabel->setGeometry(35, 8, 35, 24);
-        ui.damageValueLabel->setStyleSheet(
-            "color: #ff4d4d;"
-            "font-size: 16px;"
-            "font-weight: bold;"
-            "background: transparent;"
-            );
-        ui.damageValueLabel->hide();
-
-        //Defend (Block)
-        ui.blockWidget = new QWidget(ui.widget);
-        ui.blockWidget->setFixedSize(36, 36);
-        ui.blockWidget->setStyleSheet("background: transparent;");
-
-        ui.blockIconLabel = new QLabel(ui.blockWidget);
-        ui.blockIconLabel->setGeometry(0, 0, 36, 36);
-        ui.blockIconLabel->setPixmap(QPixmap(":/defendIcon.png").scaled(
-            36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        ui.blockIconLabel->setStyleSheet("background: transparent;");
-
-        ui.blockValueLabel = new QLabel(ui.blockWidget);
-        ui.blockValueLabel->setGeometry(0, 0, 36, 36);
-        ui.blockValueLabel->setAlignment(Qt::AlignCenter);
-        ui.blockValueLabel->setStyleSheet("color: black; font-size: 13px; font-weight: bold; background: transparent;");
-
-
-        // --- HP & Damage Container ---
-        QWidget* hpDamageContainer = new QWidget(ui.widget);
-        hpDamageContainer->setStyleSheet("background: transparent;");
-        QHBoxLayout* hpDamageLayout = new QHBoxLayout(hpDamageContainer);
-        hpDamageLayout->setContentsMargins(0, 0, 0, 0);
-        hpDamageLayout->setSpacing(2);
-
-        hpDamageLayout->addWidget(ui.blockWidget);
-        hpDamageLayout->addWidget(ui.hpBar);
-        hpDamageLayout->addWidget(damagePreviewWidget);
-
-
-
-        // Enemy effects
-        ui.effectsWidget = new QWidget(ui.widget);
-        ui.effectsWidget->setFixedHeight(28);
-        ui.effectsLayout = new QHBoxLayout(ui.effectsWidget);
-        ui.effectsLayout->setContentsMargins(0, 2, 0, 0);
-        ui.effectsLayout->setSpacing(4);
-        ui.effectsLayout->setAlignment(Qt::AlignCenter);
-
-        enemyInnerLayout->addWidget(ui.intentLabel, 0, Qt::AlignHCenter);
-        enemyInnerLayout->addStretch();
-        enemyInnerLayout->addWidget(enemyImg, 0, Qt::AlignHCenter | Qt::AlignBottom);
-        enemyInnerLayout->addWidget(hpDamageContainer, 0, Qt::AlignHCenter);
-        enemyInnerLayout->addWidget(ui.effectsWidget, 0, Qt::AlignHCenter);
-
-        enemyUIs.append(ui);
+        enemyUIs.append(createEnemyUI(enemy));
     }
+
+
 
     layout->addWidget(playerWidget, 0, Qt::AlignBottom);
     layout->addStretch(1);
@@ -1517,7 +1368,6 @@ QString BattlePage::getIntentText(Enemy* enemy)
 {
     if (!enemy || enemy->isDead())
         return "Defeated";
-
     QString emoji;
     switch (enemy->getIntent())
     {
@@ -1532,11 +1382,18 @@ QString BattlePage::getIntentText(Enemy* enemy)
     case Intent::Escape:       emoji = "💨";       break;
     case Intent::Unknown:      emoji = "❓";       break;
     }
-
     QString text = emoji;
-    if (enemy->getIntentDamage() > 0)
+
+    int baseDamage = enemy->getIntentDamage();
+    if (baseDamage > 0)
     {
-        text += QString(" %1").arg(enemy->getIntentDamage());
+        int displayDamage = baseDamage;
+        if (combatManager && player)
+        {
+            displayDamage = combatManager->getCalculator()
+            ->calculateIntentDamage(enemy, player, baseDamage);
+        }
+        text += QString(" %1").arg(displayDamage);
         if (enemy->getIntentHits() > 1)
             text += QString(" x%1").arg(enemy->getIntentHits());
     }
@@ -2275,6 +2132,196 @@ bool BattlePage::isPotionTargeted(Potion* potion) const
 
     return potion->getName() == "Fire Potion";
 }
+
+void BattlePage::rebuildEnemyUI()
+{
+    if (!combatManager || !enemyLayout || !enemyContainer)
+        return;
+
+    // به روز رسانی لیست لوکال دشمنان از روی CombatManager
+    enemies = combatManager->getEnemies();
+
+    // ۱. حذف دکمه‌های Overlay کلیک قبلی برای جلوگیری از dangling pointer
+    for (EnemyUI& ui : enemyUIs)
+    {
+        if (ui.clickOverlay)
+        {
+            ui.clickOverlay->deleteLater();
+            ui.clickOverlay = nullptr;
+        }
+    }
+
+    // ۲. خالی کردن کامل لایوت قدیمی دشمنان و حذف فیزیکی ویجت‌ها از صحنه
+    while (QLayoutItem* item = enemyLayout->takeAt(0))
+    {
+        if (QWidget* w = item->widget())
+            w->deleteLater();
+        delete item;
+    }
+
+    enemyUIs.clear();
+
+    // ۳. ساخت مجدد تمام دشمنان (جدید و قدیم)
+    for (Enemy* enemy : std::as_const(enemies))
+    {
+        if (!enemy)
+            continue;
+
+        enemyUIs.append(createEnemyUI(enemy));
+    }
+
+    // ۴. بازنشانی لایه بالایی دکمه‌ها، وضعیت‌ها، Intent و موقعیت کلیک‌ها
+    setupClickOverlays();
+    updateStats();
+
+    for (Enemy* enemy : std::as_const(enemies))
+    {
+        updateEnemyIntent(enemy);
+    }
+
+    repositionOverlays();
+}
+
+BattlePage::EnemyUI BattlePage::createEnemyUI(Enemy* enemy)
+{
+    BattlePage::EnemyUI ui{};
+
+    if (!enemy || !enemyContainer || !enemyLayout)
+        return ui;
+
+    ui.enemy = enemy;
+
+    ui.widget = new QWidget(enemyContainer);
+    ui.widget->setFixedSize(220, 380);
+    ui.widget->setStyleSheet("background: transparent;");
+    enemyLayout->addWidget(ui.widget);
+
+    QVBoxLayout* enemyInnerLayout = new QVBoxLayout(ui.widget);
+    enemyInnerLayout->setContentsMargins(0, 0, 0, 10);
+    enemyInnerLayout->setSpacing(5);
+
+    // ۱. قصد دشمن (Intent)
+    ui.intentLabel = new QLabel(getIntentText(enemy), ui.widget);
+    ui.intentLabel->setAlignment(Qt::AlignCenter);
+    ui.intentLabel->setFixedHeight(30);
+    ui.intentLabel->setStyleSheet(
+        "color: #f87171; font-size: 15px; font-weight: bold;"
+        "background: transparent; border-radius: 8px; padding: 2px;"
+        );
+
+    // ۲. تصویر دشمن
+    QLabel* enemyImg = new QLabel(ui.widget);
+    enemyImg->setFixedSize(180, 200);
+    enemyImg->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
+    enemyImg->setStyleSheet("background: transparent;");
+
+    QPixmap px(enemyImagePath(enemy));
+    enemyImg->setPixmap(px.scaled(
+        180, 200,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        ));
+
+    // ۳. نوار سلامت (HP Bar) با استایل‌دهی کامل
+    ui.hpBar = new QProgressBar(ui.widget);
+    ui.hpBar->setRange(0, enemy->getMaxHealth());
+    ui.hpBar->setValue(enemy->getCurrentHealth());
+    ui.hpBar->setFixedSize(100, 16);
+    ui.hpBar->setTextVisible(true);
+    ui.hpBar->setFormat("%v / %m");
+    ui.hpBar->setStyleSheet(
+        "QProgressBar {"
+        "  background: #1a1a1a;"
+        "  border: 2px solid #333;"
+        "  border-radius: 6px;"
+        "  color: white;"
+        "  font-size: 11px;"
+        "  text-align: center;"
+        "}"
+        "QProgressBar::chunk {"
+        "  background: #e63946;"
+        "  border-radius: 4px;"
+        "}"
+        );
+
+    // ۴. پیش‌نمایش آسیب (Damage Preview)
+    QWidget* damagePreviewWidget = new QWidget(ui.widget);
+    damagePreviewWidget->setFixedSize(70, 40);
+    damagePreviewWidget->setStyleSheet("background: transparent;");
+
+    ui.damageIconLabel = new QLabel(damagePreviewWidget);
+    ui.damageIconLabel->setGeometry(0, 0, 40, 40);
+    ui.damageIconLabel->setPixmap(
+        QPixmap(":/attack.png").scaled(
+            40, 40,
+            Qt::KeepAspectRatio,
+            Qt::SmoothTransformation
+            )
+        );
+    ui.damageIconLabel->setStyleSheet("background: transparent;");
+    ui.damageIconLabel->hide();
+
+    ui.damageValueLabel = new QLabel(damagePreviewWidget);
+    ui.damageValueLabel->setGeometry(35, 8, 35, 24);
+    ui.damageValueLabel->setStyleSheet(
+        "color: #ff4d4d;"
+        "font-size: 16px;"
+        "font-weight: bold;"
+        "background: transparent;"
+        );
+    ui.damageValueLabel->hide();
+
+    // ۵. ویجت بلاک / شیلد (Block Widget)
+    ui.blockWidget = new QWidget(ui.widget);
+    ui.blockWidget->setFixedSize(36, 36);
+    ui.blockWidget->setStyleSheet("background: transparent;");
+
+    ui.blockIconLabel = new QLabel(ui.blockWidget);
+    ui.blockIconLabel->setGeometry(0, 0, 36, 36);
+    ui.blockIconLabel->setPixmap(QPixmap(":/defendIcon.png").scaled(
+        36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation
+        ));
+    ui.blockIconLabel->setStyleSheet("background: transparent;");
+
+    ui.blockValueLabel = new QLabel(ui.blockWidget);
+    ui.blockValueLabel->setGeometry(0, 0, 36, 36);
+    ui.blockValueLabel->setAlignment(Qt::AlignCenter);
+    ui.blockValueLabel->setStyleSheet(
+        "color: black; font-size: 13px; font-weight: bold; background: transparent;"
+        );
+
+    // ۶. ظرف نگهدارنده نوار سلامت، دفاع و آسیب
+    QWidget* hpDamageContainer = new QWidget(ui.widget);
+    hpDamageContainer->setStyleSheet("background: transparent;");
+    QHBoxLayout* hpDamageLayout = new QHBoxLayout(hpDamageContainer);
+    hpDamageLayout->setContentsMargins(0, 0, 0, 0);
+    hpDamageLayout->setSpacing(2);
+
+    hpDamageLayout->addWidget(ui.blockWidget);
+    hpDamageLayout->addWidget(ui.hpBar);
+    hpDamageLayout->addWidget(damagePreviewWidget);
+
+    // ۷. افکت‌های وضعیت روی دشمن (Status Effects)
+    ui.effectsWidget = new QWidget(ui.widget);
+    ui.effectsWidget->setFixedHeight(28);
+    ui.effectsLayout = new QHBoxLayout(ui.effectsWidget);
+    ui.effectsLayout->setContentsMargins(0, 2, 0, 0);
+    ui.effectsLayout->setSpacing(4);
+    ui.effectsLayout->setAlignment(Qt::AlignCenter);
+
+    // سرهم کردن اجزا در لایه عمودی اصلی دشمن
+    enemyInnerLayout->addWidget(ui.intentLabel, 0, Qt::AlignHCenter);
+    enemyInnerLayout->addStretch();
+    enemyInnerLayout->addWidget(enemyImg, 0, Qt::AlignHCenter | Qt::AlignBottom);
+    enemyInnerLayout->addWidget(hpDamageContainer, 0, Qt::AlignHCenter);
+    enemyInnerLayout->addWidget(ui.effectsWidget, 0, Qt::AlignHCenter);
+
+    return ui;
+}
+
+
+
+
 
 
 /*

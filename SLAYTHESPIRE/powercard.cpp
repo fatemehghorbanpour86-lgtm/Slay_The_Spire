@@ -222,9 +222,8 @@ void Berserk::play(Player* user, QVector<Enemy*>& enemies, Enemy* target)
     if (!user)
         return;
 
-    user->addEffect(Effect::Type::Vulnerable, Effect::Category::Debuff,
-                    vulnerableAmount);
-    user->addEffect(Effect::Type::Berserk, Effect::Category::Buff, 0 , 2);
+    user->addEffect(Effect::Type::Vulnerable, Effect::Category::Debuff, 0 ,vulnerableAmount);
+    user->addEffect(Effect::Type::Berserk, Effect::Category::Buff, 2 , 0);
 }
 void Berserk::upgrade()
 {
