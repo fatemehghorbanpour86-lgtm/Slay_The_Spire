@@ -23,6 +23,8 @@
 #include "treasureguesspage.h"
 #include "leaderboardmanager.h"
 #include "leaderboardpage.h"
+#include "defeatpage.h"
+
 
 
 #include <QRandomGenerator>
@@ -75,9 +77,12 @@ void GameManager::connectStaticPages()
     connect(mainMenuPage, &mainpage::startGame, this, &GameManager::onStartGameRequested);
     connect(mainMenuPage, &mainpage::settingsRequested, this, &GameManager::onSettingsRequested);
 
-    connect(mainMenuPage, &mainpage::leaderboardRequested, this, &GameManager::showLeaderboardPage);
-
+    connect(mainMenuPage, &mainpage::leaderboardRequested, this, [this]()
+            {
+                showLeaderboardPage(false);
+            });
 }
+
 
 // ============================================================
 //  Page navigation
@@ -114,8 +119,11 @@ void GameManager::showMapPage()
 
     cleanupTransientPages();
 
+    updateLeaderboard(RunStatus::InProgress);
+
     stackedWidget->setCurrentWidget(mapPage);
 }
+
 
 void GameManager::showCampfirePage()
 {
@@ -232,6 +240,13 @@ void GameManager::cleanupTransientPages()
         treasureGuessPage->deleteLater();
         treasureGuessPage = nullptr;
     }
+
+    if (defeatPage)
+    {
+        stackedWidget->removeWidget(defeatPage);
+        defeatPage->deleteLater();
+        defeatPage = nullptr;
+    }
 }
 
 // ============================================================
@@ -318,11 +333,28 @@ void GameManager::showVictoryPage()
 
 void GameManager::showDefeatPage()
 {
-    // TODO: once a Defeat screen exists, show it here (with combat stats)
-    // and connect its "Return to Main Menu" button to
-    // onReturnToMainMenuRequested() instead of calling it directly.
-    onReturnToMainMenuRequested();
+    if (defeatPage)
+    {
+        stackedWidget->removeWidget(defeatPage);
+        defeatPage->deleteLater();
+        defeatPage = nullptr;
+    }
+
+    defeatPage = new DefeatPage(player, map, currentUsername, nullptr);
+    stackedWidget->addWidget(defeatPage);
+
+    connect(defeatPage, &DefeatPage::leaderboardRequested,
+            this, &GameManager::onDefeatLeaderboardRequested);
+
+
+    connect(defeatPage, &DefeatPage::mainMenuRequested,
+            this, &GameManager::onReturnToMainMenuRequested);
+
+    stackedWidget->setCurrentWidget(defeatPage);
 }
+
+
+
 
 void GameManager::updateLeaderboard(RunStatus status)
 {
@@ -563,9 +595,9 @@ void GameManager::startBattle(const QVector<Enemy*>& enemies, EncounterKind kind
 void GameManager::returnToMapAndAutosave()
 {
     autoSave();
-    updateLeaderboard(RunStatus::InProgress);
     showMapPage();
 }
+
 
 // ============================================================
 //  Slots
@@ -753,11 +785,14 @@ void GameManager::onCombatResult(bool playerWon)
 
 void GameManager::handlePlayerDefeat()
 {
-    // Battle lost: no reward is shown, straight to Defeat.
     updateLeaderboard(RunStatus::Defeat);
+
+    if (!currentUsername.isEmpty())
+        SaveManager::deleteSaveFile(currentUsername);
 
     showDefeatPage();
 }
+
 
 void GameManager::onRewardContinue()
 {
@@ -894,8 +929,13 @@ void GameManager::onReturnToMainMenuRequested()
     showMainMenuPage();
 }
 
-void GameManager::showLeaderboardPage()
+void GameManager::showLeaderboardPage(bool openedFromDefeat)
 {
+    if (openedFromDefeat)
+        updateLeaderboard(RunStatus::Defeat);
+    else
+        updateLeaderboard(RunStatus::InProgress);
+
     if (leaderboardPage)
     {
         stackedWidget->removeWidget(leaderboardPage);
@@ -906,9 +946,28 @@ void GameManager::showLeaderboardPage()
     leaderboardPage = new LeaderboardPage(currentUsername, nullptr);
     stackedWidget->addWidget(leaderboardPage);
 
-    connect(leaderboardPage, &LeaderboardPage::backRequested,
-            this, &GameManager::showMainMenuPage);
+    if (openedFromDefeat)
+    {
+        connect(leaderboardPage, &LeaderboardPage::backRequested,
+                this, &GameManager::onLeaderboardBackRequestedAfterDefeat);
+    }
+    else
+    {
+        connect(leaderboardPage, &LeaderboardPage::backRequested,
+                this, &GameManager::showMainMenuPage);
+    }
 
     stackedWidget->setCurrentWidget(leaderboardPage);
+}
+
+void GameManager::onLeaderboardBackRequestedAfterDefeat()
+{
+    onReturnToMainMenuRequested();
+}
+
+
+void GameManager::onDefeatLeaderboardRequested()
+{
+    showLeaderboardPage(true);
 }
 
