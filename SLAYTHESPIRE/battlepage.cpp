@@ -14,6 +14,8 @@
 #include "pileviewerdialog.h"
 #include "skillcards.h"
 #include "statuscards.h"
+#include "relicviewer.h"
+
 
 #include <QPropertyAnimation>
 #include <QGraphicsProxyWidget>
@@ -224,14 +226,8 @@ void BattlePage::setupTopBar()
     QHBoxLayout *leftGroup = new QHBoxLayout();
     leftGroup->setSpacing(10);
 
-    // Character name
-    QLabel *nameLabel = new QLabel(player->getName(), topBar);
-    nameLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold; background: transparent;");
-
     QLabel *classLabel = new QLabel("the Ironclad", topBar);
     classLabel->setStyleSheet("color: #cfcfcf; font-size: 13px; background: transparent;");
-
-    // HP icon + value
 
     QLabel *heartIcon = new QLabel(topBar);
     heartIcon->setFixedSize(45, 45);
@@ -243,26 +239,22 @@ void BattlePage::setupTopBar()
         ));
     heartIcon->setAlignment(Qt::AlignCenter);
 
-
     playerHpLabel = new QLabel("80/80", topBar);
     playerHpLabel->setStyleSheet("color: #e63946; font-size: 14px; font-weight: bold; background: transparent;");
 
-
-    // Gold icon + value
     QLabel *goldIcon = new QLabel(topBar);
     goldIcon->setFixedSize(45, 45);
     goldIcon->setStyleSheet("background: transparent;");
     goldIcon->setPixmap(QPixmap(":/moneyPouch.png").scaled(
-             45,45,
-             Qt::KeepAspectRatio,
-             Qt::SmoothTransformation
-             ));
+        45, 45,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        ));
     goldIcon->setAlignment(Qt::AlignCenter);
 
     goldValueLabel = new QLabel(QString::number(player->getGold()), topBar);
     goldValueLabel->setStyleSheet("color: #f5c518; font-size: 14px; font-weight: bold; background: transparent;");
 
-    leftGroup->addWidget(nameLabel);
     leftGroup->addWidget(classLabel);
     leftGroup->addSpacing(15);
     leftGroup->addWidget(heartIcon);
@@ -301,16 +293,13 @@ void BattlePage::setupTopBar()
 
             if (isPotionTargeted(potion))
             {
-
                 if (pendingCard)
                     clearSelection();
 
                 pendingPotion = potion;
                 waitingForPotionTarget = true;
-
                 showEnemyPotionHighlights();
             }
-
             else
             {
                 Enemy* target = nullptr;
@@ -321,47 +310,46 @@ void BattlePage::setupTopBar()
             }
         });
 
-
         leftGroup->addWidget(potionBtn);
         leftGroup->addSpacing(4);
         potionButtons.append(potionBtn);
     }
 
-    // ===== CENTER: floor icon + count =====
-    QHBoxLayout *centerGroup = new QHBoxLayout();
-    centerGroup->setSpacing(6);
-
-    QLabel *floorIcon = new QLabel(topBar);
-    floorIcon->setFixedSize(45, 45);
-    floorIcon->setStyleSheet("background: transparent;");
-    floorIcon->setPixmap(QPixmap(":/floor.png").scaled(
-        45,45,
-        Qt::KeepAspectRatio,
-        Qt::SmoothTransformation
-        ));
-    floorIcon->setAlignment(Qt::AlignCenter);
-
-    QLabel *floorCountLabel = new QLabel("10", topBar);
-    floorCountLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold;  background: transparent;");
-
-    centerGroup->addWidget(floorIcon);
-    centerGroup->addWidget(floorCountLabel);
-
-    // ===== RIGHT GROUP: notes/scroll, map, settings =====
+    // ===== RIGHT GROUP: relic, map, deck =====
     QHBoxLayout *rightGroup = new QHBoxLayout();
     rightGroup->setSpacing(14);
+
+    // Relic button
+    // Relic button
+    QPushButton *relicBtn = new QPushButton(topBar);
+    relicBtn->setFixedSize(30, 30);
+    relicBtn->setCursor(Qt::PointingHandCursor);
+    relicBtn->setStyleSheet(
+        "QPushButton {"
+        "   background: transparent;"
+        "   border: none;"
+        "   border-image: url(:/map/relicIcon.png);"
+        "}"
+        "QPushButton:pressed {"
+        "   margin: 2px 2px 2px 2px;"
+        "}"
+        );
+
+
+    connect(relicBtn, &QPushButton::clicked, this, [this]() {
+        RelicViewerDialog dialog(player, this);
+        dialog.exec();
+    });
 
     QLabel *mapIcon = new QLabel(topBar);
     mapIcon->setFixedSize(60, 60);
     mapIcon->setStyleSheet("background: transparent; margin-top: -20px;");
-
     mapIcon->setPixmap(QPixmap(":/mapIcon.png").scaled(
-        55,55,
+        55, 55,
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
         ));
     mapIcon->setAlignment(Qt::AlignCenter);
-
 
     QPushButton *deckBtn = new QPushButton(topBar);
     deckBtn->setFixedSize(45, 45);
@@ -379,36 +367,22 @@ void BattlePage::setupTopBar()
         "}"
         );
 
-    // Deck Count Label
-
-
-    QLabel *settingsIcon = new QLabel(topBar);
-    settingsIcon->setFixedSize(45, 45);
-    settingsIcon->setStyleSheet("background: transparent;");
-    settingsIcon->setPixmap(QPixmap(":/settingicon.png").scaled(
-        45,45,
-        Qt::KeepAspectRatio,
-        Qt::SmoothTransformation
-        ));
-    settingsIcon->setAlignment(Qt::AlignCenter);
-
+    rightGroup->addWidget(relicBtn);
     rightGroup->addWidget(mapIcon);
     rightGroup->addWidget(deckBtn);
-    rightGroup->addWidget(settingsIcon);
 
     // ===== Assemble =====
     layout->addLayout(leftGroup);
     layout->addStretch();
-    layout->addLayout(centerGroup);
     layout->addStretch();
     layout->addLayout(rightGroup);
 
     connect(deckBtn, &QPushButton::clicked, this, [this]()
             {
                 PileViewerDialog dialog(player,
-                            PileType::Deck,
-                            PileViewerMode::ViewOnly,
-                            this);
+                                        PileType::Deck,
+                                        PileViewerMode::ViewOnly,
+                                        this);
                 dialog.exec();
             });
 }
