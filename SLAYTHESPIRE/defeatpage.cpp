@@ -1,6 +1,7 @@
 #include "defeatpage.h"
 #include "player.h"
 #include "map.h"
+#include "audiomanager.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -39,6 +40,17 @@ void DefeatPage::loadAssets()
 
 void DefeatPage::setupUi()
 {
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     // -- Score panel, positioned right below the "Defeat" title in the art --
     scorePanel = new QFrame(this);
     scorePanel->setFixedSize(760, 250);
@@ -79,12 +91,22 @@ void DefeatPage::setupUi()
 
     leaderboardButton = new QPushButton("Leaderboard", scorePanel);
     leaderboardButton->setFixedSize(160, 42);
-    leaderboardButton->setCursor(Qt::PointingHandCursor);
+    leaderboardButton->setCursor(buttonHoverCursor);
+    connect(leaderboardButton, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(leaderboardButton, &QPushButton::clicked, this, &DefeatPage::leaderboardRequested);
 
     mainMenuButton = new QPushButton("Main Menu", scorePanel);
     mainMenuButton->setFixedSize(160, 42);
-    mainMenuButton->setCursor(Qt::PointingHandCursor);
+    mainMenuButton->setCursor(buttonHoverCursor);
+    connect(mainMenuButton, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(mainMenuButton, &QPushButton::clicked, this, &DefeatPage::mainMenuRequested);
 
     buttonLayout->addStretch();

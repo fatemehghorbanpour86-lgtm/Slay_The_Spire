@@ -5,10 +5,13 @@
 #include "deckviewer.h"
 #include "PileViewerDialog.h"
 #include "relicviewer.h"
+#include "audiomanager.h"
 
 #include <QDebug>
 #include <QLayoutItem>
 #include <QSpacerItem>
+#include <QCoreApplication>
+#include <QDir>
 
 ShopPage::ShopPage(Player *player, QWidget *parent)
     : QWidget(parent),
@@ -16,6 +19,11 @@ ShopPage::ShopPage(Player *player, QWidget *parent)
     shopLogic(new Shop())
 {
     shopLogic->generateStock();
+
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
 
     mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -53,6 +61,12 @@ void ShopPage::setupTopBar()
     QHBoxLayout *layout = new QHBoxLayout(topBar);
     layout->setContentsMargins(20, 6, 20, 6);
     layout->setSpacing(0);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
     // ===== LEFT GROUP: name/class + HP + gold + potions =====
     QHBoxLayout *leftGroup = new QHBoxLayout();
@@ -128,7 +142,7 @@ void ShopPage::setupTopBar()
 
     QPushButton *relicBtn = new QPushButton(topBar);
     relicBtn->setFixedSize(30, 30);
-    relicBtn->setCursor(Qt::PointingHandCursor);
+    relicBtn->setCursor(buttonHoverCursor);
     relicBtn->setStyleSheet(
         "QPushButton {"
         "   background: transparent;"
@@ -140,6 +154,11 @@ void ShopPage::setupTopBar()
         "}"
         );
 
+    connect(relicBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(relicBtn, &QPushButton::clicked, this, [this]() {
         RelicViewerDialog dialog(player, this);
         dialog.exec();
@@ -157,7 +176,7 @@ void ShopPage::setupTopBar()
 
     QPushButton *deckBtn = new QPushButton(topBar);
     deckBtn->setFixedSize(45, 45);
-    deckBtn->setCursor(Qt::PointingHandCursor);
+    deckBtn->setCursor(buttonHoverCursor);
     deckBtn->setIcon(QIcon(QPixmap(":/deckIcon.png").scaled(
         45, 45,
         Qt::KeepAspectRatio,
@@ -183,6 +202,11 @@ void ShopPage::setupTopBar()
 
     topBar->setLayout(layout);
 
+    connect(deckBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(deckBtn, &QPushButton::clicked, this, [this]()
             {
                 if (player)
@@ -195,6 +219,12 @@ void ShopPage::setupTopBar()
 
 void ShopPage::setupShopField()
 {
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     // ===== Greeting state =====
     playerContainer = new QWidget(shopField);
     playerContainer->setFixedSize(250, 350);
@@ -219,8 +249,12 @@ void ShopPage::setupShopField()
         "background: transparent;"
         "border: none;"
         );
-    merchantBtn->setCursor(Qt::PointingHandCursor);
-
+    merchantBtn->setCursor(buttonHoverCursor);
+    connect(merchantBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(merchantBtn, &QPushButton::clicked, this, &ShopPage::onMerchantClicked);
 
     // ===== Browsing state =====
@@ -235,6 +269,7 @@ void ShopPage::setupShopField()
     // Leave button
     leaveBtn = new QPushButton("Leave", bottomBar);
     leaveBtn->setFixedSize(150, 50);
+    leaveBtn->setCursor(buttonHoverCursor);
     leaveBtn->setStyleSheet(
         "background: #8b0000;"
         "color: white;"
@@ -242,7 +277,11 @@ void ShopPage::setupShopField()
         "border: none;"
         "border-radius: 8px;"
         );
-
+    connect(leaveBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(leaveBtn, &QPushButton::clicked, this, &ShopPage::onLeaveClicked);
 }
 
@@ -322,6 +361,16 @@ void ShopPage::populateInventory()
     mainInvLayout->setContentsMargins(30, 40, 30, 35);
     mainInvLayout->setSpacing(45);
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     // =========================
     // Row 1: cards
     // =========================
@@ -343,6 +392,7 @@ void ShopPage::populateInventory()
 
         QPushButton *cardBtn = new QPushButton(cardWidget);
         cardBtn->setFixedSize(150, 200);
+        cardBtn->setCursor(buttonHoverCursor);
         cardBtn->setStyleSheet(
             "background: transparent;"
             "border: 1px solid rgba(255,215,0,50);"
@@ -368,7 +418,11 @@ void ShopPage::populateInventory()
         cardLayout->addWidget(priceLabel);
 
         cardsLayout->addWidget(cardWidget);
-
+        connect(cardBtn, &QPushButton::pressed,
+                this, []()
+                {
+                    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+                });
         connect(cardBtn, &QPushButton::clicked, this, [this, i]()
                 {
                     onBuyCard(i);
@@ -400,6 +454,7 @@ void ShopPage::populateInventory()
 
         QPushButton *potBtn = new QPushButton(potWidget);
         potBtn->setFixedSize(90, 90);
+        potBtn->setCursor(buttonHoverCursor);
         potBtn->setStyleSheet(
             "background: rgba(255,255,255,10);"
             "border-radius: 45px;"
@@ -424,7 +479,11 @@ void ShopPage::populateInventory()
         potLayout->addWidget(pPrice);
 
         bottomRowLayout->addWidget(potWidget);
-
+        connect(potBtn, &QPushButton::pressed,
+                this, []()
+                {
+                    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+                });
         connect(potBtn, &QPushButton::clicked, this, [this, i]()
                 {
                     onBuyPotion(i);
@@ -451,6 +510,7 @@ void ShopPage::populateInventory()
         // Apply "Sold Out" visual state
         remBtn->setIcon(QIcon(":/sold_out.png"));
         remBtn->setIconSize(QSize(130, 170));
+        remBtn->setCursor(customCursor);
         remBtn->setEnabled(false);
         remBtn->setStyleSheet("background: transparent; border: none;");
     }
@@ -458,6 +518,7 @@ void ShopPage::populateInventory()
     {
         // Apply active state with hover effects
         remBtn->setIcon(QIcon(":/cardRemoval.png"));
+        remBtn->setCursor(buttonHoverCursor);
         remBtn->setIconSize(QSize(130, 170));
         remBtn->setStyleSheet(
             "QPushButton {"
@@ -495,6 +556,11 @@ void ShopPage::populateInventory()
     bottomRowLayout->addStretch();
 
     // Connect the button click signal
+    connect(remBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(remBtn, &QPushButton::clicked, this, [this]()
             {
                 // Safety check: do nothing if already sold

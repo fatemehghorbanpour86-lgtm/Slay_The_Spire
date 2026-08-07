@@ -2,9 +2,12 @@
 #include "player.h"
 #include "masterdeck.h"
 #include "deckviewer.h" //for DeckViewerDialog::cardImagePath
+#include "audiomanager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGraphicsDropShadowEffect>
+#include <QDir>
+#include <QCoreApplication>
 
 CardRemovalDialog::CardRemovalDialog(Player *player, QWidget *parent)
     : QDialog(parent),
@@ -27,6 +30,17 @@ CardRemovalDialog::~CardRemovalDialog()
 
 void CardRemovalDialog::setupUI()
 {
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDirCursor = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDirCursor).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(30, 30, 30, 30);
     mainLayout->setSpacing(20);
@@ -125,6 +139,7 @@ void CardRemovalDialog::setupUI()
 
     cancelBtn = new QPushButton("Cancel", this);
     cancelBtn->setFixedSize(160, 45);
+    cancelBtn->setCursor(buttonHoverCursor);
     cancelBtn->setStyleSheet(
         "QPushButton {"
         "   background-color: #8b0000;"
@@ -145,12 +160,28 @@ void CardRemovalDialog::setupUI()
     containerLayout->addLayout(buttonsLayout);
     mainLayout->addWidget(container);
 
+    connect(confirmBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
+    connect(cancelBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(confirmBtn, &QPushButton::clicked, this, &CardRemovalDialog::onConfirm);
     connect(cancelBtn, &QPushButton::clicked, this, &CardRemovalDialog::onCancel);
 }
 
 void CardRemovalDialog::populateDeck()
 {
+    QString baseDirCursor = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDirCursor).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     if (!player || !player->getMasterDeck())
         return;
 
@@ -175,10 +206,14 @@ void CardRemovalDialog::populateDeck()
         QPixmap pixmap(DeckViewerDialog::cardImagePath(card));
         cardBtn->setIcon(QIcon(pixmap));
         cardBtn->setIconSize(QSize(130, 180));
-        cardBtn->setCursor(Qt::PointingHandCursor);
+        cardBtn->setCursor(buttonHoverCursor);
 
         cardLayout->addWidget(cardBtn);
-
+        connect(cardBtn, &QPushButton::pressed,
+                this, []()
+                {
+                    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+                });
         connect(cardBtn, &QPushButton::clicked, this, [this, card, cardBtn]() {
             onCardClicked(card, cardBtn);
         });
@@ -208,6 +243,14 @@ void CardRemovalDialog::onCardClicked(Card* card, QPushButton* button)
     // استایل کارت انتخاب‌شده جدید را اعمال می‌کنیم
     selectedButton->setStyleSheet(selectedCardStyle);
     confirmBtn->setEnabled(true);
+
+    QString baseDirCursor = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDirCursor).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
+    confirmBtn->setCursor(buttonHoverCursor);
 }
 
 void CardRemovalDialog::onConfirm()

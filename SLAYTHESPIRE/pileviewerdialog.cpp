@@ -3,6 +3,7 @@
 #include "combatdeck.h"
 #include "masterdeck.h"
 #include "deckviewer.h"
+#include "audiomanager.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -18,6 +19,7 @@
 #include <QAbstractAnimation>
 #include <QRect>
 #include <QColor>
+#include <QDir>
 
 PileViewerDialog::PileViewerDialog(Player *player,
                                    PileType pileType,
@@ -51,6 +53,18 @@ PileViewerDialog::~PileViewerDialog()
 
 void PileViewerDialog::setupUI()
 {
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
+
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(30, 30, 30, 30);
     mainLayout->setSpacing(20);
@@ -125,6 +139,7 @@ void PileViewerDialog::setupUI()
         mode == PileViewerMode::SelectCard ? "Cancel" : "Leave",
         this);
     leaveBtn->setFixedSize(160, 45);
+    leaveBtn->setCursor(buttonHoverCursor);
     leaveBtn->setStyleSheet(
         "QPushButton {"
         "   background-color: #8b0000;"
@@ -145,16 +160,25 @@ void PileViewerDialog::setupUI()
         confirmBtn = new QPushButton("Select", this);
         confirmBtn->setFixedSize(160, 45);
         confirmBtn->setEnabled(false);
+        confirmBtn->setCursor(buttonHoverCursor);
         confirmBtn->setStyleSheet(confirmBtnDisabledStyle);
         buttonsLayout->addWidget(confirmBtn);
-
+        connect(confirmBtn, &QPushButton::pressed,
+                this, []()
+                {
+                    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+                });
         connect(confirmBtn, &QPushButton::clicked,
                 this, &PileViewerDialog::onConfirmSelectionClicked);
     }
 
     containerLayout->addLayout(buttonsLayout);
     mainLayout->addWidget(container);
-
+    connect(leaveBtn, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(leaveBtn, &QPushButton::clicked,
             this, &PileViewerDialog::onLeaveOrCancelClicked);
 }
@@ -206,6 +230,12 @@ void PileViewerDialog::populatePile()
         return;
     }
 
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     const QVector<Card *> &cards = getCardsForPile();
 
     int row = 0;
@@ -226,7 +256,7 @@ void PileViewerDialog::populatePile()
         QPushButton *cardBtn = new QPushButton(cardWidget);
         cardBtn->setGeometry(25, 30, 140, 190);
         cardBtn->setStyleSheet(cardStyle);
-        cardBtn->setCursor(Qt::PointingHandCursor);
+        cardBtn->setCursor(buttonHoverCursor);
 
         QPixmap pixmap(DeckViewerDialog::cardImagePath(card));
         cardBtn->setIcon(QIcon(pixmap));

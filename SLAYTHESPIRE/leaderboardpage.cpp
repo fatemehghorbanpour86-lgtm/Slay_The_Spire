@@ -1,4 +1,5 @@
 #include "leaderboardpage.h"
+#include "audiomanager.h"
 
 #include <QAbstractItemView>
 #include <QBrush>
@@ -43,6 +44,17 @@ void LeaderboardPage::loadAssets()
 
 void LeaderboardPage::setupUi()
 {
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
+
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     mainPanel = new QFrame(this);
     mainPanel->setGeometry(55, 35, 1170, 650);
 
@@ -57,6 +69,12 @@ void LeaderboardPage::setupUi()
 
     backButton = new QPushButton("Back", this);
     backButton->setFixedSize(110, 42);
+    backButton->setCursor(buttonHoverCursor);
+    connect(backButton, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(backButton, &QPushButton::clicked, this, &LeaderboardPage::backRequested);
 
     titleLabel = new QLabel("GLOBAL RANKING", this);
@@ -316,6 +334,12 @@ void LeaderboardPage::populateTable()
     leaderboardTable->clearContents();
     leaderboardTable->setRowCount(entries.size());
 
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     for (int row = 0; row < entries.size(); ++row) {
         const LeaderboardEntry& entry = entries[row];
 
@@ -370,7 +394,7 @@ void LeaderboardPage::populateTable()
         // Details button
         QPushButton* detailsButton = new QPushButton("Details");
         detailsButton->setFixedSize(90, 30);
-        detailsButton->setCursor(Qt::PointingHandCursor);
+        detailsButton->setCursor(buttonHoverCursor);
         detailsButton->setStyleSheet(
             "QPushButton {"
             "  background-color: rgba(125, 88, 28, 220);"
@@ -391,6 +415,11 @@ void LeaderboardPage::populateTable()
             "}"
             );
 
+        connect(detailsButton, &QPushButton::pressed,
+                this, []()
+                {
+                    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+                });
         connect(detailsButton, &QPushButton::clicked, this, [this, row]() {
             openEntryDetailsDialog(row);
         });
@@ -448,6 +477,17 @@ void LeaderboardPage::openEntryDetailsDialog(int row)
         "border-radius: 14px;"
         );
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    dialog.setCursor(customCursor);
+
+    QString baseDirCursor = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDirCursor).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     QVBoxLayout* layout = new QVBoxLayout(&dialog);
     layout->setContentsMargins(30, 25, 30, 25);
     layout->setSpacing(15);
@@ -468,7 +508,7 @@ void LeaderboardPage::openEntryDetailsDialog(int row)
 
     QPushButton* closeButton = new QPushButton("Close", &dialog);
     closeButton->setFixedSize(90, 36);
-    closeButton->setCursor(Qt::PointingHandCursor);
+    closeButton->setCursor(buttonHoverCursor);
     closeButton->setStyleSheet(
         "QPushButton {"
         "  background-color: rgba(120, 84, 28, 220);"
@@ -482,6 +522,11 @@ void LeaderboardPage::openEntryDetailsDialog(int row)
         "  border-color: rgb(255, 232, 150);"
         "}"
         );
+    connect(closeButton, &QPushButton::pressed,
+            this, []()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+            });
     connect(closeButton, &QPushButton::clicked, &dialog, &QDialog::accept);
 
     headerLayout->addWidget(playerNameLabel);

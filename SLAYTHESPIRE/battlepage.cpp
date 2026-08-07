@@ -118,6 +118,10 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
 
    // setupTestDeck();
 
+    QPixmap pixmap(":/cursor.png");
+    QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor customCursor(scaledPixmap, 0, 0);
+    this->setCursor(customCursor);
 
     // -- Main vertical layout --
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -222,6 +226,12 @@ void BattlePage::setupTopBar()
     layout->setContentsMargins(20, 6, 20, 6);
     layout->setSpacing(0);
 
+    QString baseDir = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDir).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     // ===== LEFT GROUP: name + HP + gold + potions =====
     QHBoxLayout *leftGroup = new QHBoxLayout();
     leftGroup->setSpacing(10);
@@ -270,7 +280,7 @@ void BattlePage::setupTopBar()
     {
         QPushButton *potionBtn = new QPushButton(topBar);
         potionBtn->setFixedSize(30, 30);
-        potionBtn->setCursor(Qt::PointingHandCursor);
+        potionBtn->setCursor(buttonHoverCursor);
         potionBtn->setStyleSheet(
             "QPushButton {"
             "background: rgba(255,255,255,20); border: 1px solid #666; border-radius: 4px;"
@@ -323,7 +333,7 @@ void BattlePage::setupTopBar()
     // Relic button
     QPushButton *relicBtn = new QPushButton(topBar);
     relicBtn->setFixedSize(30, 30);
-    relicBtn->setCursor(Qt::PointingHandCursor);
+    relicBtn->setCursor(buttonHoverCursor);
     relicBtn->setStyleSheet(
         "QPushButton {"
         "   background: transparent;"
@@ -353,7 +363,7 @@ void BattlePage::setupTopBar()
 
     QPushButton *deckBtn = new QPushButton(topBar);
     deckBtn->setFixedSize(45, 45);
-    deckBtn->setCursor(Qt::PointingHandCursor);
+    deckBtn->setCursor(buttonHoverCursor);
     deckBtn->setIcon(QIcon(QPixmap(":/deckIcon.png").scaled(
         45, 45,
         Qt::KeepAspectRatio,
@@ -570,6 +580,12 @@ void BattlePage::setupBottomBar()
     layout->setContentsMargins(50, 0, 50,0);
     layout->setSpacing(10);
 
+    QString baseDirCursor = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDirCursor).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     // -- Top row: energy orb (left) + End Turn button (right) --
     QHBoxLayout *controlRow = new QHBoxLayout();
 
@@ -591,6 +607,7 @@ void BattlePage::setupBottomBar()
 
     endTurnBtn = new QPushButton("End Turn", bottomBar);
     endTurnBtn->setFixedSize(140, 50);
+    endTurnBtn->setCursor(buttonHoverCursor);
     endTurnBtn->setStyleSheet(
         "QPushButton { background-color: #b91c1c; color: white; font-size: 16px;"
         "border: 3px solid #7f1d1d; border-radius: 10px; font-weight: bold; }"
@@ -667,7 +684,7 @@ void BattlePage::setupBottomBar()
     // ===== Draw Pile button (bottom-left) =====
     drawPileBtn = new QPushButton(this);
     drawPileBtn->setFixedSize(70, 90);
-    drawPileBtn->setCursor(Qt::PointingHandCursor);
+    drawPileBtn->setCursor(buttonHoverCursor);
     drawPileBtn->setIcon(QIcon(QPixmap(":/drawPile.png").scaled(
         80, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
     drawPileBtn->setIconSize(QSize(80, 100));
@@ -691,7 +708,7 @@ void BattlePage::setupBottomBar()
     // ===== Discard Pile button (bottom-right) =====
     discardPileBtn = new QPushButton(this);
     discardPileBtn->setFixedSize(70, 90);
-    discardPileBtn->setCursor(Qt::PointingHandCursor);
+    discardPileBtn->setCursor(buttonHoverCursor);
     discardPileBtn->setIcon(QIcon(QPixmap(":/discardPile.png").scaled(
         80, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
     discardPileBtn->setIconSize(QSize(80, 100));
@@ -725,7 +742,7 @@ void BattlePage::setupBottomBar()
     exhaustPileBtn = new QPushButton(this);
     exhaustPileBtn->setFixedSize(exhaustSize);
     exhaustPileBtn->move(1035, 592);
-    exhaustPileBtn->setCursor(Qt::PointingHandCursor);
+    exhaustPileBtn->setCursor(buttonHoverCursor);
     exhaustPileBtn->setFlat(true);
     exhaustPileBtn->setStyleSheet(
         "QPushButton {"
@@ -1163,6 +1180,12 @@ void BattlePage::refreshHand()
     if (hand.isEmpty())
         return;
 
+    QString baseDirCursor = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDirCursor).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     const int cardW    = 150;
     const int cardH    = 220;
     const int spacing  = 105;
@@ -1192,7 +1215,7 @@ void BattlePage::refreshHand()
         // events stay simple and predictable.
         QPushButton* btn = new QPushButton();
         btn->setFixedSize(cardW, cardH);
-        btn->setCursor(Qt::PointingHandCursor);
+        btn->setCursor(buttonHoverCursor);
 
         QPixmap px(DeckViewerDialog::cardImagePath(card));
 
@@ -1449,6 +1472,12 @@ void BattlePage::showEnemyHighlights()
 {
     clearHighlights();
 
+    QString baseDirCursor = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDirCursor).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
+
     for (EnemyUI& ui : enemyUIs)
     {
         if (!ui.enemy || !ui.widget)
@@ -1479,7 +1508,7 @@ void BattlePage::showEnemyHighlights()
 
         if (ui.clickOverlay)
         {
-            ui.clickOverlay->setCursor(Qt::PointingHandCursor);
+            ui.clickOverlay->setCursor(buttonHoverCursor);
             ui.clickOverlay->raise();
             ui.clickOverlay->show();
             ui.clickOverlay->setEnabled(true);
@@ -1491,6 +1520,12 @@ void BattlePage::showEnemyHighlights()
 void BattlePage::showPlayerHighlight()
 {
     clearHighlights();
+
+    QString baseDirCursor = QCoreApplication::applicationDirPath();
+    QString BtnPath = QDir(baseDirCursor).filePath("assets/image/cursorBtn.png");
+    QPixmap buttonHoverPixmap(BtnPath);
+    QPixmap scaledHover = buttonHoverPixmap.scaled(40, 61, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QCursor buttonHoverCursor(scaledHover, scaledHover.width() / 2, 10);
 
     if (!playerWidget)
         return;
@@ -1505,7 +1540,7 @@ void BattlePage::showPlayerHighlight()
 
     if (playerClickOverlay)
     {
-        playerClickOverlay->setCursor(Qt::PointingHandCursor);
+        playerClickOverlay->setCursor(buttonHoverCursor);
         playerClickOverlay->raise();
         playerClickOverlay->show();
         playerClickOverlay->setEnabled(true);
