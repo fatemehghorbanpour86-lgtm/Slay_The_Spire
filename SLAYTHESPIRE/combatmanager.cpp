@@ -65,6 +65,7 @@ void CombatManager::changeState(CombatState newState)
         break;
 
     case CombatState::BattleWon:
+        handleCombatHeal();
         cleanupAfterCombat();
         emit battleWon();
         break;
@@ -377,6 +378,9 @@ void CombatManager::handleEnemyTurn()
 
 void CombatManager::checkWinLossCondition()
 {
+    if (isBattleFinished())
+        return;
+
     if (!player) return;
 
     if (player->getCurrentHealth() <= 0)
@@ -661,6 +665,42 @@ void CombatManager::handleEnemySplit(Enemy* enemy)
     emit enemiesChanged();
     emit statsUpdated();
 }
+
+void CombatManager::handleCombatHeal()
+{
+    bool bossFight = false;
+
+    for (Enemy* enemy : std::as_const(enemies))
+    {
+        if (!enemy)
+            continue;
+
+        const QString name = enemy->getName();
+
+        if (name == "King Slime" ||
+            name == "HexaGhost" ||
+            name == "The Champ")
+        {
+            bossFight = true;
+            break;
+        }
+    }
+
+    if (player && bossFight)
+    {
+        player->heal(player->getMaxHealth());
+    }
+
+    // Trigger end-of-combat relic effects such as Burning Blood.
+    if (player)
+    {
+        player->getRelicSystem().onCombatEnd(player);
+    }
+
+    emit statsUpdated();
+}
+
+
 
 
 
