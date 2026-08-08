@@ -118,8 +118,6 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     if (this->enemies.isEmpty())
         this->enemies.append (new Cultist);
 
-   // setupTestDeck();
-
     QPixmap pixmap(":/cursor.png");
     QPixmap scaledPixmap = pixmap.scaled(30, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     QCursor customCursor(scaledPixmap, 0, 0);
@@ -349,6 +347,7 @@ void BattlePage::setupTopBar()
 
 
     connect(relicBtn, &QPushButton::clicked, this, [this]() {
+        AudioManager::instance().play(AudioManager::Sound::ButtonClick);
         RelicViewerDialog dialog(player, this);
         dialog.exec();
     });
@@ -391,6 +390,8 @@ void BattlePage::setupTopBar()
 
     connect(deckBtn, &QPushButton::clicked, this, [this]()
             {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+
                 PileViewerDialog dialog(player,
                                         PileType::Deck,
                                         PileViewerMode::ViewOnly,
@@ -1361,6 +1362,8 @@ void BattlePage::onBattleLost()
 
 void BattlePage::onDrawPileClicked()
 {
+    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+
     PileViewerDialog dialog(player,
                             PileType::Draw,
                             PileViewerMode::ViewOnly,
@@ -1368,8 +1371,11 @@ void BattlePage::onDrawPileClicked()
     dialog.exec();
 }
 
+
 void BattlePage::onExhaustPileClicked()
 {
+    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+
     PileViewerDialog dialog(player,
                             PileType::Exhaust,
                             PileViewerMode::ViewOnly,
