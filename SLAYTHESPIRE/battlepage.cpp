@@ -12,10 +12,12 @@
 #include "qtimer.h"
 
 #include "pileviewerdialog.h"
-#include "skillcards.h"
 #include "statuscards.h"
 #include "relicviewer.h"
 
+#include <QSequentialAnimationGroup>
+#include <QPauseAnimation>
+#include "audiomanager.h"
 
 #include <QPropertyAnimation>
 #include <QGraphicsProxyWidget>
@@ -1748,6 +1750,7 @@ void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function
 
     QWidget* realAttacker = attacker;
     QWidget* attackerOverlay = nullptr;
+    bool isEnemyAttacker = false;
 
     for (EnemyUI& ui : enemyUIs)
     {
@@ -1758,8 +1761,15 @@ void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function
         {
             realAttacker = enemyWidget;
             attackerOverlay = ui.clickOverlay;
+            isEnemyAttacker = true;
             break;
         }
+    }
+
+    // Play player attack sound immediately at the start of the animation.
+    if (!isEnemyAttacker)
+    {
+        AudioManager::instance().play(AudioManager::Sound::Attack);
     }
 
     const QPixmap snapshot = realAttacker->grab();
@@ -1810,32 +1820,44 @@ void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function
 
     const QPoint forward = origin + QPoint(int(nudge.x()), int(nudge.y()));
 
-    auto* goForward = new QPropertyAnimation(ghost, "pos", ghost);
+    // Create animations and sequence group.
+    auto* group = new QSequentialAnimationGroup(this);
+
+    auto* goForward = new QPropertyAnimation(ghost, "pos", group);
     goForward->setDuration(120);
     goForward->setStartValue(origin);
     goForward->setEndValue(forward);
     goForward->setEasingCurve(QEasingCurve::OutCubic);
 
-    auto* goBack = new QPropertyAnimation(ghost, "pos", ghost);
+    auto* pause = new QPauseAnimation(70, group);
+
+    auto* goBack = new QPropertyAnimation(ghost, "pos", group);
     goBack->setDuration(200);
     goBack->setStartValue(forward);
     goBack->setEndValue(origin);
     goBack->setEasingCurve(QEasingCurve::OutBounce);
 
-    connect(goForward, &QPropertyAnimation::finished, this,
-            [goBack, onDone]() {
-                goBack->start();
+    group->addAnimation(goForward);
+    group->addAnimation(pause);
+    group->addAnimation(goBack);
 
-                if (onDone)
-                    onDone();
-            });
+    // Play the hit sound exactly when the forward movement finishes (start of the pause).
+    connect(goForward, &QPropertyAnimation::finished, this, [isEnemyAttacker]() {
+        if (isEnemyAttacker)
+        {
+            AudioManager::instance().play(AudioManager::Sound::TakeDamage);
+        }
+    });
 
-    connect(goBack, &QPropertyAnimation::finished, this,
-            [safeGhost,
+    // Handle cleanup and callback when the entire sequence finishes.
+    connect(group, &QSequentialAnimationGroup::finished, this,
+            [group,
+             safeGhost,
              safeAttacker,
              safeAttackerOverlay,
              overlayWasVisible,
-             overlayWasEnabled]() {
+             overlayWasEnabled,
+             onDone]() {
                 if (safeAttacker)
                     safeAttacker->setGraphicsEffect(nullptr);
 
@@ -1849,11 +1871,15 @@ void BattlePage::animateAttack(QWidget* attacker, QWidget* target, std::function
 
                 if (safeGhost)
                     safeGhost->deleteLater();
+
+                if (onDone)
+                    onDone();
+
+                group->deleteLater();
             });
 
-    goForward->start();
+    group->start();
 }
-
 
 QString BattlePage::effectImagePath(const Effect* effect)
 {
@@ -2353,41 +2379,3 @@ BattlePage::EnemyUI BattlePage::createEnemyUI(Enemy* enemy)
 
     return ui;
 }
-
-
-
-
-
-
-/*
-
-void BattlePage::setupTestDeck()
-{
-    if (!player)
-        return;
-
-    MasterDeck* deck = player->getMasterDeck();
-    if (!deck)
-        return;
-
-    QVector<Card*> oldCards = deck->getCards();
-
-    for (Card* card : oldCards)
-        deck->removeCard(card);
-
-    for (int i = 0; i < 5; ++i)
-    {
-        deck->addCard(new Strike());
-    }
-    for (int i = 0; i < 4; ++i)
-    {
-       deck->addCard(new Defend());
-    }
-    deck->addCard(new Reaper());
-    deck->addCard(new Reaper());
-
-    deck->addCard(new Impervious());
-    deck->addCard(new Exhume());
-    deck->addCard(new Exhume());
-}
-*/
