@@ -1314,6 +1314,8 @@ void BattlePage::onCardClicked(Card* card, QGraphicsProxyWidget* proxy)
         return;
     }
 
+    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+
     clearSelection();
 
     pendingCard = card;
