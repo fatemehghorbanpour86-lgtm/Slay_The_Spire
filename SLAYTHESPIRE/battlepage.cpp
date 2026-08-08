@@ -173,7 +173,12 @@ BattlePage::BattlePage(Player* player, QVector<Enemy*> enemies, QWidget* parent)
     connect(combatManager, &CombatManager::statsUpdated, this, &BattlePage::updateStats);
     connect(combatManager, &CombatManager::battleWon,    this, &BattlePage::onBattleWon);
     connect(combatManager, &CombatManager::battleLost,   this, &BattlePage::onBattleLost);
-    connect(endTurnBtn,    &QPushButton::clicked,        combatManager, &CombatManager::endTurn);
+    connect(endTurnBtn, &QPushButton:: pressed, this, [this]()
+            {
+                AudioManager::instance().play(AudioManager::Sound::ButtonClick);
+                combatManager->endTurn();
+            });
+
     connect(combatManager, &CombatManager::enemyIntentUpdated, this, &BattlePage::updateEnemyIntent);
     connect(combatManager, &CombatManager::enemiesChanged, this, &BattlePage::rebuildEnemyUI);
 
@@ -1386,6 +1391,7 @@ void BattlePage::onExhaustPileClicked()
 
 void BattlePage::onDiscardPileClicked()
 {
+    AudioManager::instance().play(AudioManager::Sound::ButtonClick);
 
     PileViewerDialog dialog(player,
                             PileType::Discard,

@@ -9,6 +9,8 @@
 #include "combatdeck.h"
 #include "relicsystem.h"
 #include "statuscards.h"
+#include "audiomanager.h"
+
 
 #include <utility>
 #include <QDebug>
@@ -50,6 +52,7 @@ void CombatManager::changeState(CombatState newState)
         break;
 
     case CombatState::TurnStart:
+        AudioManager::instance().play(AudioManager::Sound::Enemy);
         handleTurnStart();
         break;
 
@@ -71,9 +74,11 @@ void CombatManager::changeState(CombatState newState)
         break;
 
     case CombatState::BattleLost:
+        AudioManager::instance().play(AudioManager::Sound::Defeat); // Play defeat sound
         cleanupAfterCombat();
         emit battleLost();
         break;
+
 
     }
 }
@@ -209,6 +214,8 @@ bool CombatManager::usePotion(Potion* potion, Enemy* target)
 
     if (!potion->canUse(player))
         return false;
+
+    AudioManager::instance().play(AudioManager::Sound::Drink);
 
     potion->use(player, target);
 
